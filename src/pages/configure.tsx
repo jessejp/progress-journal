@@ -1,12 +1,13 @@
 import { type NextPage } from "next";
 import Layout from "../components/layouts/layout";
 import { useState } from "react";
+import Link from "next/link";
 
-const Profile: NextPage = () => {
+const Configure: NextPage = () => {
   const [inputBodyweight, setInputBodyweight] = useState<number>();
 
   return (
-    <Layout page="profile">
+    <Layout page="configure">
       <h1>Profile</h1>
       <div className="flex-row">
         <div>Enter your bodyweight:</div>
@@ -28,11 +29,11 @@ const Profile: NextPage = () => {
         </div>
         <div className="m-1" />
         <div>
-          <button className="border-2 bg-red-300">Save Changes</button>
+          <Link href="/" className="border-2 bg-red-300">Save Changes</Link>
         </div>
       </div>
     </Layout>
   );
 };
 
-export default Profile;
+export default Configure;
