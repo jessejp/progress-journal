@@ -63,8 +63,8 @@ model User {
   image           String?
   accounts        Account[]
   sessions        Session[]
-  bodyweightValue Int?
-  bodyweightUnit  String?
+  bodyweight      Int?
+  units           String?
 }
 
 model VerificationToken {

@@ -1,40 +1,50 @@
 import { type NextPage } from "next";
+import { useForm } from "react-hook-form";
+import { type SubmitHandler } from "react-hook-form/dist/types";
+import { trpc } from "../utils/trpc";
 import Layout from "../components/layouts/layout";
-import { useState } from "react";
-import Link from "next/link";
 import Accordion from "../components/accordion";
 
+type FormValues = {
+  units: string;
+  bodyweight: number;
+};
+
 const Configure: NextPage = () => {
-  const [inputBodyweight, setInputBodyweight] = useState<number>();
+  const updateUserSettings = trpc.user.updateSettings.useMutation();
+
+  const { register, handleSubmit } = useForm<FormValues>();
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    console.log(data);
+    updateUserSettings.mutate(data);
+  };
 
   return (
     <Layout page="configure">
       <h1>Profile</h1>
-      <div className="flex-row">
+      <form className="flex-row" onSubmit={handleSubmit(onSubmit)}>
         <Accordion title="Personal Information">
-        <div>Enter your bodyweight:</div>
-        <div className="flex flex-row">
-          <input
-            value={inputBodyweight}
-            name="value"
-            type="number"
-            placeholder="value"
-            onChange={(e) => {
-              setInputBodyweight(e.target.valueAsNumber);
-            }}
-          />
-          <p className="w-4 text-red-500">*</p>
-        </div>
-        <div className="m-1" />
-        <div>
-          <input name="unit" type="text" placeholder="kg" maxLength={5} />
-        </div>
-        <div className="m-1" />
+          <div className="flex flex-row justify-between">
+            <label>Units</label>
+            <select className="border-2" {...register("units")}>
+              <option value="Metric">Metric</option>
+            </select>
+          </div>
+          <div className="m-2" />
+          <div className="flex flex-row justify-between">
+            <label>Bodyweight:</label>
+            <input
+              type="number"
+              className="w-16 border-2"
+              {...register("bodyweight", {valueAsNumber: true, min: 0})}
+            />
+          </div>
+          <div className="m-2" />
         </Accordion>
         <div>
-          <Link href="/" className="border-2 bg-red-300">Save Changes</Link>
+          <button className="border-2 bg-red-300">Save Changes</button>
         </div>
-      </div>
+      </form>
     </Layout>
   );
 };
