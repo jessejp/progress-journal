@@ -8,9 +8,15 @@ export const userRouter = router({
       /* ctx.prisma.user.findFirst({
         where: { id: { equals: ctx.session.user.id } },
       }) */
+      console.log("updateSettings");
       return ctx.prisma.user.update({
-        where: { id: ctx.session.user.id},
-        data: { bodyweight: input.bodyweight, units: input.units || 'Metric' }
+        where: { id: ctx.session.user.id },
+        data: { bodyweight: input.bodyweight, units: input.units || "Metric" },
       });
     }),
+  getSettings: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.user.findFirst({
+      where: { id: { equals: ctx.session.user.id } },
+    });
+  }),
 });
