@@ -1,9 +1,11 @@
 import { type NextPage } from "next";
-import { useForm, useFormState } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { type SubmitHandler } from "react-hook-form/dist/types";
 import { trpc } from "../utils/trpc";
 import Layout from "../components/layouts/layout";
 import Accordion from "../components/accordion";
+import { useEffect } from "react";
+import { type RouterOutputs } from "../utils/trpc";
 
 type FormValues = {
   units: string;
@@ -16,16 +18,7 @@ const Configure: NextPage = () => {
   const getSettings = trpc.user.getSettings.useQuery();
   const updateUserSettings = trpc.user.updateSettings.useMutation();
 
-  const { register, handleSubmit } = useForm<FormValues>({
-    defaultValues: async () => {
-      return {
-        units: getSettings.data?.units,
-        bodyweight: getSettings.data?.bodyweight,
-        subjectName: "",
-        trackingTemplate: "",
-      };
-    }
-  });
+  const { register, handleSubmit, reset } = useForm<FormValues>();
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     if (
@@ -37,6 +30,19 @@ const Configure: NextPage = () => {
         units: data.units,
       });
   };
+
+  useEffect(() => {
+    if (getSettings.data) {
+      console.log(getSettings.data?.bodyweight + " " + "use Effect");
+      let defaultValues = {
+        units: getSettings.data.units || "Metric",
+        bodyweight: getSettings.data.bodyweight || 0,
+      };
+      reset({
+        ...defaultValues,
+      });
+    }
+  }, [getSettings.data]);
 
   return (
     <Layout page="configure">
@@ -63,7 +69,7 @@ const Configure: NextPage = () => {
 
         <div className="m-2" />
 
-        <Accordion title="New Journal Subject">
+        {/* <Accordion title="New Journal Subject">
           <div className="flex flex-row justify-between">
             <label>Subject Name</label>
             <input
@@ -89,7 +95,7 @@ const Configure: NextPage = () => {
             <label>Entry Name</label>
             <input type="text" className="border-2" />
           </div>
-        </Accordion>
+        </Accordion> */}
         <div>
           <button className="border-2 bg-red-300">Save Changes</button>
         </div>

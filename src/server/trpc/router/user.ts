@@ -3,7 +3,7 @@ import { router, protectedProcedure } from "../trpc";
 
 export const userRouter = router({
   updateSettings: protectedProcedure
-    .input(z.object({ bodyweight: z.number(), units: z.string() }))
+    .input(z.object({ bodyweight: z.number().nullable(), units: z.string() }))
     .mutation(({ ctx, input }) => {
       /* ctx.prisma.user.findFirst({
         where: { id: { equals: ctx.session.user.id } },
