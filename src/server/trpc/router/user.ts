@@ -1,14 +1,11 @@
-import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
+import { validationSchema } from "../../../pages/configure";
 
 export const userRouter = router({
   updateSettings: protectedProcedure
-    .input(z.object({ bodyweight: z.number().nullable(), units: z.string() }))
+    .input(validationSchema)
     .mutation(({ ctx, input }) => {
-      /* ctx.prisma.user.findFirst({
-        where: { id: { equals: ctx.session.user.id } },
-      }) */
-      console.log("updateSettings");
+      console.log("--- --- updateSettings called --- ---");
       return ctx.prisma.user.update({
         where: { id: ctx.session.user.id },
         data: { bodyweight: input.bodyweight, units: input.units || "Metric" },

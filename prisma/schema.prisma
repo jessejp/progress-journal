@@ -20,12 +20,37 @@ model Example {
   updatedAt DateTime @updatedAt
 }
 
-model Things {
+model Subject {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  value     Float
-  unit      String?
+  name      String
+  icon      String
+  Entry     Entry[]
+}
+
+model Entry {
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  subject      Subject       @relation(fields: [subjectId], references: [id])
+  subjectId    String
+  date         DateTime
+  name         String
+  category     String?
+  fieldOptions FieldOption[]
+}
+
+model FieldOption {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  optionName    String
+  numberOption  Int?
+  decimalOption Float?
+  unitOption    String?
+  Entry         Entry?   @relation(fields: [entryId], references: [id])
+  entryId       String?
 }
 
 // Necessary for Next auth
@@ -56,15 +81,15 @@ model Session {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  name            String?
-  email           String?   @unique
-  emailVerified   DateTime?
-  image           String?
-  accounts        Account[]
-  sessions        Session[]
-  bodyweight      Int?
-  units           String?
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  bodyweight    Int?
+  units         String?
 }
 
 model VerificationToken {
