@@ -1,5 +1,6 @@
 import { type NextPage } from "next";
-import { useForm, UseFormProps, useFormState } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { type UseFormProps } from "react-hook-form";
 import Link from "next/link";
 import { trpc } from "../utils/trpc";
 import Layout from "../components/layouts/layout";
@@ -48,7 +49,7 @@ const Configure: NextPage = () => {
   // Set Form Defaults
   useEffect(() => {
     if (userSettings) {
-      let defaultValues = {
+      const defaultValues = {
         units: userSettings.units || "Metric",
         bodyweight: userSettings.bodyweight,
       };
