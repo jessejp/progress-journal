@@ -3,6 +3,7 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import type { Session } from "next-auth";
 import Layout from "../components/layouts/layout";
+import Button from "../ui/Button";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
@@ -50,12 +51,12 @@ const AuthShowcase: React.FC<{ sessionData: Session | null }> = (props) => {
       <p className="text-center text-white">
         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
       </p>
-      <button
-        className="rounded-full bg-white/10 font-semibold text-white no-underline transition hover:bg-white/20"
+      <Button
+        intent={sessionData ? "cancel" : "open"}
         onClick={sessionData ? () => signOut() : () => signIn()}
       >
         {sessionData ? "Sign out" : "Sign in"}
-      </button>
+      </Button>
     </div>
   );
 };
