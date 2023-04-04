@@ -4,7 +4,7 @@ import Link from "next/link";
 
 interface Props {
   intent: "open" | "accept" | "cancel";
-  action?: () => Promise<undefined>;
+  action?: () => Promise<void>;
   link?: string;
 }
 

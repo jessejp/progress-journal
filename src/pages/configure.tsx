@@ -1,20 +1,19 @@
 import { type NextPage } from "next";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { type UseFormProps } from "react-hook-form";
-import Link from "next/link";
-import { trpc } from "../utils/trpc";
-import Layout from "../components/layouts/layout";
-import Accordion from "../components/accordion";
-import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { type UseFormProps } from "react-hook-form";
+import { trpc } from "../utils/trpc";
+import Layout from "../components/layouts/layout";
+import Button from "../ui/Button";
+import Heading from "../ui/Heading";
 
 // This validation schema is exported to the backend, it is used by the server
 export const validationSchema = z.object({
-  bodyweight: z.number().nullable(),
-  units: z.string(),
-  subjectName: z.string().nullable(),
-  trackingTemplate: z.string(),
+  subjectName: z.string().min(1).max(50),
+  bodyweight: z.number().min(1).max(1000),
+  unit: z.enum(["kg", "lb"]),
 });
 
 function useZodForm<TSchema extends z.ZodType>(
@@ -31,96 +30,49 @@ function useZodForm<TSchema extends z.ZodType>(
 }
 
 const Configure: NextPage = () => {
-  const utils = trpc.useContext().user;
-  const getSettings = trpc.user.getSettings.useQuery();
+  const router = useRouter();
+  const utils = trpc.useContext();
 
-  const userSettings = getSettings.data;
-
-  const updateUserSettings = trpc.user.updateSettings.useMutation({
+  const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
-      await utils.getSettings.invalidate();
+      await utils.subject.getSubjects.invalidate();
+      router.push("/");
     },
   });
 
   const form = useZodForm({
     schema: validationSchema,
+    defaultValues: {
+      subjectName: "",
+    },
   });
-
-  // Set Form Defaults
-  useEffect(() => {
-    if (userSettings) {
-      const defaultValues = {
-        units: userSettings.units || "Metric",
-        bodyweight: userSettings.bodyweight,
-      };
-      form.reset({
-        ...defaultValues,
-      });
-    }
-  }, [userSettings]);
 
   return (
     <Layout page="configure">
-      <h1>Profile</h1>
-      <form
-        className="flex flex-col items-center justify-center"
-        onSubmit={form.handleSubmit(async (values) => {
-          await updateUserSettings.mutateAsync(values);
-        })}
-      >
-        <Accordion title="Personal Information">
-          <div className="flex flex-row justify-between">
-            <label>Units</label>
-            <select className="border-2" {...form.register("units")}>
-              <option value="Metric">Metric</option>
-            </select>
-          </div>
-          <div className="m-2" />
-          <div className="flex flex-row justify-between">
-            <label>Bodyweight:</label>
-            <input
-              type="number"
-              className="w-16 border-2"
-              {...form.register("bodyweight", { valueAsNumber: true, min: 0 })}
-            />
-          </div>
-          <div className="m-2" />
-        </Accordion>
-
-        <div className="m-2" />
-
-        <Accordion title="New Journal Subject">
-          <div className="flex flex-row justify-between">
-            <label>Subject Name</label>
-            <input
-              type="text"
-              className="border-2"
-              {...form.register("subjectName")}
-            />
-          </div>
-          <div className="m-2" />
-          <div className="flex flex-row justify-between">
-            <p>Measurable data for progress tracking</p>
-          </div>
-          <div className="m-2" />
-          <div className="flex flex-row justify-between">
-            <label>Template</label>
-            <select className="border-2" {...form.register("trackingTemplate")}>
-              <option value="Custom">Custom</option>
-              <option value="Weight Training">Weight Training</option>
-            </select>
-          </div>
-          <div className="m-2" />
-          <div className="flex flex-row justify-between">
-            <label>Entry Name</label>
-            <input type="text" className="border-2" />
-          </div>
-        </Accordion>
-        <div>
-          <button className="border-2 bg-red-300">Save Changes</button>
+      <Heading>Profile</Heading>
+      <form>
+        <div className="flex flex-row flex-wrap justify-between">
+          <label>Subject Name</label>
+          <input
+            type="text"
+            className="border-2"
+            {...form.register("subjectName")}
+          />
+          {form.formState.errors.subjectName && (
+            <p>{form.formState.errors.subjectName.message}</p>
+          )}
         </div>
       </form>
-      <Link href="/">Back</Link>
+      <nav className="flex w-full flex-row justify-evenly">
+        <Button
+          intent="accept"
+          action={form.handleSubmit(async (values) => {
+            await addSubject.mutateAsync(values);
+          })}
+        >
+          Submit
+        </Button>
+      </nav>
     </Layout>
   );
 };

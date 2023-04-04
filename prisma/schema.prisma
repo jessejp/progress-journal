@@ -11,48 +11,46 @@ datasource db {
   relationMode = "prisma"
 }
 
-model Example {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model Subject {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String
-  icon      String
-  Entry     Entry[]
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // icon      String
+  // Entry     Entry[]
+
+  @@index([userId])
 }
 
-model Entry {
-  id           String        @id @default(cuid())
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  subject      Subject       @relation(fields: [subjectId], references: [id])
-  subjectId    String
-  date         DateTime
-  name         String
-  category     String?
-  fieldOptions FieldOption[]
+// model Entry {
+//   id           String        @id @default(cuid())
+//   createdAt    DateTime      @default(now())
+//   updatedAt    DateTime      @updatedAt
+//   subject      Subject       @relation(fields: [subjectId], references: [id])
+//   subjectId    String
+//   date         DateTime
+//   name         String
+//   category     String?
+//   fieldOptions FieldOption[]
 
-  @@index([subjectId])
-}
+//   @@index([subjectId])
+// }
 
-model FieldOption {
-  id            String   @id @default(cuid())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  optionName    String
-  numberOption  Int?
-  decimalOption Float?
-  unitOption    String?
-  Entry         Entry?   @relation(fields: [entryId], references: [id])
-  entryId       String?
+// model FieldOption {
+//   id            String   @id @default(cuid())
+//   createdAt     DateTime @default(now())
+//   updatedAt     DateTime @updatedAt
+//   optionName    String
+//   numberOption  Int?
+//   decimalOption Float?
+//   unitOption    String?
+//   Entry         Entry?   @relation(fields: [entryId], references: [id])
+//   entryId       String?
 
-  @@index([entryId])
-}
+//   @@index([entryId])
+// }
 
 // Necessary for Next auth
 model Account {
@@ -85,15 +83,26 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?    @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-  bodyweight    Int?
-  units         String?
+  subjects      Subject[]
+  settings      Settings[]
+}
+
+model Settings {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme      String?
+  units      String?
+  bodyweight Int?
+
+  @@index([userId])
 }
 
 model VerificationToken {
