@@ -61,6 +61,7 @@ const Configure: NextPage = () => {
           )}
         </div>
       </form>
+      <nav className="flex w-full flex-row justify-evenly">
       <Button
         intent="accept"
         action={form.handleSubmit(async (values) => {
@@ -69,6 +70,7 @@ const Configure: NextPage = () => {
       >
         Submit
       </Button>
+      </nav>
     </Layout>
   );
 };
