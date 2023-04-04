@@ -12,8 +12,6 @@ import Heading from "../ui/Heading";
 // This validation schema is exported to the backend, it is used by the server
 export const validationSchema = z.object({
   subjectName: z.string().min(1).max(50),
-  bodyweight: z.number().min(1).max(1000),
-  unit: z.enum(["kg", "lb"]),
 });
 
 function useZodForm<TSchema extends z.ZodType>(
