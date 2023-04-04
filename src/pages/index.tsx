@@ -4,19 +4,15 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import type { Session } from "next-auth";
 import Layout from "../components/layouts/layout";
 import Button from "../ui/Button";
+import Heading from "../ui/Heading";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
 
   return (
     <Layout page="home">
-      <div className="flex flex-row justify-between">
-        <h1 className="text-center text-4xl font-bold">
-          {sessionData ? "Progress Journal" : "Sign in to use the app"}
-        </h1>
-        <AuthShowcase sessionData={sessionData} />
-      </div>
-      
+      <Heading sessionData={sessionData}>{sessionData ? "Progress Journal" : "Unauthorized"}</Heading>
+
       <main>{sessionData && <Subjects />}</main>
 
       <nav className="flex w-full flex-row justify-evenly">

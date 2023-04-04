@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import clsx from "clsx";
 import Link from "next/link";
 
