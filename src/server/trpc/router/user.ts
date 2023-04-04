@@ -2,7 +2,7 @@ import { router, protectedProcedure } from "../trpc";
 import { validationSchema } from "../../../pages/configure";
 
 export const userRouter = router({
-  updateSettings: protectedProcedure
+  /* updateSettings: protectedProcedure
     .input(validationSchema)
     .mutation(({ ctx, input }) => {
       console.log("--- --- updateSettings called --- ---");
@@ -15,5 +15,5 @@ export const userRouter = router({
     return ctx.prisma.settings.findFirst({
       where: { id: { equals: ctx.session.user.id } },
     });
-  }),
+  }), */
 });
