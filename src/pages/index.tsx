@@ -6,8 +6,6 @@ import Layout from "../components/layouts/layout";
 import Button from "../ui/Button";
 import Heading from "../ui/Heading";
 import { trpc } from "../utils/trpc";
-import { useEffect } from "react";
-import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
