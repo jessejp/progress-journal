@@ -85,15 +85,26 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?    @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-  bodyweight    Int?
-  units         String?
+  subjects      Subject[]
+  settings      Settings[]
+}
+
+model Settings {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme      String?
+  units      String?
+  bodyweight Int?
+
+  @@index([userId])
 }
 
 model VerificationToken {

@@ -30,14 +30,19 @@ const Home: NextPage = () => {
 export default Home;
 
 const Subjects: React.FC = () => {
+  const subjectsQuery = trpc.subject.getSubjects.useQuery();
+  const { data } = subjectsQuery;
   return (
     <div className="flex flex-row flex-wrap justify-center">
-      <Link
-        href="/testing"
-        className="m-2 items-center justify-center bg-slate-100 px-3 py-2 text-center"
-      >
-        Test 1
-      </Link>
+      {data?.map((subject) => (
+        <Link
+          key={subject.id}
+          href={`/subjects/${subject.id}`}
+          className="m-2 items-center justify-center bg-slate-100 px-3 py-2 text-center"
+        >
+          {subject.name}
+        </Link>
+      ))}
     </div>
   );
 };
