@@ -1,9 +1,13 @@
 import { router, protectedProcedure } from "../trpc";
-import { validationSchema } from "../../../pages/configure";
+import z from "zod";
+
+export const subjectValidationSchema = z.object({
+  subjectName: z.string().min(1).max(50),
+});
 
 export const subjectRouter = router({
   addSubject: protectedProcedure
-    .input(validationSchema)
+    .input(subjectValidationSchema)
     .mutation(({ ctx, input }) => {
       return ctx.prisma.subject.create({
         data: { name: input.subjectName, userId: ctx.session.user.id },

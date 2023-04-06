@@ -1,32 +1,13 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { type UseFormProps } from "react-hook-form";
 import { trpc } from "../utils/trpc";
 import Layout from "../ui/Layout";
 import Button from "../ui/Button";
 import Heading from "../ui/Heading";
 import ButtonContainer from "../ui/ButtonContainer";
+import { useZodForm } from "../utils/useZodForm";
+import { subjectValidationSchema } from "../server/trpc/router/subject";
 
-// This validation schema is exported to the backend, it is used by the server
-export const validationSchema = z.object({
-  subjectName: z.string().min(1).max(50),
-});
-
-function useZodForm<TSchema extends z.ZodType>(
-  props: Omit<UseFormProps<TSchema["_input"]>, "resolver"> & {
-    schema: TSchema;
-  }
-) {
-  const form = useForm<TSchema["_input"]>({
-    ...props,
-    resolver: zodResolver(props.schema, undefined),
-  });
-
-  return form;
-}
 
 const Configure: NextPage = () => {
   const router = useRouter();
@@ -40,7 +21,7 @@ const Configure: NextPage = () => {
   });
 
   const form = useZodForm({
-    schema: validationSchema,
+    schema: subjectValidationSchema,
     defaultValues: {
       subjectName: "",
     },
