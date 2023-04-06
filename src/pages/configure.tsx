@@ -5,9 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { type UseFormProps } from "react-hook-form";
 import { trpc } from "../utils/trpc";
-import Layout from "../components/layouts/layout";
+import Layout from "../ui/Layout";
 import Button from "../ui/Button";
 import Heading from "../ui/Heading";
+import ButtonContainer from "../ui/ButtonContainer";
 
 // This validation schema is exported to the backend, it is used by the server
 export const validationSchema = z.object({
@@ -61,7 +62,7 @@ const Configure: NextPage = () => {
           )}
         </div>
       </form>
-      <nav className="flex w-full flex-row justify-evenly">
+      <ButtonContainer>
         <Button
           intent="accept"
           action={form.handleSubmit(async (values) => {
@@ -70,7 +71,7 @@ const Configure: NextPage = () => {
         >
           Submit
         </Button>
-      </nav>
+      </ButtonContainer>
     </Layout>
   );
 };
