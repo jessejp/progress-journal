@@ -13,7 +13,7 @@ const Heading: React.FC<PropsWithChildren<HeadingProps>> = ({
 }) => {
   return (
     <div className="flex flex-row justify-evenly">
-      <h1 className="text-center text-4xl font-bold">
+      <h1 className="text-zinc-100 text-center text-4xl font-bold">
         <Link className="hover:text-cyan-400 hover:bg-zinc-800" href="/">{children}</Link>
       </h1>
       {sessionData && (

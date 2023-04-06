@@ -2,10 +2,12 @@ import { type NextPage } from "next";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import type { Session } from "next-auth";
-import Layout from "../components/layouts/layout";
+import Layout from "../ui/Layout";
 import Button from "../ui/Button";
 import Heading from "../ui/Heading";
 import { trpc } from "../utils/trpc";
+import ButtonContainer from "../ui/ButtonContainer";
+import MainContent from "../ui/MainContent";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
@@ -16,16 +18,16 @@ const Home: NextPage = () => {
         {sessionData ? "Progress Journal" : "Unauthorized"}
       </Heading>
 
-      <main>{sessionData && <Subjects />}</main>
+      <MainContent>{sessionData && <Subjects />}</MainContent>
 
-      <nav className="flex w-full flex-row justify-evenly">
+      <ButtonContainer>
         {!sessionData && <AuthShowcase sessionData={sessionData} />}
         {sessionData && (
           <Button intent="open" link="/configure">
             Configure
           </Button>
         )}
-      </nav>
+      </ButtonContainer>
     </Layout>
   );
 };
@@ -36,17 +38,20 @@ const Subjects: React.FC = () => {
   const subjectsQuery = trpc.subject.getSubjects.useQuery();
   const { data } = subjectsQuery;
   return (
-    <div className="flex flex-row flex-wrap justify-center">
-      {data?.map((subject) => (
-        <Link
-          key={subject.id}
-          href={`/${subject.name}`}
-          className="m-2 items-center justify-center bg-slate-100 px-3 py-2 text-center"
-        >
-          {subject.name}
-        </Link>
-      ))}
-    </div>
+    <>
+      {data?.map((subject) => {
+        const url = `subjects/${subject.name.toLocaleLowerCase()}`;
+        return (
+          <Link
+            key={subject.id}
+            href={url}
+            className="m-3 w-2/5 rounded bg-zinc-200 px-3 py-5 text-center text-lg text-zinc-900"
+          >
+            {subject.name}
+          </Link>
+        );
+      })}
+    </>
   );
 };
 
