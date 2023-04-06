@@ -12,45 +12,56 @@ datasource db {
 }
 
 model Subject {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String       @id @default(cuid())
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  name       String
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   // icon      String
-  // Entry     Entry[]
+  entries    Entry[]
+  FieldInput FieldInput[]
 
   @@index([userId])
 }
 
-// model Entry {
-//   id           String        @id @default(cuid())
-//   createdAt    DateTime      @default(now())
-//   updatedAt    DateTime      @updatedAt
-//   subject      Subject       @relation(fields: [subjectId], references: [id])
-//   subjectId    String
-//   date         DateTime
-//   name         String
-//   category     String?
-//   fieldOptions FieldOption[]
+model Entry {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Subject   Subject  @relation(fields: [subjectId], references: [id])
+  subjectId String
+  fields    Field[]
 
-//   @@index([subjectId])
-// }
+  @@index([subjectId])
+}
 
-// model FieldOption {
-//   id            String   @id @default(cuid())
-//   createdAt     DateTime @default(now())
-//   updatedAt     DateTime @updatedAt
-//   optionName    String
-//   numberOption  Int?
-//   decimalOption Float?
-//   unitOption    String?
-//   Entry         Entry?   @relation(fields: [entryId], references: [id])
-//   entryId       String?
+model Field {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  entry     Entry?   @relation(fields: [entryId], references: [id])
+  entryId   String
+  fieldName String
 
-//   @@index([entryId])
-// }
+  @@index([entryId])
+}
+
+model FieldInput {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  subject      Subject  @relation(fields: [subjectId], references: [id])
+  subjectId    String
+  valueInteger Int?    @db.Int
+  valueFloat   Float? @db.Float
+  valueString  String? @db.VarChar(510)
+  valueBoolean Boolean? 
+  unit         String? @db.VarChar(12)
+  inputType    String
+  
+  @@index([subjectId])
+}
 
 // Necessary for Next auth
 model Account {
