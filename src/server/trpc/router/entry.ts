@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
 import z from "zod";
 
@@ -15,13 +16,19 @@ export const entryRouter = router({
   getEntries: protectedProcedure
     .input(
       z.object({
-        subjectId: z.string(),
+        subjectName: z.string(),
       })
     )
-    .query(({ input, ctx }) => {
+    .query(async ({ input, ctx }) => {
+      const subject = await ctx.prisma.subject.findFirst({
+        where: {
+          name: input.subjectName,
+          userId: ctx.session.user.id,
+        },
+      });
       return ctx.prisma.entry.findMany({
         where: {
-          subjectId: input.subjectId,
+          subjectId: subject?.id,
         },
       });
     }),

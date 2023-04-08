@@ -40,7 +40,7 @@ const Subjects: React.FC = () => {
   return (
     <>
       {data?.map((subject) => {
-        const url = `subjects/${subject.name.toLocaleLowerCase()}`;
+        const url = `subjects/${subject.name}`;
         return (
           <Link
             key={subject.id}

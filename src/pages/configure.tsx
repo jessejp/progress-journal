@@ -5,9 +5,7 @@ import Layout from "../ui/Layout";
 import Button from "../ui/Button";
 import Heading from "../ui/Heading";
 import ButtonContainer from "../ui/ButtonContainer";
-import { useZodForm } from "../utils/useZodForm";
-import { subjectValidationSchema } from "../server/trpc/router/subject";
-
+import { useZodForm, subjectValidationSchema } from "../utils/useZodForm";
 
 const Configure: NextPage = () => {
   const router = useRouter();

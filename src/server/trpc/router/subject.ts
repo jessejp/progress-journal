@@ -1,9 +1,7 @@
 import { router, protectedProcedure } from "../trpc";
 import z from "zod";
+import { subjectValidationSchema } from "../../../utils/useZodForm";
 
-export const subjectValidationSchema = z.object({
-  subjectName: z.string().min(1).max(50),
-});
 
 export const subjectRouter = router({
   addSubject: protectedProcedure
@@ -13,13 +11,19 @@ export const subjectRouter = router({
         data: { name: input.subjectName, userId: ctx.session.user.id },
       });
     }),
-  getSubjects: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.subject.findMany({
-      where: {
-        userId: ctx.session.user.id,
-      },
-    });
-  }),
+  getSubjects: protectedProcedure
+    .output(z.array(z.object({ name: z.string(), id: z.string() }))) //Output filter's the data that is returned
+    .query(({ ctx }) => {
+      const subject = ctx.prisma.subject.findMany({
+        where: {
+          userId: ctx.session.user.id,
+        },
+      });
+      
+      if (!subject) throw new Error("No subjects found");
+
+      return subject;
+    }),
   checkUserSubjects: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.subject.findFirstOrThrow({
       where: {
