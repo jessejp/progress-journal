@@ -31,6 +31,30 @@ export const entryRouter = router({
         },
       });
     }),
+  getEntryTemplate: protectedProcedure
+    .input(z.object({ subjectName: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const subject = await ctx.prisma.subject.findFirst({
+        where: {
+          name: input.subjectName,
+          userId: ctx.session.user.id,
+        },
+      });
+      const entryTemplate = ctx.prisma.entry.findFirst({
+        where: {
+          subjectId: subject?.id,
+          template: true,
+        },
+        include: {
+          fields: true,
+        },
+      });
+      return ctx.prisma.fieldInput.findMany({
+        where: {
+          
+        }
+      })
+    }),
   createEntry: protectedProcedure
     .input(
       z.object({

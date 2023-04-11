@@ -2,13 +2,30 @@ import { router, protectedProcedure } from "../trpc";
 import z from "zod";
 import { subjectValidationSchema } from "../../../utils/useZodForm";
 
-
 export const subjectRouter = router({
   addSubject: protectedProcedure
     .input(subjectValidationSchema)
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.subject.create({
-        data: { name: input.subjectName, userId: ctx.session.user.id },
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.subject.create({
+        data: {
+          name: input.subjectName,
+          userId: ctx.session.user.id,
+          entries: {
+            create: {
+              template: true,
+              fields: {
+                create: {
+                  name: "Journal",
+                  fieldInputs: {
+                    create: {
+                      inputType: "TEXTAREA",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
     }),
   getSubjects: protectedProcedure
@@ -19,16 +36,9 @@ export const subjectRouter = router({
           userId: ctx.session.user.id,
         },
       });
-      
+
       if (!subject) throw new Error("No subjects found");
 
       return subject;
     }),
-  checkUserSubjects: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.subject.findFirstOrThrow({
-      where: {
-        userId: ctx.session.user.id,
-      },
-    });
-  }),
 });

@@ -31,6 +31,7 @@ model Entry {
   Subject   Subject  @relation(fields: [subjectId], references: [id])
   subjectId String
   fields    Field[]
+  template  Boolean  @default(false)
 
   @@index([subjectId])
 }

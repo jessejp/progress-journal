@@ -10,8 +10,10 @@ import { appRouter } from "../../server/trpc/router/_app";
 import { prisma } from "../../server/db/client";
 import superjson from "superjson";
 import type { GetStaticPaths, GetStaticPropsContext } from "next";
+import dayjs from "dayjs";
 
 const Subject: NextPage<{ subject: string }> = ({ subject }) => {
+  console.log(subject)
   const { data } = trpc.entry.getEntries.useQuery({
     subjectName: subject,
   });
@@ -22,9 +24,11 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
       <Heading>{subject}</Heading>
       <MainContent>
         {!data.length && <div>No entries yet</div>}
-        {!!data.length && data.map((entry) => (
-          <div key={entry.id}>Test</div>
-        ))}
+        {!!data.length && data.map((entry) => {
+          const date = dayjs(entry.createdAt).format("DD/MM/YYYY");
+          return(
+          <div key={entry.id}>Entry: {date}</div>
+        )})}
       </MainContent>
       <ButtonContainer>
         {/*  <Button intent="cancel" link="/">
@@ -53,9 +57,9 @@ export async function getStaticProps(
     ctx: { prisma, session: null },
     transformer: superjson,
   });
-
+  console.log(context.params)
   const subject = context.params?.subject as string;
-
+  
   await ssg.entry.getEntries.prefetch({ subjectName: subject });
 
   return {
