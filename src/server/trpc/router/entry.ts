@@ -1,15 +1,6 @@
 import { router, protectedProcedure } from "../trpc";
 import z from "zod";
-
-const fieldInputValidation = z.object({
-  fieldId: z.string(),
-  valueInteger: z.optional(z.number().nullable()),
-  valueFloat: z.optional(z.number().nullable()),
-  valueString: z.optional(z.string().max(510).nullable()),
-  valueBoolean: z.optional(z.boolean().nullable()),
-  unit: z.optional(z.string().max(12).nullable()),
-  inputType: z.string(),
-});
+import { fieldInputValidation } from "../../../utils/useZodForm";
 
 export const entryRouter = router({
   getEntries: protectedProcedure
@@ -33,27 +24,27 @@ export const entryRouter = router({
     }),
   getEntryTemplate: protectedProcedure
     .input(z.object({ subjectName: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const subject = await ctx.prisma.subject.findFirst({
+    .query(({ input, ctx }) => {
+      return ctx.prisma.subject.findFirst({
         where: {
           name: input.subjectName,
           userId: ctx.session.user.id,
         },
-      });
-      const entryTemplate = ctx.prisma.entry.findFirst({
-        where: {
-          subjectId: subject?.id,
-          template: true,
-        },
         include: {
-          fields: true,
+          entries: {
+            where: {
+              template: true,
+            },
+            include: {
+              fields: {
+                include: {
+                  fieldInputs: true,
+                },
+              },
+            },
+          },
         },
       });
-      return ctx.prisma.fieldInput.findMany({
-        where: {
-          
-        }
-      })
     }),
   createEntry: protectedProcedure
     .input(

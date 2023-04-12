@@ -1,44 +1,83 @@
 import { type NextPage } from "next";
-import { useState } from "react";
 import Layout from "../../../ui/Layout";
 import Button from "../../../ui/Button";
 import Heading from "../../../ui/Heading";
 import ButtonContainer from "../../../ui/ButtonContainer";
 import MainContent from "../../../ui/MainContent";
 import { trpc } from "../../../utils/trpc";
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import { appRouter } from "../../../server/trpc/router/_app";
-import { prisma } from "../../../server/db/client";
-import superjson from "superjson";
 import type { GetStaticPaths, GetStaticPropsContext } from "next";
+import { useZodForm, entryValidationSchema } from "../../../utils/useZodForm";
+import React from "react";
 
 const Entry: NextPage<{ subject: string }> = ({ subject }) => {
-  console.log(subject);
   const { data } = trpc.entry.getEntryTemplate.useQuery({
     subjectName: subject,
   });
 
-  if (!data) return <div>No data</div>;
+  const form = useZodForm({
+    schema: entryValidationSchema,
+    defaultValues: {
+      fields: data?.entries[0]?.fields.map((field) => {
+        return {
+          fieldInputs: field.fieldInputs.map((input) => {
+            return {
+              valueString: input.inputType === "TEXTAREA" ? "" : undefined,
+              valueNumber:
+                input.inputType === "NUMBER" ? input.valueInteger : undefined,
+            };
+          }),
+        };
+      }),
+    },
+  });
+
+  if (!data || !data.entries.length) return <div>No data</div>;
 
   return (
     <Layout page="New Entry">
       <Heading>New Entry</Heading>
       <MainContent>
-        {data?.fields.map((field) => {
-          const inputType = () => {
-            switch (field.inputType) {
-              case "textarea":
-                return <TextArea />;
-            }
-          };
-
-          return (
-            <div key={field.id}>
-              <label htmlFor={field.name}>{field.name}</label>
-              {inputType()}
-            </div>
-          );
-        })}
+        <form
+          onSubmit={form.handleSubmit(() => {
+            console.log("handleSubmit");
+          })}
+        >
+          {data?.entries[0]?.fields.map((field, fieldIndex) => {
+            return (
+              <div
+                className="w-full bg-slate-500 px-4 py-2 md:w-3/5"
+                key={field.id}
+              >
+                <label className="text-zinc-200" htmlFor={field.name}>
+                  {field.name}
+                </label>
+                {field.fieldInputs.map((input, inputIndex) => {
+                  function inputType() {
+                    switch (input.inputType) {
+                      case "TEXTAREA":
+                        return (
+                          <React.Fragment key={input.id}>
+                            <textarea
+                              className="h-32 w-full bg-slate-400"
+                              {...form.register(
+                                `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
+                              )}
+                            />
+                          </React.Fragment>
+                        );
+                      default:
+                        return null;
+                    }
+                  }
+                  return inputType();
+                })}
+              </div>
+            );
+          })}
+          <button className="bg-zinc-200" type="submit">
+            Submit
+          </button>
+        </form>
       </MainContent>
       <ButtonContainer>
         <Button intent="cancel" link="/">
@@ -46,24 +85,6 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
         </Button>
       </ButtonContainer>
     </Layout>
-  );
-};
-
-const TextArea = () => {
-  const [text, setText] = useState("");
-
-  return (
-    <div className="flex w-full flex-col">
-      <label className="text-slate-200" htmlFor="entry">
-        Entry
-      </label>
-      <textarea
-        onChange={(event) => {
-          setText(event.target.value);
-        }}
-        className="bg-slate-400"
-      ></textarea>
-    </div>
   );
 };
 

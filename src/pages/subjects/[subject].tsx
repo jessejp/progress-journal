@@ -13,22 +13,21 @@ import type { GetStaticPaths, GetStaticPropsContext } from "next";
 import dayjs from "dayjs";
 
 const Subject: NextPage<{ subject: string }> = ({ subject }) => {
-  console.log(subject)
   const { data } = trpc.entry.getEntries.useQuery({
     subjectName: subject,
   });
   if (!data) return <div>404 Not Found</div>;
-  console.log(data);
+
   return (
     <Layout page={"Subject"}>
       <Heading>{subject}</Heading>
       <MainContent>
         {!data.length && <div>No entries yet</div>}
-        {!!data.length && data.map((entry) => {
-          const date = dayjs(entry.createdAt).format("DD/MM/YYYY");
-          return(
-          <div key={entry.id}>Entry: {date}</div>
-        )})}
+        {!!data.length &&
+          data.map((entry) => {
+            const date = dayjs(entry.createdAt).format("DD/MM/YYYY");
+            return <div key={entry.id}>Entry: {date}</div>;
+          })}
       </MainContent>
       <ButtonContainer>
         {/*  <Button intent="cancel" link="/">
@@ -57,9 +56,9 @@ export async function getStaticProps(
     ctx: { prisma, session: null },
     transformer: superjson,
   });
-  console.log(context.params)
+  console.log(context.params);
   const subject = context.params?.subject as string;
-  
+
   await ssg.entry.getEntries.prefetch({ subjectName: subject });
 
   return {

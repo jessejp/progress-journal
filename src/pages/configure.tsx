@@ -9,11 +9,9 @@ import { useZodForm, subjectValidationSchema } from "../utils/useZodForm";
 
 const Configure: NextPage = () => {
   const router = useRouter();
-  const utils = trpc.useContext();
 
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
-      await utils.subject.getSubjects.invalidate();
       router.push("/");
     },
   });
