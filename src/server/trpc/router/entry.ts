@@ -1,6 +1,9 @@
 import { router, protectedProcedure } from "../trpc";
 import z from "zod";
-import { fieldInputValidation } from "../../../utils/useZodForm";
+import {
+  entryValidationSchema,
+  fieldInputValidation,
+} from "../../../utils/useZodForm";
 
 export const entryRouter = router({
   getEntries: protectedProcedure
@@ -22,8 +25,14 @@ export const entryRouter = router({
         },
       });
     }),
-  getEntryTemplate: protectedProcedure
-    .input(z.object({ subjectName: z.string() }))
+  getEntry: protectedProcedure
+    .input(
+      z.object({
+        subjectName: z.string(),
+        template: z.boolean(),
+        entryId: z.string().optional(),
+      })
+    )
     .query(({ input, ctx }) => {
       return ctx.prisma.subject.findFirst({
         where: {
@@ -33,7 +42,10 @@ export const entryRouter = router({
         include: {
           entries: {
             where: {
-              template: true,
+              id: input.entryId,
+              OR: {
+                template: input.template,
+              },
             },
             include: {
               fields: {
@@ -46,17 +58,27 @@ export const entryRouter = router({
         },
       });
     }),
-  createEntry: protectedProcedure
-    .input(
-      z.object({
-        subjectId: z.string(),
-        fields: z.array(fieldInputValidation),
-      })
-    )
+  addEntry: protectedProcedure
+    .input(entryValidationSchema)
     .mutation(({ input, ctx }) => {
       return ctx.prisma.entry.create({
         data: {
           subjectId: input.subjectId,
+          fields: {
+            create: input.fields.map((field) => ({
+              name: field.name,
+              fieldInputs: {
+                create: field.fieldInputs.map((fieldInput) => ({
+                  valueInteger: fieldInput.valueInteger,
+                  valueFloat: fieldInput.valueFloat,
+                  valueString: fieldInput.valueString,
+                  valueBoolean: fieldInput.valueBoolean,
+                  unit: fieldInput.unit,
+                  inputType: fieldInput.inputType,
+                })),
+              },
+            })),
+          },
         },
       });
     }),

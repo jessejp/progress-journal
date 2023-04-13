@@ -1,35 +1,63 @@
+import React, { useEffect } from "react";
 import { type NextPage } from "next";
+import { useRouter } from "next/router";
+import type { GetStaticPaths, GetStaticPropsContext } from "next";
 import Layout from "../../../ui/Layout";
 import Button from "../../../ui/Button";
 import Heading from "../../../ui/Heading";
 import ButtonContainer from "../../../ui/ButtonContainer";
 import MainContent from "../../../ui/MainContent";
 import { trpc } from "../../../utils/trpc";
-import type { GetStaticPaths, GetStaticPropsContext } from "next";
 import { useZodForm, entryValidationSchema } from "../../../utils/useZodForm";
-import React from "react";
 
 const Entry: NextPage<{ subject: string }> = ({ subject }) => {
-  const { data } = trpc.entry.getEntryTemplate.useQuery({
-    subjectName: subject,
+  const router = useRouter();
+  const { data } = trpc.entry.getEntry.useQuery(
+    {
+      subjectName: subject,
+      template: true,
+      entryId: undefined,
+    },
+    { refetchOnWindowFocus: false }
+  );
+
+  const addEntry = trpc.entry.addEntry.useMutation({
+    onSuccess: async () => {
+      console.log("onSuccess");
+      router.push(`/subjects/${subject}`);
+    },
+    onError: async () => {
+      console.log("onError");
+    },
   });
 
   const form = useZodForm({
     schema: entryValidationSchema,
-    defaultValues: {
-      fields: data?.entries[0]?.fields.map((field) => {
-        return {
-          fieldInputs: field.fieldInputs.map((input) => {
-            return {
-              valueString: input.inputType === "TEXTAREA" ? "" : undefined,
-              valueNumber:
-                input.inputType === "NUMBER" ? input.valueInteger : undefined,
-            };
-          }),
-        };
-      }),
-    },
   });
+
+  useEffect(() => {
+    if (data?.id) {
+      form.reset({
+        subjectId: data?.id,
+        fields: data?.entries[0]?.fields.map((field) => {
+          return {
+            name: field.name,
+            fieldInputs: field.fieldInputs.map((input) => {
+              return {
+                fieldId: field.id,
+                valueString: input.inputType === "TEXTAREA" ? "" : undefined,
+                valueNumber:
+                  input.inputType === "NUMBER" ? input.valueInteger : undefined,
+                valueBoolean: input.inputType === "BOOLEAN" ? false : undefined,
+                unit: input.unit,
+                inputType: input.inputType,
+              };
+            }),
+          };
+        }),
+      });
+    }
+  }, [data, form]);
 
   if (!data || !data.entries.length) return <div>No data</div>;
 
@@ -37,11 +65,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     <Layout page="New Entry">
       <Heading>New Entry</Heading>
       <MainContent>
-        <form
-          onSubmit={form.handleSubmit(() => {
-            console.log("handleSubmit");
-          })}
-        >
+        <form>
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
@@ -74,14 +98,24 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
               </div>
             );
           })}
-          <button className="bg-zinc-200" type="submit">
-            Submit
-          </button>
         </form>
       </MainContent>
       <ButtonContainer>
         <Button intent="cancel" link="/">
           Back
+        </Button>
+        <Button
+          intent="accept"
+          action={form.handleSubmit(
+            async (values) => {
+              await addEntry.mutateAsync(values);
+            },
+            (err) => {
+              console.log("on invalid", err);
+            }
+          )}
+        >
+          Next
         </Button>
       </ButtonContainer>
     </Layout>

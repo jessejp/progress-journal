@@ -23,6 +23,7 @@ export const fieldValidationSchema = z.object({
 });
 
 export const entryValidationSchema = z.object({
+  subjectId: z.string(),
   fields: z.array(fieldValidationSchema),
 });
 
