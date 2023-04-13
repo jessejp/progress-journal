@@ -65,11 +65,11 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     <Layout page="New Entry">
       <Heading>New Entry</Heading>
       <MainContent>
-        <form>
+        <form className="w-full flex justify-center">
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
-                className="w-full bg-slate-500 px-4 py-2 md:w-3/5"
+                className="w-full bg-slate-600 px-4 py-2 md:w-3/5"
                 key={field.id}
               >
                 <label className="text-zinc-200" htmlFor={field.name}>
@@ -82,7 +82,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                         return (
                           <React.Fragment key={input.id}>
                             <textarea
-                              className="h-32 w-full bg-slate-400"
+                              className="h-32 w-full text-slate-200 bg-slate-800"
                               {...form.register(
                                 `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
                               )}

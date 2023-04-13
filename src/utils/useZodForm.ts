@@ -4,6 +4,7 @@ import { type UseFormProps } from "react-hook-form";
 import { z } from "zod";
 
 export const subjectValidationSchema = z.object({
+  subjectSelection: z.string(),
   subjectName: z.string().min(1).max(50),
 });
 
