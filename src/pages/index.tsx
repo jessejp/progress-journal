@@ -40,12 +40,12 @@ const Subjects: React.FC = () => {
   return (
     <>
       {data?.map((subject) => {
-        const url = `subjects/${subject.name.toLocaleLowerCase()}`;
+        const url = `subjects/${subject.name}`;
         return (
           <Link
             key={subject.id}
             href={url}
-            className="m-3 w-2/5 rounded bg-zinc-200 px-3 py-5 text-center text-lg text-zinc-900"
+            className="m-3 w-full max-w-sm rounded bg-zinc-200 px-3 py-5 text-center text-lg text-zinc-900"
           >
             {subject.name}
           </Link>
