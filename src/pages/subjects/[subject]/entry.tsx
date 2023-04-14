@@ -36,7 +36,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
   });
 
   useEffect(() => {
-    if (data?.id) {
+    if (data?.id && !form.formState.defaultValues) {
       form.reset({
         subjectId: data?.id,
         fields: data?.entries[0]?.fields.map((field) => {
@@ -65,7 +65,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     <Layout page="New Entry">
       <Heading>New Entry</Heading>
       <MainContent>
-        <form className="w-full flex justify-center">
+        <form className="flex w-full justify-center">
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
@@ -82,7 +82,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                         return (
                           <React.Fragment key={input.id}>
                             <textarea
-                              className="h-32 w-full text-slate-200 bg-slate-800"
+                              className="h-32 w-full bg-slate-800 text-slate-200"
                               {...form.register(
                                 `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
                               )}

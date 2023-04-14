@@ -11,19 +11,20 @@ export const subjectRouter = router({
           name: input.subjectName,
           userId: ctx.session.user.id,
           entries: {
-            create: {
-              template: true,
+            create: input.entries.map((entry) => ({
+              template: entry.template,
               fields: {
-                create: {
-                  name: "Journal",
+                create: input?.entries[0]?.fields.map((field) => ({
+                  name: field.name,
                   fieldInputs: {
-                    create: {
-                      inputType: "TEXTAREA",
-                    },
+                    create: field.fieldInputs.map((fieldInput) => ({
+                      inputType: fieldInput.inputType,
+                      unit: fieldInput.unit,
+                    })),
                   },
-                },
+                })),
               },
-            },
+            })),
           },
         },
       });
