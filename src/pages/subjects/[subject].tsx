@@ -16,6 +16,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
   const { data } = trpc.entry.getEntries.useQuery({
     subjectName: subject,
   });
+  
   if (!data) return <div>404 Not Found</div>;
 
   return (
@@ -24,7 +25,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
       <MainContent>
         {!data.length && <div>No entries yet</div>}
         {!!data.length &&
-          data.map((entry) => {
+          data.filter((entry) => entry.template === false).map((entry) => {
             const date = dayjs(entry.createdAt).format("DD/MM/YYYY");
             return <div key={entry.id}>Entry: {date}</div>;
           })}

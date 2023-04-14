@@ -37,9 +37,12 @@ export default Home;
 const Subjects: React.FC = () => {
   const subjectsQuery = trpc.subject.getSubjects.useQuery();
   const { data } = subjectsQuery;
+
+  if(!data) return <p className="text-red-600">Create your first subject in order to start journaling!</p>
+
   return (
     <>
-      {data?.map((subject) => {
+      {data.map((subject) => {
         const url = `subjects/${subject.name}`;
         return (
           <Link

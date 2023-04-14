@@ -10,6 +10,7 @@ import {
   subjectValidationSchema,
   inputTypes,
 } from "../utils/useZodForm";
+import React from "react";
 
 const Configure: NextPage = () => {
   const router = useRouter();
@@ -35,6 +36,8 @@ const Configure: NextPage = () => {
       ],
     },
   });
+
+  const watchFields = form.watch("entries.0.fields");
 
   return (
     <Layout page="configure">
@@ -73,23 +76,27 @@ const Configure: NextPage = () => {
         </div>
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-around">
           {form.formState?.defaultValues?.entries?.length &&
-            form.formState?.defaultValues?.entries[0]?.fields?.map(
-              (field, index) => {
-                return (
-                  <div className="rounded bg-slate-500 p-4" key={index}>
-                    <div>Field {index + 1}</div>
-                    <div className="mb-4 mt-2 flex flex-row flex-wrap">
-                      <label className="h-8 w-1/2 overflow-clip text-lg font-bold text-zinc-200">
-                        Field Name
-                      </label>
-                      <input
-                        type="text"
-                        className="w-2/4 border-2"
-                        {...form.register(`entries.0.fields.${index}.name`)}
-                      />
-                      {field?.fieldInputs?.map((input, index) => {
-                        return (
-                          <select key={index}>
+            watchFields.map((field, fieldIndex) => {
+              return (
+                <div className="rounded bg-slate-500 p-4" key={fieldIndex}>
+                  <div>Field {fieldIndex + 1}</div>
+                  <div className="mb-4 mt-2 flex flex-row flex-wrap gap-2">
+                    <label className="h-8 w-1/2 overflow-clip text-lg font-bold text-zinc-200">
+                      Field Name
+                    </label>
+                    <input
+                      type="text"
+                      className="w-2/4 border-2"
+                      {...form.register(`entries.0.fields.${fieldIndex}.name`)}
+                    />
+                    {field?.fieldInputs?.map((input, inputIndex) => {
+                      return (
+                        <div className="flex gap-2" key={inputIndex}>
+                          <select
+                            {...form.register(
+                              `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
+                            )}
+                          >
                             <option value={input?.inputType}>
                               {input?.inputType}
                             </option>
@@ -103,13 +110,22 @@ const Configure: NextPage = () => {
                                 );
                               })}
                           </select>
-                        );
-                      })}
-                    </div>
+                          {input?.inputType === "UNIT" && (
+                            <input
+                              type="text"
+                              placeholder="kg, lbs, etc."
+                              {...form.register(
+                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.unit`
+                              )}
+                            ></input>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              }
-            )}
+                </div>
+              );
+            })}
         </div>
       </form>
       <ButtonContainer>
@@ -119,7 +135,7 @@ const Configure: NextPage = () => {
             if (values.subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
             } else {
-              console.log("update subject");
+              //update subject
             }
           })}
         >
