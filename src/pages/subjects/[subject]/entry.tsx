@@ -47,7 +47,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                 fieldId: field.id,
                 valueString: input.inputType === "TEXTAREA" ? "" : undefined,
                 valueNumber:
-                  input.inputType === "NUMBER" ? input.valueInteger : undefined,
+                  input.inputType === "NUMBER" ? input.valueNumber : undefined,
                 valueBoolean: input.inputType === "BOOLEAN" ? false : undefined,
                 unit: input.unit,
                 inputType: input.inputType,

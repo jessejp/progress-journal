@@ -5,8 +5,7 @@ import { z } from "zod";
 
 export const fieldInputValidation = z.object({
   fieldId: z.string(),
-  valueInteger: z.optional(z.number().nullable()),
-  valueFloat: z.optional(z.number().nullable()),
+  valueNumber: z.optional(z.number().nullable()),
   valueString: z.optional(z.string().max(510).nullable()),
   valueBoolean: z.optional(z.boolean().nullable()),
   unit: z.optional(z.string().max(12).nullable()),
@@ -34,8 +33,7 @@ export const subjectValidationSchema = z.object({
           name: z.string().min(1).max(50),
           fieldInputs: z.array(
             z.object({
-              valueInteger: z.optional(z.number().nullable()),
-              valueFloat: z.optional(z.number().nullable()),
+              valueNumber: z.optional(z.number().nullable()),
               valueString: z.optional(z.string().max(510).nullable()),
               valueBoolean: z.optional(z.boolean().nullable()),
               unit: z.optional(z.string().max(12).nullable()),
@@ -63,9 +61,7 @@ export const useZodForm = <TSchema extends z.ZodType>(
 
 export const inputTypes = [
   "TEXTAREA",
-  "UNIT",
-  "WHOLE NUMBER",
-  "FLOAT",
+  "NUMBER",
   "BOOLEAN",
   "RANGE",
 ] as const;

@@ -44,7 +44,7 @@ const Configure: NextPage = () => {
       <Heading>Profile</Heading>
       <form className="flex w-10/12 flex-col content-center justify-center">
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-around">
-          <label className="h-8 w-1/2 overflow-clip text-center text-lg font-bold text-zinc-200">
+          <label className="h-8 w-24 overflow-clip text-center text-lg font-bold text-zinc-200">
             Select Subject
           </label>
           <select
@@ -59,8 +59,8 @@ const Configure: NextPage = () => {
             ))}
           </select>
         </div>
-        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-around">
-          <label className="h-8 w-1/2 overflow-clip text-center text-lg font-bold text-zinc-200">
+        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
+          <label className="h-8 w-24 overflow-clip text-center text-lg font-bold text-zinc-200">
             Subject Name
           </label>
           <input
@@ -74,59 +74,70 @@ const Configure: NextPage = () => {
             </p>
           )}
         </div>
-        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-around">
-          {form.formState?.defaultValues?.entries?.length &&
-            watchFields.map((field, fieldIndex) => {
-              return (
-                <div className="rounded bg-slate-500 p-4" key={fieldIndex}>
+        {form.formState?.defaultValues?.entries?.length &&
+          watchFields.map((field, fieldIndex) => {
+            return (
+              <div className="rounded bg-slate-500 p-4" key={fieldIndex}>
+                <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2">
                   <div>Field {fieldIndex + 1}</div>
-                  <div className="mb-4 mt-2 flex flex-row flex-wrap gap-2">
-                    <label className="h-8 w-1/2 overflow-clip text-lg font-bold text-zinc-200">
-                      Field Name
-                    </label>
-                    <input
-                      type="text"
-                      className="w-2/4 border-2"
-                      {...form.register(`entries.0.fields.${fieldIndex}.name`)}
-                    />
-                    {field?.fieldInputs?.map((input, inputIndex) => {
-                      return (
-                        <div className="flex gap-2" key={inputIndex}>
-                          <select
-                            {...form.register(
-                              `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
-                            )}
-                          >
-                            <option value={input?.inputType}>
-                              {input?.inputType}
-                            </option>
-                            {inputTypes
-                              .filter((type) => type !== input?.inputType)
-                              .map((type) => {
-                                return (
-                                  <option key={type} value={type}>
-                                    {type}
-                                  </option>
-                                );
-                              })}
-                          </select>
-                          {input?.inputType === "UNIT" && (
-                            <input
-                              type="text"
-                              placeholder="kg, lbs, etc."
-                              {...form.register(
-                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.unit`
-                              )}
-                            ></input>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
                 </div>
-              );
-            })}
-        </div>
+                <div className="mb-4 mt-2 flex flex-row flex-wrap justify-start gap-2">
+                  <label className="h-8 w-1/3 text-lg overflow-clip font-bold text-zinc-200">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-40 border-2"
+                    {...form.register(`entries.0.fields.${fieldIndex}.name`)}
+                  />
+                </div>
+                {field?.fieldInputs?.map((input, inputIndex) => {
+                  return (
+                    <div
+                      className="mb-4 mt-2 flex flex-row flex-wrap justify-start gap-2"
+                      key={inputIndex}
+                    >
+                      <label className="h-8 w-1/3 text-lg font-bold text-zinc-200">
+                        Input&nbsp;Type
+                      </label>
+                      <div
+                      className="flex gap-4">
+                      <select
+                        className="w-fit border-2"
+                        {...form.register(
+                          `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
+                        )}
+                      >
+                        <option value={input?.inputType}>
+                          {input?.inputType}
+                        </option>
+                        {inputTypes
+                          .filter((type) => type !== input?.inputType)
+                          .map((type) => {
+                            return (
+                              <option key={type} value={type}>
+                                {type}
+                              </option>
+                            );
+                          })}
+                      </select>
+                      {input?.inputType === "NUMBER" && (
+                        <input
+                          className="w-24"
+                          type="text"
+                          placeholder="kg, lbs, etc."
+                          {...form.register(
+                            `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.unit`
+                          )}
+                        ></input>
+                      )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
       </form>
       <ButtonContainer>
         <Button
