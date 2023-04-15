@@ -14,7 +14,10 @@ import React from "react";
 
 const Configure: NextPage = () => {
   const router = useRouter();
-  const { data } = trpc.subject.getSubjects.useQuery();
+  const { data } = trpc.subject.getSubjects.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
+
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
@@ -37,7 +40,20 @@ const Configure: NextPage = () => {
     },
   });
 
-  const watchFields = form.watch("entries.0.fields");
+  const watchFields = form.watch();
+
+  const addNewInput = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    fieldIndex: number
+  ) => {
+    event.preventDefault();
+
+    const currentForm = watchFields;
+    currentForm.entries[0]?.fields[fieldIndex]?.fieldInputs.push({
+      inputType: "BOOLEAN",
+    });
+    form.reset({ ...currentForm }, { keepDefaultValues: true });
+  };
 
   return (
     <Layout page="configure">
@@ -75,19 +91,19 @@ const Configure: NextPage = () => {
           )}
         </div>
         {form.formState?.defaultValues?.entries?.length &&
-          watchFields.map((field, fieldIndex) => {
+          watchFields.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div className="rounded bg-slate-500 p-4" key={fieldIndex}>
                 <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2">
                   <div>Field {fieldIndex + 1}</div>
                 </div>
                 <div className="mb-4 mt-2 flex flex-row flex-wrap justify-start gap-2">
-                  <label className="h-8 w-1/3 text-lg overflow-clip font-bold text-zinc-200">
+                  <label className="h-8 w-1/3 flex-grow-0 overflow-clip text-lg font-bold text-zinc-200">
                     Name
                   </label>
                   <input
                     type="text"
-                    className="w-40 border-2"
+                    className="w-2/4 max-w-xs border-2"
                     {...form.register(`entries.0.fields.${fieldIndex}.name`)}
                   />
                 </div>
@@ -97,40 +113,47 @@ const Configure: NextPage = () => {
                       className="mb-4 mt-2 flex flex-row flex-wrap justify-start gap-2"
                       key={inputIndex}
                     >
-                      <label className="h-8 w-1/3 text-lg font-bold text-zinc-200">
+                      <label className="h-8 w-1/3 flex-grow-0 text-lg font-bold text-zinc-200">
                         Input&nbsp;Type
                       </label>
-                      <div
-                      className="flex gap-4">
-                      <select
-                        className="w-fit border-2"
-                        {...form.register(
-                          `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
-                        )}
-                      >
-                        <option value={input?.inputType}>
-                          {input?.inputType}
-                        </option>
-                        {inputTypes
-                          .filter((type) => type !== input?.inputType)
-                          .map((type) => {
-                            return (
-                              <option key={type} value={type}>
-                                {type}
-                              </option>
-                            );
-                          })}
-                      </select>
-                      {input?.inputType === "NUMBER" && (
-                        <input
-                          className="w-24"
-                          type="text"
-                          placeholder="kg, lbs, etc."
+                      <div className="flex flex-grow gap-4">
+                        <select
+                          className="w-fit border-2"
                           {...form.register(
-                            `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.unit`
+                            `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
                           )}
-                        ></input>
-                      )}
+                        >
+                          <option value={input?.inputType}>
+                            {input?.inputType}
+                          </option>
+                          {inputTypes
+                            .filter((type) => type !== input?.inputType)
+                            .map((type) => {
+                              return (
+                                <option key={type} value={type}>
+                                  {type}
+                                </option>
+                              );
+                            })}
+                        </select>
+                        {input?.inputType === "NUMBER" && (
+                          <input
+                            className="w-24"
+                            type="text"
+                            placeholder="kg, lbs, etc."
+                            {...form.register(
+                              `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.unit`
+                            )}
+                          ></input>
+                        )}
+                      </div>
+                      <div className="flex-grow-0">
+                        <button
+                          className="rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
+                          onClick={(event) => addNewInput(event, fieldIndex)}
+                        >
+                          Add
+                        </button>
                       </div>
                     </div>
                   );
