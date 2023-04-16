@@ -6,6 +6,7 @@ export const subjectRouter = router({
   addSubject: protectedProcedure
     .input(subjectValidationSchema)
     .mutation(async ({ ctx, input }) => {
+      console.log('Add subject API reached');
       await ctx.prisma.subject.create({
         data: {
           name: input.subjectName,
