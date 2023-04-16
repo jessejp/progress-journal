@@ -42,7 +42,7 @@ const Configure: NextPage = () => {
 
   const watchFields = form.watch();
 
-  const addNewInput = (
+  const addFieldInput = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     fieldIndex: number
   ) => {
@@ -55,16 +55,25 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
+  const removeFieldInput = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    fieldIndex: number,
+    inputIndex: number
+  ) => {
+    event.preventDefault();
+    form.unregister(`entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}`);
+  };
+
   return (
     <Layout page="configure">
       <Heading>Profile</Heading>
-      <form className="flex w-10/12 flex-col content-center justify-center">
-        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-around">
-          <label className="h-8 w-24 overflow-clip text-center text-lg font-bold text-zinc-200">
+      <form className="flex w-full flex-col content-center justify-center">
+        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
+          <label className="h-8 text-center text-lg font-bold text-zinc-200">
             Select Subject
           </label>
           <select
-            className="h-8 w-1/2 overflow-clip"
+            className="h-8 w-40 overflow-clip"
             {...form.register("subjectSelection")}
           >
             <option value="Add New Subject">Add New Subject</option>
@@ -76,12 +85,12 @@ const Configure: NextPage = () => {
           </select>
         </div>
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
-          <label className="h-8 w-24 overflow-clip text-center text-lg font-bold text-zinc-200">
+          <label className="h-8 text-center text-lg font-bold text-zinc-200">
             Subject Name
           </label>
           <input
             type="text"
-            className="w-2/4 border-2"
+            className="w-40 border-2"
             {...form.register("subjectName")}
           />
           {form.formState.errors.subjectName && (
@@ -103,7 +112,7 @@ const Configure: NextPage = () => {
                   </label>
                   <input
                     type="text"
-                    className="w-2/4 max-w-xs border-2"
+                    className="w-40 max-w-xs border-2"
                     {...form.register(`entries.0.fields.${fieldIndex}.name`)}
                   />
                 </div>
@@ -114,7 +123,7 @@ const Configure: NextPage = () => {
                       key={inputIndex}
                     >
                       <label className="h-8 w-1/3 flex-grow-0 text-lg font-bold text-zinc-200">
-                        Input&nbsp;Type
+                        Input Type
                       </label>
                       <div className="flex flex-grow gap-4">
                         <select
@@ -147,13 +156,27 @@ const Configure: NextPage = () => {
                           ></input>
                         )}
                       </div>
-                      <div className="flex-grow-0">
-                        <button
-                          className="rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
-                          onClick={(event) => addNewInput(event, fieldIndex)}
-                        >
-                          Add
-                        </button>
+                      <div className="flex flex-grow-0 gap-2">
+                        {field?.fieldInputs?.length > 1 && (
+                          <button
+                            className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
+                            onClick={(event) =>
+                              removeFieldInput(event, fieldIndex, inputIndex)
+                            }
+                          >
+                            X
+                          </button>
+                        )}
+                        {inputIndex === field?.fieldInputs?.length - 1 && (
+                          <button
+                            className="rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
+                            onClick={(event) =>
+                              addFieldInput(event, fieldIndex)
+                            }
+                          >
+                            +
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
