@@ -1,12 +1,12 @@
 import { router, protectedProcedure } from "../trpc";
 import z from "zod";
 import { subjectValidationSchema } from "../../../utils/useZodForm";
+import { TRPCError } from "@trpc/server";
 
 export const subjectRouter = router({
   addSubject: protectedProcedure
     .input(subjectValidationSchema)
     .mutation(async ({ ctx, input }) => {
-      console.log('Add subject API reached');
       await ctx.prisma.subject.create({
         data: {
           name: input.subjectName,
@@ -39,7 +39,37 @@ export const subjectRouter = router({
         },
       });
 
-      if (!subject) throw new Error("No subjects found");
+      if (!subject)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No subjects found",
+        });
+
+      return subject;
+    }),
+  getSubject: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(({ ctx, input }) => {
+      const subject = ctx.prisma.subject.findFirst({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+        include: {
+          entries: {
+            include: {
+              fields: {
+                include: {
+                  fieldInputs: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!subject)
+        throw new TRPCError({ code: "NOT_FOUND", message: "No subject found" });
 
       return subject;
     }),

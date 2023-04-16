@@ -10,11 +10,11 @@ import {
   subjectValidationSchema,
   inputTypes,
 } from "../utils/useZodForm";
-import React from "react";
+import React, { useEffect } from "react";
 
 const Configure: NextPage = () => {
   const router = useRouter();
-  const { data } = trpc.subject.getSubjects.useQuery(undefined, {
+  const subjects = trpc.subject.getSubjects.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
 
@@ -39,8 +39,33 @@ const Configure: NextPage = () => {
       ],
     },
   });
-
+  const watchSubjectSelection = form.watch("subjectSelection");
   const watchFields = form.watch();
+
+  const subjectWithFields = trpc.subject.getSubject.useQuery(
+    {
+      id: watchSubjectSelection,
+    },
+    { enabled: watchSubjectSelection !== "Add New Subject" }
+  );
+
+  const { isFetched, data } = subjectWithFields;
+  useEffect(() => {
+    if (watchSubjectSelection === "Add New Subject") {
+      form.reset({ ...form.formState.defaultValues });
+    }
+
+    if (isFetched) {
+      form.reset(
+        {
+          subjectName: data?.name,
+          subjectSelection: watchSubjectSelection,
+          entries: data?.entries,
+        },
+        { keepDefaultValues: true }
+      );
+    }
+  }, [isFetched, data, form, watchSubjectSelection]);
 
   const addField = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
@@ -92,15 +117,15 @@ const Configure: NextPage = () => {
       <Heading>Profile</Heading>
       <form className="flex w-full flex-col justify-center overflow-scroll">
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
-          <label className="h-8 text-center text-lg font-bold text-zinc-200">
+          <label className="h-8 text-lg font-bold text-zinc-200 max-sm:order-1 max-sm:w-1/2">
             Select Subject
           </label>
           <select
-            className="h-8 w-40 overflow-clip"
+            className="w-40 overflow-clip border-2 max-sm:order-2 max-sm:w-1/2"
             {...form.register("subjectSelection")}
           >
             <option value="Add New Subject">Add New Subject</option>
-            {data?.map((subject) => (
+            {subjects.data?.map((subject) => (
               <option key={subject.id} value={subject.id}>
                 {subject.name}
               </option>
@@ -108,19 +133,19 @@ const Configure: NextPage = () => {
           </select>
         </div>
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
-          <label className="h-8 text-center text-lg font-bold text-zinc-200">
+          <label className="h-8 text-lg font-bold text-zinc-200 max-sm:order-1 max-sm:w-1/2">
             Subject Name
           </label>
-          <input
-            type="text"
-            className="w-40 border-2"
-            {...form.register("subjectName")}
-          />
           {form.formState.errors.subjectName && (
-            <p className="text-red-500">
+            <p className="text-red-500 max-sm:order-3">
               {form.formState.errors.subjectName.message}
             </p>
           )}
+          <input
+            type="text"
+            className="w-40 border-2 max-sm:order-2 max-sm:w-1/2"
+            {...form.register("subjectName")}
+          />
         </div>
         {watchFields.entries[0]?.fields.length &&
           watchFields.entries[0].fields.map((field, fieldIndex, fieldArray) => {
