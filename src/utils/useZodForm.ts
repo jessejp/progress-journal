@@ -23,7 +23,6 @@ export const entryValidationSchema = z.object({
 });
 
 export const subjectValidationSchema = z.object({
-  subjectSelection: z.string(),
   subjectName: z.string().min(1).max(50),
   entries: z.array(
     z.object({

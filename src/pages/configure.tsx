@@ -17,7 +17,9 @@ const Configure: NextPage = () => {
   const subjects = trpc.subject.getSubjects.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
-  const [fieldTemplate, setFieldTemplate] = useState("journal");
+  const [fieldTemplateSelection, setFieldTemplateSelection] =
+    useState("journal");
+  const [subjectSelection, setSubjectSelection] = useState("Add New Subject");
 
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
@@ -34,7 +36,6 @@ const Configure: NextPage = () => {
   const form = useZodForm({
     schema: subjectValidationSchema,
     defaultValues: {
-      subjectSelection: "Add New Subject",
       subjectName: "",
       entries: [
         {
@@ -46,22 +47,22 @@ const Configure: NextPage = () => {
       ],
     },
   });
-  const watchSubjectSelection = form.watch("subjectSelection");
+
   const watchFields = form.watch();
 
   const subjectWithFields = trpc.subject.getSubject.useQuery(
     {
-      id: watchSubjectSelection,
+      id: subjectSelection,
     },
     {
-      enabled: watchSubjectSelection !== "Add New Subject",
+      enabled: subjectSelection !== "Add New Subject",
       refetchOnWindowFocus: false,
     }
   );
 
   const { isFetched, data } = subjectWithFields;
   useEffect(() => {
-    if (watchSubjectSelection === "Add New Subject") {
+    if (subjectSelection === "Add New Subject") {
       form.reset({ ...form.formState.defaultValues });
     }
 
@@ -70,13 +71,12 @@ const Configure: NextPage = () => {
       form.reset(
         {
           subjectName: data?.name,
-          subjectSelection: watchSubjectSelection,
           entries: data?.entries,
         },
         { keepDefaultValues: true }
       );
     }
-  }, [isFetched, data, form, watchSubjectSelection]);
+  }, [isFetched, data, form, subjectSelection]);
 
   const addField = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -156,7 +156,10 @@ const Configure: NextPage = () => {
           </label>
           <select
             className="w-40 overflow-clip border-2 max-sm:order-2 max-sm:w-1/2"
-            {...form.register("subjectSelection")}
+            value={subjectSelection}
+            onChange={(event) => {
+              setSubjectSelection(event.target.value);
+            }}
           >
             <option value="Add New Subject">Add New Subject</option>
             {subjects.data?.map((subject) => (
@@ -190,7 +193,7 @@ const Configure: NextPage = () => {
                     <div>Field {fieldIndex + 1}</div>
                     {fieldIndex === fieldArray.length - 1 &&
                       fieldIndex > 0 &&
-                      watchSubjectSelection === "Add New Subject" && (
+                      subjectSelection === "Add New Subject" && (
                         <button
                           className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
                           onClick={(event) => removeField(event, fieldIndex)}
@@ -224,9 +227,7 @@ const Configure: NextPage = () => {
                             {...form.register(
                               `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
                             )}
-                            disabled={
-                              watchSubjectSelection !== "Add New Subject"
-                            }
+                            disabled={subjectSelection !== "Add New Subject"}
                           >
                             <option value={input?.inputType}>
                               {input?.inputType}
@@ -254,7 +255,7 @@ const Configure: NextPage = () => {
                         </div>
                         <div className="flex flex-grow-0 gap-2">
                           {inputArray.length > 1 &&
-                            watchSubjectSelection === "Add New Subject" && (
+                            subjectSelection === "Add New Subject" && (
                               <button
                                 className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
                                 onClick={(event) =>
@@ -287,14 +288,16 @@ const Configure: NextPage = () => {
                   <div className="mt-4 flex w-full flex-row justify-center">
                     <button
                       className="w-fit rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
-                      onClick={(event) => addField(event, fieldTemplate)}
+                      onClick={(event) =>
+                        addField(event, fieldTemplateSelection)
+                      }
                     >
                       TEST
                     </button>
                     <select
-                      value={fieldTemplate}
+                      value={fieldTemplateSelection}
                       onChange={(event) => {
-                        setFieldTemplate(event.target.value);
+                        setFieldTemplateSelection(event.target.value);
                       }}
                       className="w-fit border-2"
                     >
@@ -313,16 +316,14 @@ const Configure: NextPage = () => {
         <Button
           intent="accept"
           action={form.handleSubmit(async (values) => {
-            if (values.subjectSelection === "Add New Subject") {
+            if (subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
             } else {
               await updateSubject.mutateAsync(values);
             }
           })}
         >
-          {form.formState.dirtyFields.subjectSelection
-            ? "Update"
-            : "Add New Subject"}
+          {subjectSelection ? "Update" : "Add New Subject"}
         </Button>
       </ButtonContainer>
     </Layout>
