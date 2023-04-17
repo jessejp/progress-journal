@@ -54,8 +54,7 @@ model FieldInput {
   updatedAt    DateTime @updatedAt
   field        Field    @relation(fields: [fieldId], references: [id])
   fieldId      String
-  valueInteger Int?     @db.Int
-  valueFloat   Float?   @db.Float
+  valueNumber  Float?   @db.Float
   valueString  String?  @db.VarChar(510)
   valueBoolean Boolean?
   unit         String?  @db.VarChar(12)

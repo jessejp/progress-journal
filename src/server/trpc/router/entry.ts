@@ -69,8 +69,7 @@ export const entryRouter = router({
               name: field.name,
               fieldInputs: {
                 create: field.fieldInputs.map((fieldInput) => ({
-                  valueInteger: fieldInput.valueInteger,
-                  valueFloat: fieldInput.valueFloat,
+                  valueNumber: fieldInput.valueNumber,
                   valueString: fieldInput.valueString,
                   valueBoolean: fieldInput.valueBoolean,
                   unit: fieldInput.unit,
@@ -105,8 +104,7 @@ export const fieldRouter = router({
       return ctx.prisma.fieldInput.create({
         data: {
           fieldId: input.fieldId,
-          valueInteger: input.valueInteger,
-          valueFloat: input.valueFloat,
+          valueNumber: input.valueNumber,
           valueString: input.valueString,
           valueBoolean: input.valueBoolean,
           unit: input.unit,
