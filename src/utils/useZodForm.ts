@@ -28,6 +28,7 @@ export const subjectValidationSchema = z.object({
   entries: z.array(
     z.object({
       template: z.boolean(),
+      entryId: z.optional(z.string()),
       fields: z.array(
         z.object({
           name: z.string().min(1).max(50),

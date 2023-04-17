@@ -10,15 +10,22 @@ import {
   subjectValidationSchema,
   inputTypes,
 } from "../utils/useZodForm";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const Configure: NextPage = () => {
   const router = useRouter();
   const subjects = trpc.subject.getSubjects.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
+  const [fieldTemplate, setFieldTemplate] = useState("journal");
 
   const addSubject = trpc.subject.addSubject.useMutation({
+    onSuccess: async () => {
+      router.push("/");
+    },
+  });
+
+  const updateSubject = trpc.subject.updateSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
     },
@@ -46,7 +53,10 @@ const Configure: NextPage = () => {
     {
       id: watchSubjectSelection,
     },
-    { enabled: watchSubjectSelection !== "Add New Subject" }
+    {
+      enabled: watchSubjectSelection !== "Add New Subject",
+      refetchOnWindowFocus: false,
+    }
   );
 
   const { isFetched, data } = subjectWithFields;
@@ -56,6 +66,7 @@ const Configure: NextPage = () => {
     }
 
     if (isFetched) {
+      console.log("form reset");
       form.reset(
         {
           subjectName: data?.name,
@@ -67,13 +78,31 @@ const Configure: NextPage = () => {
     }
   }, [isFetched, data, form, watchSubjectSelection]);
 
-  const addField = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const addField = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    fieldTemplate: string
+  ) => {
     event.preventDefault();
-
     const currentForm = watchFields;
+
+    const fieldTemplateData = () => {
+      switch (fieldTemplate) {
+        case "journal":
+          return [{ inputType: "TEXTAREA" }];
+        case "weight training":
+          return [
+            { inputType: "NUMBER", unit: "kg" },
+            { inputType: "NUMBER", unit: "reps" },
+            { inputType: "NUMBER", unit: "sets" },
+          ];
+        default:
+          return [{ inputType: "TEXTAREA" }];
+      }
+    };
+
     currentForm.entries[0]?.fields.push({
       name: "",
-      fieldInputs: [{ inputType: "TEXTAREA" }],
+      fieldInputs: fieldTemplateData(),
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
@@ -112,10 +141,15 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
+  const dirtyfields = form.formState.dirtyFields;
+  useEffect(() => {
+    console.log(dirtyfields);
+  }, [dirtyfields]);
+
   return (
     <Layout page="configure">
       <Heading>Profile</Heading>
-      <form className="flex w-full flex-col justify-center overflow-scroll">
+      <form className="flex w-full flex-col overflow-scroll">
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
           <label className="h-8 text-lg font-bold text-zinc-200 max-sm:order-1 max-sm:w-1/2">
             Select Subject
@@ -154,14 +188,16 @@ const Configure: NextPage = () => {
                 <div className="my-2 rounded bg-slate-500 p-4">
                   <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2">
                     <div>Field {fieldIndex + 1}</div>
-                    {fieldIndex === fieldArray.length - 1 && fieldIndex > 0 && (
-                      <button
-                        className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                        onClick={(event) => removeField(event, fieldIndex)}
-                      >
-                        X
-                      </button>
-                    )}
+                    {fieldIndex === fieldArray.length - 1 &&
+                      fieldIndex > 0 &&
+                      watchSubjectSelection === "Add New Subject" && (
+                        <button
+                          className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
+                          onClick={(event) => removeField(event, fieldIndex)}
+                        >
+                          X
+                        </button>
+                      )}
                   </div>
                   <div className="mb-4 mt-2 flex flex-row flex-wrap justify-start gap-2">
                     <label className="h-8 w-1/3 flex-grow-0 overflow-clip text-lg font-bold text-zinc-200">
@@ -188,6 +224,9 @@ const Configure: NextPage = () => {
                             {...form.register(
                               `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
                             )}
+                            disabled={
+                              watchSubjectSelection !== "Add New Subject"
+                            }
                           >
                             <option value={input?.inputType}>
                               {input?.inputType}
@@ -214,16 +253,21 @@ const Configure: NextPage = () => {
                           )}
                         </div>
                         <div className="flex flex-grow-0 gap-2">
-                          {inputArray.length > 1 && (
-                            <button
-                              className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                              onClick={(event) =>
-                                removeFieldInput(event, fieldIndex, inputIndex)
-                              }
-                            >
-                              X
-                            </button>
-                          )}
+                          {inputArray.length > 1 &&
+                            watchSubjectSelection === "Add New Subject" && (
+                              <button
+                                className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
+                                onClick={(event) =>
+                                  removeFieldInput(
+                                    event,
+                                    fieldIndex,
+                                    inputIndex
+                                  )
+                                }
+                              >
+                                X
+                              </button>
+                            )}
                           {inputIndex === inputArray.length - 1 && (
                             <button
                               className="rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
@@ -240,13 +284,25 @@ const Configure: NextPage = () => {
                   })}
                 </div>
                 {fieldIndex === fieldArray.length - 1 && (
-                  <div className="mt-4 flex w-full justify-center">
+                  <div className="mt-4 flex w-full flex-row justify-center">
                     <button
                       className="w-fit rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
-                      onClick={(event) => addField(event)}
+                      onClick={(event) => addField(event, fieldTemplate)}
                     >
                       TEST
                     </button>
+                    <select
+                      value={fieldTemplate}
+                      onChange={(event) => {
+                        setFieldTemplate(event.target.value);
+                      }}
+                      className="w-fit border-2"
+                    >
+                      <option value="journal">Journal template</option>
+                      <option value="weight training">
+                        weight training template
+                      </option>
+                    </select>
                   </div>
                 )}
               </React.Fragment>
@@ -260,7 +316,7 @@ const Configure: NextPage = () => {
             if (values.subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
             } else {
-              //update subject
+              await updateSubject.mutateAsync(values);
             }
           })}
         >

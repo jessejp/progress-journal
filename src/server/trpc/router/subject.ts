@@ -4,6 +4,46 @@ import { subjectValidationSchema } from "../../../utils/useZodForm";
 import { TRPCError } from "@trpc/server";
 
 export const subjectRouter = router({
+  updateSubject: protectedProcedure
+    .input(subjectValidationSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.subject.update({
+        where: {
+          id: input.subjectSelection,
+        },
+        include: {
+          entries: {
+            where: {
+              template: true,
+              subjectId: input.subjectSelection,
+            },
+          },
+        },
+        data: {
+          name: input.subjectName,
+          entries: {
+            update: input.entries.map((entry) => ({
+              where: {
+                id: entry.entryId,
+              },
+              data: {
+                fields: {
+                  create: input?.entries[0]?.fields.map((field) => ({
+                    name: field.name,
+                    fieldInputs: {
+                      create: field.fieldInputs.map((fieldInput) => ({
+                        inputType: fieldInput.inputType,
+                        unit: fieldInput.unit,
+                      })),
+                    },
+                  })),
+                },
+              },
+            })),
+          },
+        },
+      });
+    }),
   addSubject: protectedProcedure
     .input(subjectValidationSchema)
     .mutation(async ({ ctx, input }) => {

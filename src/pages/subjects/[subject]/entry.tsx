@@ -65,7 +65,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     <Layout page="New Entry">
       <Heading>New Entry</Heading>
       <MainContent>
-        <form className="flex w-full justify-center">
+        <form className="flex w-full flex-col gap-2 overflow-scroll">
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
