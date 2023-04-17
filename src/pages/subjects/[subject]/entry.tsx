@@ -76,24 +76,59 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                   {field.name}
                 </label>
                 {field.fieldInputs.map((input, inputIndex) => {
-                  function inputType() {
-                    switch (input.inputType) {
-                      case "TEXTAREA":
-                        return (
-                          <React.Fragment key={input.id}>
-                            <textarea
-                              className="h-32 w-full bg-slate-800 text-slate-200"
-                              {...form.register(
-                                `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
-                              )}
-                            />
-                          </React.Fragment>
-                        );
-                      default:
-                        return null;
-                    }
+                  switch (input.inputType) {
+                    case "TEXTAREA":
+                      return (
+                        <textarea
+                          key={input.id}
+                          className="h-32 w-full bg-slate-800 text-slate-200"
+                          {...form.register(
+                            `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
+                          )}
+                        />
+                      );
+                    case "NUMBER":
+                      return (
+                        <React.Fragment key={input.id}>
+                          <input
+                            key={input.id}
+                            type="number"
+                            className="bg-slate-800 text-slate-200"
+                            {...form.register(
+                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                            )}
+                          />
+                          <span>{input.unit}</span>
+                        </React.Fragment>
+                      );
+                    case "BOOLEAN":
+                      return (
+                        <React.Fragment key={input.id}>
+                          <input
+                            key={input.id}
+                            type="checkbox"
+                            className=" bg-slate-800 text-slate-200"
+                            {...form.register(
+                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
+                            )}
+                          />
+                        </React.Fragment>
+                      );
+                    case "RANGE":
+                      return (
+                        <React.Fragment key={input.id}>
+                          <input
+                            type="range"
+                            className=" bg-slate-800 text-slate-200"
+                            {...form.register(
+                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
+                            )}
+                          />
+                        </React.Fragment>
+                      );
+                    default:
+                      return null;
                   }
-                  return inputType();
                 })}
               </div>
             );
