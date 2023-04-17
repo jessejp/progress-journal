@@ -29,13 +29,18 @@ const Configure: NextPage = () => {
 
   const updateSubject = trpc.subject.updateSubject.useMutation({
     onSuccess: async () => {
+      console.log('onSuccess');
       router.push("/");
+    },
+    onError: async () => {
+      console.log('onError');
     },
   });
 
   const form = useZodForm({
     schema: subjectValidationSchema,
     defaultValues: {
+      subjectId: subjectSelection,
       subjectName: "",
       entries: [
         {
@@ -141,10 +146,12 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
-  const dirtyfields = form.formState.dirtyFields;
-  useEffect(() => {
-    console.log(dirtyfields);
-  }, [dirtyfields]);
+  // const dirtyfields = form.formState.dirtyFields;
+  // const formValues = form.getValues();
+  // useEffect(() => {
+  //   console.log("dirty:", dirtyfields);
+  //   console.log("values:", formValues);
+  // }, [dirtyfields, formValues]);
 
   return (
     <Layout page="configure">
@@ -227,7 +234,13 @@ const Configure: NextPage = () => {
                             {...form.register(
                               `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
                             )}
-                            disabled={subjectSelection !== "Add New Subject"}
+                            disabled={
+                              subjectSelection !== "Add New Subject" &&
+                              form.formState.dirtyFields?.entries?.[0]
+                                ?.fields?.[fieldIndex]?.fieldInputs?.[
+                                inputIndex
+                              ]?.id !== undefined
+                            }
                           >
                             <option value={input?.inputType}>
                               {input?.inputType}
@@ -319,6 +332,16 @@ const Configure: NextPage = () => {
             if (subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
             } else {
+              //filter out fields with an id from the values
+              // const filteredValues = {
+              //   ...values,
+              //   entries: {
+              //     ...values.entries,
+              //     fields: values.entries[0]?.fields.map((field) => {
+              //       field.fieldInputs.filter((input) => input.id === undefined);
+              //     }),
+              //   },
+              // };
               await updateSubject.mutateAsync(values);
             }
           })}
