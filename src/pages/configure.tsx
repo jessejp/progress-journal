@@ -29,11 +29,11 @@ const Configure: NextPage = () => {
 
   const updateSubject = trpc.subject.updateSubject.useMutation({
     onSuccess: async () => {
-      console.log('onSuccess');
+      console.log("onSuccess");
       router.push("/");
     },
     onError: async () => {
-      console.log('onError');
+      console.log("onError");
     },
   });
 
@@ -346,7 +346,7 @@ const Configure: NextPage = () => {
             }
           })}
         >
-          {subjectSelection ? "Update" : "Add New Subject"}
+          {subjectSelection === "Add New Subject" ? subjectSelection : "Update"}
         </Button>
       </ButtonContainer>
     </Layout>
