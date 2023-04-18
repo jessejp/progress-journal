@@ -9,6 +9,7 @@ import Heading from "../../../ui/Heading";
 import Button from "../../../ui/Button";
 import ButtonContainer from "../../../ui/ButtonContainer";
 import MainContent from "../../../ui/MainContent";
+import { createContextInner } from "../../../server/trpc/context";
 
 const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
   subject,
@@ -24,24 +25,27 @@ const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
       <Heading>Read Entry</Heading>
       <MainContent>
         {data && (
-          <div>
+          <div className="flex flex-col gap-4">
             {data?.entries[0]?.fields.map((field) => {
               return (
                 <div key={field.id}>
                   <div>{field.name}</div>
                   {field.fieldInputs.map((input) => {
                     return (
-                      <div key={input.id}>
-                        {input.inputType === "TEXTAREA" && (
-                          <div>{input.valueString}</div>
-                        )}
-                        {input.inputType === "NUMBER" ||
-                          (input.inputType === "RANGE" && (
-                            <div>{input.valueNumber}</div>
-                          ))}
-                        {input.inputType === "BOOLEAN" && (
-                          <div>{input.valueBoolean}</div>
-                        )}
+                      <div key={input.id} className="text-slate-300">
+                        {input.inputType === "TEXTAREA" &&
+                          input.valueString && <span>{input.valueString}</span>}
+                        {(input.inputType === "NUMBER" ||
+                          input.inputType === "RANGE") &&
+                          input.valueNumber && (
+                            <span>{`${input.valueNumber} ${
+                              input.unit ? input.unit : ""
+                            }`}</span>
+                          )}
+                        {input.inputType === "BOOLEAN" &&
+                          input.inputType !== null && (
+                            <span>{input.valueBoolean ? "Yes" : "No"}</span>
+                          )}
                       </div>
                     );
                   })}
@@ -70,10 +74,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export async function getStaticProps(
   context: GetStaticPropsContext<{ subject: string; entryId: string }>
 ) {
-  const session = trpc.auth.getSession.useQuery();
+  const ctxInner = await createContextInner({ session: null });
   const ssg = await createServerSideHelpers({
     router: appRouter,
-    ctx: { prisma, session: session.data === undefined ? null : session.data },
+    ctx: { ...ctxInner },
     transformer: superjson,
   });
 
@@ -90,6 +94,7 @@ export async function getStaticProps(
     props: {
       trpcState: ssg.dehydrate(),
       subject: subject,
+      entryId: entryId,
     },
   };
 }

@@ -71,7 +71,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
-                className="flex w-full flex-col items-start gap-2 bg-slate-600 px-4 py-2 md:w-3/5"
+                className="flex w-full flex-col items-start gap-2 bg-slate-600 px-4 py-2"
                 key={field.id}
               >
                 <label className="w-full text-zinc-200" htmlFor={field.name}>

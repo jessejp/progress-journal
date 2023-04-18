@@ -16,19 +16,32 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
   const { data } = trpc.entry.getEntries.useQuery({
     subjectName: subject,
   });
-  
+
   if (!data) return <div>404 Not Found</div>;
 
   return (
     <Layout page={"Subject"}>
       <Heading>{subject}</Heading>
       <MainContent>
-        {!data.length && <div>No entries yet</div>}
-        {!!data.length &&
-          data.filter((entry) => entry.template === false).map((entry) => {
-            const date = dayjs(entry.createdAt).format("DD/MM/YYYY");
-            return <div key={entry.id}>Entry: {date}</div>;
-          })}
+        <div className="flex flex-col gap-2">
+          {!data.length && <div>No entries yet</div>}
+          {!!data.length &&
+            data
+              .filter((entry) => entry.template === false)
+              .map((entry) => {
+                const date = dayjs(entry.createdAt).format("DD/MM/YYYY HH-mm");
+                return (
+                  <Button
+                    key={entry.id}
+                    link={`/subjects/${subject}/${entry.id}`}
+                    intent="open"
+                    style="small"
+                  >
+                    Entry: {date}
+                  </Button>
+                );
+              }).reverse()}
+        </div>
       </MainContent>
       <ButtonContainer>
         {/*  <Button intent="cancel" link="/">
