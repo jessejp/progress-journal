@@ -47,7 +47,9 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                 fieldId: field.id,
                 valueString: input.inputType === "TEXTAREA" ? "" : undefined,
                 valueNumber:
-                  input.inputType === "NUMBER" ? input.valueNumber : undefined,
+                  input.inputType === "NUMBER" || input.inputType === "RANGE"
+                    ? input.valueNumber
+                    : undefined,
                 valueBoolean: input.inputType === "BOOLEAN" ? false : undefined,
                 unit: input.unit,
                 inputType: input.inputType,
@@ -65,14 +67,14 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     <Layout page="New Entry">
       <Heading>New Entry</Heading>
       <MainContent>
-        <form className="flex w-full flex-col gap-2 overflow-scroll">
+        <form className="flex w-full flex-col items-center gap-2 overflow-scroll">
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
-                className="w-full bg-slate-600 px-4 py-2 md:w-3/5"
+                className="flex w-full flex-col items-start gap-2 bg-slate-600 px-4 py-2 md:w-3/5"
                 key={field.id}
               >
-                <label className="text-zinc-200" htmlFor={field.name}>
+                <label className="w-full text-zinc-200" htmlFor={field.name}>
                   {field.name}
                 </label>
                 {field.fieldInputs.map((input, inputIndex) => {
@@ -81,7 +83,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                       return (
                         <textarea
                           key={input.id}
-                          className="h-32 w-full bg-slate-800 text-slate-200"
+                          className="h-32 bg-slate-800 text-slate-200"
                           {...form.register(
                             `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
                           )}
@@ -89,17 +91,20 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                       );
                     case "NUMBER":
                       return (
-                        <React.Fragment key={input.id}>
+                        <div key={input.id} className="flex flex-row gap-1">
                           <input
                             key={input.id}
                             type="number"
-                            className="bg-slate-800 text-slate-200"
+                            className="w-14 bg-slate-800 p-1 text-center text-slate-200"
                             {...form.register(
-                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                              { valueAsNumber: true }
                             )}
                           />
-                          <span>{input.unit}</span>
-                        </React.Fragment>
+                          <span className="bg-slate-700 p-1 px-2 text-slate-200">
+                            {input.unit}
+                          </span>
+                        </div>
                       );
                     case "BOOLEAN":
                       return (
@@ -121,7 +126,8 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                             type="range"
                             className=" bg-slate-800 text-slate-200"
                             {...form.register(
-                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
+                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                              { valueAsNumber: true }
                             )}
                           />
                         </React.Fragment>
