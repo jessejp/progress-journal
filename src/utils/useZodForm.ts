@@ -8,12 +8,12 @@ export const fieldInputValidation = z.object({
   valueNumber: z.optional(z.number().nullable()),
   valueString: z.optional(z.string().max(510).nullable()),
   valueBoolean: z.optional(z.boolean().nullable()),
-  unit: z.optional(z.string().max(12).nullable()),
+  inputHelper: z.optional(z.string().max(12).nullable()),
   inputType: z.string(),
 });
 
 export const fieldValidationSchema = z.object({
-  name: z.string().min(1).max(50),
+  name: z.string().min(1).max(36),
   fieldInputs: z.array(fieldInputValidation),
 });
 
@@ -28,18 +28,20 @@ export const subjectValidationSchema = z.object({
   entries: z.array(
     z.object({
       template: z.boolean(),
+      categories: z.optional(z.string()),
       entryId: z.optional(z.string()),
       fields: z.array(
         z.object({
           name: z.string().min(1).max(50),
           id: z.optional(z.string()),
+          category: z.optional(z.string()),
           fieldInputs: z.array(
             z.object({
               id: z.optional(z.string()),
               valueNumber: z.optional(z.number().nullable()),
               valueString: z.optional(z.string().max(510).nullable()),
               valueBoolean: z.optional(z.boolean().nullable()),
-              unit: z.optional(z.string().max(12).nullable()),
+              inputHelper: z.optional(z.string().max(36).nullable()),
               inputType: z.string(),
             })
           ),

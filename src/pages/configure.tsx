@@ -20,6 +20,7 @@ const Configure: NextPage = () => {
   const [fieldTemplateSelection, setFieldTemplateSelection] =
     useState("journal");
   const [subjectSelection, setSubjectSelection] = useState("Add New Subject");
+  const [fieldCategories, setFieldCategories] = useState([]);
 
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
@@ -46,7 +47,10 @@ const Configure: NextPage = () => {
         {
           template: true,
           fields: [
-            { name: "Journal", fieldInputs: [{ inputType: "TEXTAREA" }] },
+            {
+              name: "Journal",
+              fieldInputs: [{ inputType: "TEXTAREA" }],
+            },
           ],
         },
       ],
@@ -83,6 +87,16 @@ const Configure: NextPage = () => {
     }
   }, [isFetched, data, form, subjectSelection]);
 
+  const addCategoryHandler = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+    fieldIndex: number
+  ) => {
+    console.log("addCategoryHandler", event.target.value);
+    /* form.register(`entries.0.fields.${fieldIndex}.category`, {
+      value: event.target.value,
+    }); */
+  };
+
   const addField = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     fieldTemplate: string
@@ -96,9 +110,9 @@ const Configure: NextPage = () => {
           return [{ inputType: "TEXTAREA" }];
         case "weight training":
           return [
-            { inputType: "NUMBER", unit: "kg" },
-            { inputType: "NUMBER", unit: "reps" },
-            { inputType: "NUMBER", unit: "sets" },
+            { inputType: "NUMBER", inputHelper: "kg" },
+            { inputType: "NUMBER", inputHelper: "reps" },
+            { inputType: "NUMBER", inputHelper: "sets" },
           ];
         default:
           return [{ inputType: "TEXTAREA" }];
@@ -146,13 +160,6 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
-  // const dirtyfields = form.formState.dirtyFields;
-  // const formValues = form.getValues();
-  // useEffect(() => {
-  //   console.log("dirty:", dirtyfields);
-  //   console.log("values:", formValues);
-  // }, [dirtyfields, formValues]);
-
   return (
     <Layout page="configure">
       <Heading>Profile</Heading>
@@ -197,7 +204,29 @@ const Configure: NextPage = () => {
               <React.Fragment key={fieldIndex}>
                 <div className="my-2 rounded bg-slate-500 p-4">
                   <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2">
-                    <div>Field {fieldIndex + 1}</div>
+                    <div className="flex flex-row items-center gap-4">
+                      <select
+                        aria-label="field category"
+                        className="w-40 overflow-clip border-2"
+                        /* {...form.register(
+                          `entries.0.fields.${fieldIndex}.category`
+                        )} */
+                        onChange={(event) =>
+                          addCategoryHandler(event, fieldIndex)
+                        }
+                      >
+                        {fieldCategories.length > 0 ? (
+                          fieldCategories?.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="">unassigned</option>
+                        )}
+                        <option value="+ new category">+ new category</option>
+                      </select>
+                    </div>
                     {fieldIndex === fieldArray.length - 1 &&
                       fieldIndex > 0 &&
                       subjectSelection === "Add New Subject" && (
@@ -261,13 +290,14 @@ const Configure: NextPage = () => {
                               type="text"
                               placeholder="kg, lbs, etc."
                               {...form.register(
-                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.unit`
+                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
                               )}
                             ></input>
                           )}
                         </div>
                         <div className="flex flex-grow-0 gap-2">
                           {inputArray.length > 1 &&
+                            inputIndex === inputArray.length - 1 &&
                             subjectSelection === "Add New Subject" && (
                               <button
                                 className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
@@ -305,7 +335,7 @@ const Configure: NextPage = () => {
                         addField(event, fieldTemplateSelection)
                       }
                     >
-                      TEST
+                      + add field
                     </button>
                     <select
                       value={fieldTemplateSelection}
@@ -314,9 +344,9 @@ const Configure: NextPage = () => {
                       }}
                       className="w-fit border-2"
                     >
-                      <option value="journal">Journal template</option>
+                      <option value="journal">default template</option>
                       <option value="weight training">
-                        weight training template
+                        kg/reps/sets template
                       </option>
                     </select>
                   </div>

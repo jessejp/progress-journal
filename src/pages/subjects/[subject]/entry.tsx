@@ -51,7 +51,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                     ? input.valueNumber
                     : undefined,
                 valueBoolean: input.inputType === "BOOLEAN" ? false : undefined,
-                unit: input.unit,
+                inputHelper: input.inputHelper,
                 inputType: input.inputType,
               };
             }),
@@ -102,7 +102,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                             )}
                           />
                           <span className="bg-slate-700 p-1 px-2 text-slate-200">
-                            {input.unit}
+                            {input.inputHelper}
                           </span>
                         </div>
                       );
