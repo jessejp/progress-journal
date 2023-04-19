@@ -23,9 +23,14 @@ const Configure: NextPage = () => {
   const [fieldCategories, setFieldCategories] = useState<Array<string>>([
     "unassigned",
   ]);
-  const [fieldCategoryInput, setFieldCategoryInput] = useState({
+  const [fieldCategoryInput, setFieldCategoryInput] = useState<{
+    showInput: boolean;
+    value: string;
+    fieldIndex: number | null;
+  }>({
     showInput: false,
     value: "",
+    fieldIndex: null,
   });
 
   const addSubject = trpc.subject.addSubject.useMutation({
@@ -93,22 +98,64 @@ const Configure: NextPage = () => {
     }
   }, [isFetched, data, form, subjectSelection]);
 
-  const addCategoryHandler = (
+  const selectCategoryHandler = (
     event: React.ChangeEvent<HTMLSelectElement>,
     fieldIndex: number
   ) => {
-    console.log("addCategoryHandler", event.target.value);
     if (event.target.value === "+ new category") {
-      setFieldCategoryInput((prev) => ({ ...prev, showInput: true }));
+      setFieldCategoryInput((prev) => ({
+        ...prev,
+        showInput: true,
+        fieldIndex,
+      }));
     } else {
       setFieldCategoryInput((prev) => ({ ...prev, showInput: false }));
 
       if (!!event.target.value) {
-        form.register(`entries.0.fields.${fieldIndex}.category`, {
-          value: event.target.value,
-        });
+        watchFields.entries[0]?.fields[fieldIndex]?.category === undefined
+          ? form.register(`entries.0.fields.${fieldIndex}.category`, {
+              value: event.target.value,
+            })
+          : form.setValue(
+              `entries.0.fields.${fieldIndex}.category`,
+              event.target.value
+            );
       }
     }
+  };
+
+  const addCategoryHandler = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    setFieldCategories((prev) => {
+      const newCategory = {
+        value: fieldCategoryInput.value,
+        fieldIndex: fieldCategoryInput.fieldIndex,
+      };
+
+      setFieldCategoryInput({
+        showInput: false,
+        value: "",
+        fieldIndex: null,
+      });
+
+      if (newCategory.fieldIndex !== null)
+        watchFields.entries[0]?.fields[newCategory.fieldIndex]?.category ===
+        undefined
+          ? form.register(
+              `entries.0.fields.${newCategory.fieldIndex}.category`,
+              {
+                value: newCategory.value,
+              }
+            )
+          : form.setValue(
+              `entries.0.fields.${newCategory.fieldIndex}.category`,
+              newCategory.value
+            );
+
+      return [...prev, newCategory.value];
+    });
   };
 
   const addField = (
@@ -174,6 +221,10 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
+  // useEffect(() => {
+  //   console.log("watchfields", watchFields);
+  // }, [watchFields]);
+
   return (
     <Layout page="configure">
       <Heading>Profile</Heading>
@@ -214,33 +265,27 @@ const Configure: NextPage = () => {
         </div>
         {fieldCategoryInput.showInput === true && (
           <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
-            <>
-              <input
-                type="text"
-                maxLength={12}
-                className="w-40 overflow-clip border-2"
-                placeholder="category name"
-                value={fieldCategoryInput.value}
-                onChange={(event) => {
-                  setFieldCategoryInput((prev) => ({
-                    ...prev,
-                    value: event.target.value,
-                  }));
-                }}
-              />
-              <button
-                onClick={(event) => {
-                  event.preventDefault();
-                  setFieldCategories((prev) => [
-                    ...prev,
-                    fieldCategoryInput.value,
-                  ]);
-                }}
-                className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-              >
-                Add Category
-              </button>
-            </>
+            <input
+              type="text"
+              maxLength={12}
+              className="w-40 overflow-clip border-2"
+              placeholder="category name"
+              value={fieldCategoryInput.value}
+              onChange={(event) => {
+                setFieldCategoryInput((prev) => ({
+                  ...prev,
+                  value: event.target.value,
+                }));
+              }}
+            />
+            <button
+              onClick={(event) => {
+                addCategoryHandler(event);
+              }}
+              className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+            >
+              Add Category
+            </button>
           </div>
         )}
         {watchFields.entries[0]?.fields.length &&
@@ -253,11 +298,9 @@ const Configure: NextPage = () => {
                       <select
                         aria-label="field category"
                         className="w-40 overflow-clip border-2"
-                        /* {...form.register(
-                          `entries.0.fields.${fieldIndex}.category`
-                        )} */
+                        value={field.category}
                         onChange={(event) =>
-                          addCategoryHandler(event, fieldIndex)
+                          selectCategoryHandler(event, fieldIndex)
                         }
                       >
                         {fieldCategories?.map((category) => (
