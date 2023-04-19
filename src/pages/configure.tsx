@@ -57,6 +57,7 @@ const Configure: NextPage = () => {
       entries: [
         {
           template: true,
+          categories: fieldCategories.join(),
           fields: [
             {
               name: "Journal",
@@ -157,6 +158,10 @@ const Configure: NextPage = () => {
       return [...prev, newCategory.value];
     });
   };
+
+  useEffect(() => {
+    form.setValue(`entries.0.categories`, fieldCategories.join());
+  }, [fieldCategories, form]);
 
   const addField = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -271,6 +276,7 @@ const Configure: NextPage = () => {
               className="w-40 overflow-clip border-2"
               placeholder="category name"
               value={fieldCategoryInput.value}
+              autoFocus={true}
               onChange={(event) => {
                 setFieldCategoryInput((prev) => ({
                   ...prev,
