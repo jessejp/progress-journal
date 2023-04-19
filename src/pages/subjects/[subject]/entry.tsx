@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import type { GetStaticPaths, GetStaticPropsContext } from "next";
@@ -9,6 +9,7 @@ import ButtonContainer from "../../../ui/ButtonContainer";
 import MainContent from "../../../ui/MainContent";
 import { trpc } from "../../../utils/trpc";
 import { useZodForm, entryValidationSchema } from "../../../utils/useZodForm";
+import clsx from "clsx";
 
 const Entry: NextPage<{ subject: string }> = ({ subject }) => {
   const router = useRouter();
@@ -20,6 +21,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     },
     { refetchOnWindowFocus: false }
   );
+  const [selectedFilter, setSelectedFilter] = useState<string>("all");
 
   const addEntry = trpc.entry.addEntry.useMutation({
     onSuccess: async () => {
@@ -67,11 +69,46 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     <Layout page="New Entry">
       <Heading>New Entry</Heading>
       <MainContent>
+        <div className="flex flex-row gap-4">
+          <div className="rounded bg-slate-600 p-2">
+            <input
+              type="radio"
+              name="filter"
+              id="all"
+              value="all"
+              defaultChecked
+              onChange={(e) => setSelectedFilter(e.target.value)}
+            />
+            <label htmlFor="all">All</label>
+          </div>
+          {data?.entries[0]?.categories?.split(",").map((category) => {
+            return (
+              <div className="rounded bg-slate-600 p-2" key={category}>
+                <input
+                  type="radio"
+                  name="filter"
+                  id={category}
+                  value={category}
+                  onChange={(e) => setSelectedFilter(e.target.value)}
+                />
+                <label htmlFor={category}>{category}</label>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4" />
         <form className="flex flex-col gap-2">
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
-                className="flex w-full flex-col items-start gap-2 bg-slate-600 px-4 py-2"
+                className={clsx(
+                  "flex w-full flex-col items-start gap-2 bg-slate-600 px-4 py-2",
+                  {
+                    hidden:
+                      selectedFilter !== "all" &&
+                      field.category !== selectedFilter,
+                  }
+                )}
                 key={field.id}
               >
                 <label className="w-full text-zinc-200" htmlFor={field.name}>

@@ -20,9 +20,7 @@ const Configure: NextPage = () => {
   const [fieldTemplateSelection, setFieldTemplateSelection] =
     useState("journal");
   const [subjectSelection, setSubjectSelection] = useState("Add New Subject");
-  const [fieldCategories, setFieldCategories] = useState<Array<string>>([
-    "unassigned",
-  ]);
+  const [fieldCategories, setFieldCategories] = useState<Array<string>>([]);
   const [fieldCategoryInput, setFieldCategoryInput] = useState<{
     showInput: boolean;
     value: string;
@@ -92,7 +90,7 @@ const Configure: NextPage = () => {
       form.reset(
         {
           subjectName: data?.name,
-          entries: data?.entries,
+          //entries: data?.entries,
         },
         { keepDefaultValues: true }
       );
@@ -244,6 +242,7 @@ const Configure: NextPage = () => {
             onChange={(event) => {
               setSubjectSelection(event.target.value);
             }}
+            disabled={true} // TODO: enable when updating existing subjects is implemented
           >
             <option value="Add New Subject">Add New Subject</option>
             {subjects.data?.map((subject) => (
@@ -309,6 +308,7 @@ const Configure: NextPage = () => {
                           selectCategoryHandler(event, fieldIndex)
                         }
                       >
+                        <option value="unassigned">unassigned</option>
                         {fieldCategories?.map((category) => (
                           <option key={category} value={category}>
                             {category}

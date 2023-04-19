@@ -14,11 +14,13 @@ export const fieldInputValidation = z.object({
 
 export const fieldValidationSchema = z.object({
   name: z.string().min(1).max(36),
+  category: z.optional(z.string()),
   fieldInputs: z.array(fieldInputValidation),
 });
 
 export const entryValidationSchema = z.object({
   subjectId: z.string(),
+  categories: z.optional(z.string()),
   fields: z.array(fieldValidationSchema),
 });
 
