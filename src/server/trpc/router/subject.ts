@@ -29,7 +29,7 @@ export const subjectRouter = router({
                         fieldInputs: {
                           create: field.fieldInputs.map((fieldInput) => ({
                             inputType: fieldInput.inputType,
-                            unit: fieldInput.unit,
+                            inputHelper: fieldInput.inputHelper,
                           })),
                         },
                       })),
@@ -57,13 +57,15 @@ export const subjectRouter = router({
           entries: {
             create: input.entries.map((entry) => ({
               template: entry.template,
+              categories: entry.categories,
               fields: {
                 create: input?.entries[0]?.fields.map((field) => ({
                   name: field.name,
+                  category: field.category,
                   fieldInputs: {
                     create: field.fieldInputs.map((fieldInput) => ({
                       inputType: fieldInput.inputType,
-                      unit: fieldInput.unit,
+                      inputHelper: fieldInput.inputHelper,
                     })),
                   },
                 })),

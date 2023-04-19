@@ -20,6 +20,16 @@ const Configure: NextPage = () => {
   const [fieldTemplateSelection, setFieldTemplateSelection] =
     useState("journal");
   const [subjectSelection, setSubjectSelection] = useState("Add New Subject");
+  const [fieldCategories, setFieldCategories] = useState<Array<string>>([]);
+  const [fieldCategoryInput, setFieldCategoryInput] = useState<{
+    showInput: boolean;
+    value: string;
+    fieldIndex: number | null;
+  }>({
+    showInput: false,
+    value: "",
+    fieldIndex: null,
+  });
 
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
@@ -45,8 +55,12 @@ const Configure: NextPage = () => {
       entries: [
         {
           template: true,
+          categories: fieldCategories.join(),
           fields: [
-            { name: "Journal", fieldInputs: [{ inputType: "TEXTAREA" }] },
+            {
+              name: "Journal",
+              fieldInputs: [{ inputType: "TEXTAREA" }],
+            },
           ],
         },
       ],
@@ -76,12 +90,76 @@ const Configure: NextPage = () => {
       form.reset(
         {
           subjectName: data?.name,
-          entries: data?.entries,
+          //entries: data?.entries,
         },
         { keepDefaultValues: true }
       );
     }
   }, [isFetched, data, form, subjectSelection]);
+
+  const selectCategoryHandler = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+    fieldIndex: number
+  ) => {
+    if (event.target.value === "+ new category") {
+      setFieldCategoryInput((prev) => ({
+        ...prev,
+        showInput: true,
+        fieldIndex,
+      }));
+    } else {
+      setFieldCategoryInput((prev) => ({ ...prev, showInput: false }));
+
+      if (!!event.target.value) {
+        watchFields.entries[0]?.fields[fieldIndex]?.category === undefined
+          ? form.register(`entries.0.fields.${fieldIndex}.category`, {
+              value: event.target.value,
+            })
+          : form.setValue(
+              `entries.0.fields.${fieldIndex}.category`,
+              event.target.value
+            );
+      }
+    }
+  };
+
+  const addCategoryHandler = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    setFieldCategories((prev) => {
+      const newCategory = {
+        value: fieldCategoryInput.value,
+        fieldIndex: fieldCategoryInput.fieldIndex,
+      };
+
+      setFieldCategoryInput({
+        showInput: false,
+        value: "",
+        fieldIndex: null,
+      });
+
+      if (newCategory.fieldIndex !== null)
+        watchFields.entries[0]?.fields[newCategory.fieldIndex]?.category ===
+        undefined
+          ? form.register(
+              `entries.0.fields.${newCategory.fieldIndex}.category`,
+              {
+                value: newCategory.value,
+              }
+            )
+          : form.setValue(
+              `entries.0.fields.${newCategory.fieldIndex}.category`,
+              newCategory.value
+            );
+
+      return [...prev, newCategory.value];
+    });
+  };
+
+  useEffect(() => {
+    form.setValue(`entries.0.categories`, fieldCategories.join());
+  }, [fieldCategories, form]);
 
   const addField = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -96,9 +174,9 @@ const Configure: NextPage = () => {
           return [{ inputType: "TEXTAREA" }];
         case "weight training":
           return [
-            { inputType: "NUMBER", unit: "kg" },
-            { inputType: "NUMBER", unit: "reps" },
-            { inputType: "NUMBER", unit: "sets" },
+            { inputType: "NUMBER", inputHelper: "kg" },
+            { inputType: "NUMBER", inputHelper: "reps" },
+            { inputType: "NUMBER", inputHelper: "sets" },
           ];
         default:
           return [{ inputType: "TEXTAREA" }];
@@ -146,12 +224,9 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
-  // const dirtyfields = form.formState.dirtyFields;
-  // const formValues = form.getValues();
   // useEffect(() => {
-  //   console.log("dirty:", dirtyfields);
-  //   console.log("values:", formValues);
-  // }, [dirtyfields, formValues]);
+  //   console.log("watchfields", watchFields);
+  // }, [watchFields]);
 
   return (
     <Layout page="configure">
@@ -167,6 +242,7 @@ const Configure: NextPage = () => {
             onChange={(event) => {
               setSubjectSelection(event.target.value);
             }}
+            disabled={true} // TODO: enable when updating existing subjects is implemented
           >
             <option value="Add New Subject">Add New Subject</option>
             {subjects.data?.map((subject) => (
@@ -191,13 +267,56 @@ const Configure: NextPage = () => {
             {...form.register("subjectName")}
           />
         </div>
+        {fieldCategoryInput.showInput === true && (
+          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
+            <input
+              type="text"
+              maxLength={12}
+              className="w-40 overflow-clip border-2"
+              placeholder="category name"
+              value={fieldCategoryInput.value}
+              autoFocus={true}
+              onChange={(event) => {
+                setFieldCategoryInput((prev) => ({
+                  ...prev,
+                  value: event.target.value,
+                }));
+              }}
+            />
+            <button
+              onClick={(event) => {
+                addCategoryHandler(event);
+              }}
+              className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+            >
+              Add Category
+            </button>
+          </div>
+        )}
         {watchFields.entries[0]?.fields.length &&
           watchFields.entries[0].fields.map((field, fieldIndex, fieldArray) => {
             return (
               <React.Fragment key={fieldIndex}>
                 <div className="my-2 rounded bg-slate-500 p-4">
                   <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2">
-                    <div>Field {fieldIndex + 1}</div>
+                    <div className="flex h-10 flex-row items-center gap-4">
+                      <select
+                        aria-label="field category"
+                        className="w-40 overflow-clip border-2"
+                        value={field.category}
+                        onChange={(event) =>
+                          selectCategoryHandler(event, fieldIndex)
+                        }
+                      >
+                        <option value="unassigned">unassigned</option>
+                        {fieldCategories?.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                        <option value="+ new category">+ new category</option>
+                      </select>
+                    </div>
                     {fieldIndex === fieldArray.length - 1 &&
                       fieldIndex > 0 &&
                       subjectSelection === "Add New Subject" && (
@@ -261,13 +380,14 @@ const Configure: NextPage = () => {
                               type="text"
                               placeholder="kg, lbs, etc."
                               {...form.register(
-                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.unit`
+                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
                               )}
                             ></input>
                           )}
                         </div>
                         <div className="flex flex-grow-0 gap-2">
                           {inputArray.length > 1 &&
+                            inputIndex === inputArray.length - 1 &&
                             subjectSelection === "Add New Subject" && (
                               <button
                                 className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
@@ -305,7 +425,7 @@ const Configure: NextPage = () => {
                         addField(event, fieldTemplateSelection)
                       }
                     >
-                      TEST
+                      + add field
                     </button>
                     <select
                       value={fieldTemplateSelection}
@@ -314,9 +434,9 @@ const Configure: NextPage = () => {
                       }}
                       className="w-fit border-2"
                     >
-                      <option value="journal">Journal template</option>
+                      <option value="journal">default template</option>
                       <option value="weight training">
-                        weight training template
+                        kg/reps/sets template
                       </option>
                     </select>
                   </div>

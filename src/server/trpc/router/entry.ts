@@ -72,7 +72,7 @@ export const entryRouter = router({
                   valueNumber: fieldInput.valueNumber,
                   valueString: fieldInput.valueString,
                   valueBoolean: fieldInput.valueBoolean,
-                  unit: fieldInput.unit,
+                  inputHelper: fieldInput.inputHelper,
                   inputType: fieldInput.inputType,
                 })),
               },
@@ -107,7 +107,7 @@ export const fieldRouter = router({
           valueNumber: input.valueNumber,
           valueString: input.valueString,
           valueBoolean: input.valueBoolean,
-          unit: input.unit,
+          inputHelper: input.inputHelper,
           inputType: input.inputType,
         },
       });

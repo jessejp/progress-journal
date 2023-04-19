@@ -1,7 +1,6 @@
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import type { GetStaticPaths, GetStaticPropsContext, NextPage } from "next";
 import { appRouter } from "../../../server/trpc/router/_app";
-import { prisma } from "../../../server/db/client";
 import superjson from "superjson";
 import { trpc } from "../../../utils/trpc";
 import Layout from "../../../ui/Layout";
@@ -39,7 +38,7 @@ const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
                           input.inputType === "RANGE") &&
                           input.valueNumber && (
                             <span>{`${input.valueNumber} ${
-                              input.unit ? input.unit : ""
+                              input.inputHelper ? input.inputHelper : ""
                             }`}</span>
                           )}
                         {input.inputType === "BOOLEAN" &&
