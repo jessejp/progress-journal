@@ -20,7 +20,13 @@ const Configure: NextPage = () => {
   const [fieldTemplateSelection, setFieldTemplateSelection] =
     useState("journal");
   const [subjectSelection, setSubjectSelection] = useState("Add New Subject");
-  const [fieldCategories, setFieldCategories] = useState([]);
+  const [fieldCategories, setFieldCategories] = useState<Array<string>>([
+    "unassigned",
+  ]);
+  const [fieldCategoryInput, setFieldCategoryInput] = useState({
+    showInput: false,
+    value: "",
+  });
 
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
@@ -92,9 +98,17 @@ const Configure: NextPage = () => {
     fieldIndex: number
   ) => {
     console.log("addCategoryHandler", event.target.value);
-    /* form.register(`entries.0.fields.${fieldIndex}.category`, {
-      value: event.target.value,
-    }); */
+    if (event.target.value === "+ new category") {
+      setFieldCategoryInput((prev) => ({ ...prev, showInput: true }));
+    } else {
+      setFieldCategoryInput((prev) => ({ ...prev, showInput: false }));
+
+      if (!!event.target.value) {
+        form.register(`entries.0.fields.${fieldIndex}.category`, {
+          value: event.target.value,
+        });
+      }
+    }
   };
 
   const addField = (
@@ -198,13 +212,44 @@ const Configure: NextPage = () => {
             {...form.register("subjectName")}
           />
         </div>
+        {fieldCategoryInput.showInput === true && (
+          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
+            <>
+              <input
+                type="text"
+                maxLength={12}
+                className="w-40 overflow-clip border-2"
+                placeholder="category name"
+                value={fieldCategoryInput.value}
+                onChange={(event) => {
+                  setFieldCategoryInput((prev) => ({
+                    ...prev,
+                    value: event.target.value,
+                  }));
+                }}
+              />
+              <button
+                onClick={(event) => {
+                  event.preventDefault();
+                  setFieldCategories((prev) => [
+                    ...prev,
+                    fieldCategoryInput.value,
+                  ]);
+                }}
+                className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+              >
+                Add Category
+              </button>
+            </>
+          </div>
+        )}
         {watchFields.entries[0]?.fields.length &&
           watchFields.entries[0].fields.map((field, fieldIndex, fieldArray) => {
             return (
               <React.Fragment key={fieldIndex}>
                 <div className="my-2 rounded bg-slate-500 p-4">
                   <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2">
-                    <div className="flex flex-row items-center gap-4">
+                    <div className="flex h-10 flex-row items-center gap-4">
                       <select
                         aria-label="field category"
                         className="w-40 overflow-clip border-2"
@@ -215,15 +260,11 @@ const Configure: NextPage = () => {
                           addCategoryHandler(event, fieldIndex)
                         }
                       >
-                        {fieldCategories.length > 0 ? (
-                          fieldCategories?.map((category) => (
-                            <option key={category} value={category}>
-                              {category}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="">unassigned</option>
-                        )}
+                        {fieldCategories?.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
                         <option value="+ new category">+ new category</option>
                       </select>
                     </div>

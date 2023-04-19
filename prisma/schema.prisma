@@ -32,7 +32,7 @@ model Entry {
   subjectId  String
   fields     Field[]
   template   Boolean  @default(false)
-  categories String?  @db.VarChar(72) // used for loading the options in config
+  categories String?  @db.VarChar(64) // used for loading the options in config, max 5 categories
 
   @@index([subjectId])
 }
