@@ -11,29 +11,42 @@ export const subjectRouter = router({
         where: {
           id: input.id,
         },
-        // include: {
-        //   entries: {
-        //     where: {
-        //       template: true,
-        //     },
-        //   },
-        // },
+        include: {
+          entries: {
+            where: {
+              template: true,
+            },
+            include: {
+              fields: {
+                include: {
+                  fieldInputs: true,
+                },
+              },
+            },
+          },
+        },
         data: {
           name: input.name,
-          
-          // entries: {
-          //   upsert: input.entries.map((entry) => ({
-          //     where: {
-          //       id: entry.entryId,
-          //     },
-          //     update: {
-          //       categories: entry.categories,
-          //     },
-          //     create: {
-          //       categories: entry.categories,
-          //     },
-          //   })),
-          // },
+          entries: {
+            update: input.entries.map((entry) => ({
+              where: {
+                id: entry.id,
+              },
+              data: {
+                categories: entry.categories,
+                fields: {
+                  update: entry.fields.map((field) => ({
+                    where: {
+                      id: field.id,
+                    },
+                    data: {
+                      category: field.category,
+                    },
+                  })),
+                },
+              },
+            })),
+          },
         },
       });
     }),

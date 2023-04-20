@@ -36,6 +36,7 @@ export const subjectValidationSchema = z.object({
         z.object({
           name: z.string().min(1).max(50),
           category: z.optional(z.string().nullable()),
+          id: z.string(),
           fieldInputs: z.array(
             z.object({
               id: z.optional(z.string()),

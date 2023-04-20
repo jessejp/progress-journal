@@ -34,7 +34,7 @@ const Configure: NextPage = () => {
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
-    }
+    },
   });
 
   const updateSubject = trpc.subject.updateSubject.useMutation({
@@ -93,10 +93,11 @@ const Configure: NextPage = () => {
           id: data?.id,
           entries: data?.entries,
         },
-        { keepDefaultValues: true  }
+        { keepDefaultValues: true }
       );
+      setFieldCategories(data?.entries[0]?.categories?.split(",") || []);
     }
-  }, [isFetched, data, form, subjectSelection]);
+  }, [isFetched, data, form, subjectSelection, setFieldCategories]);
 
   const selectCategoryHandler = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -186,6 +187,7 @@ const Configure: NextPage = () => {
 
     currentForm.entries[0]?.fields.push({
       name: "",
+      id: "",
       fieldInputs: fieldTemplateData(),
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
