@@ -34,7 +34,7 @@ const Configure: NextPage = () => {
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
-    },
+    }
   });
 
   const updateSubject = trpc.subject.updateSubject.useMutation({
@@ -50,11 +50,12 @@ const Configure: NextPage = () => {
   const form = useZodForm({
     schema: subjectValidationSchema,
     defaultValues: {
-      subjectId: subjectSelection,
-      subjectName: "",
+      id: subjectSelection,
+      name: "",
       entries: [
         {
           template: true,
+          id: "",
           categories: fieldCategories.join(),
           fields: [
             {
@@ -86,13 +87,13 @@ const Configure: NextPage = () => {
     }
 
     if (isFetched) {
-      console.log("form reset");
       form.reset(
         {
-          subjectName: data?.name,
-          //entries: data?.entries,
+          name: data?.name,
+          id: data?.id,
+          entries: data?.entries,
         },
-        { keepDefaultValues: true }
+        { keepDefaultValues: true  }
       );
     }
   }, [isFetched, data, form, subjectSelection]);
@@ -228,6 +229,8 @@ const Configure: NextPage = () => {
   //   console.log("watchfields", watchFields);
   // }, [watchFields]);
 
+  // console.log("form", form.formState.errors);
+
   return (
     <Layout page="configure">
       <Heading>Profile</Heading>
@@ -242,7 +245,6 @@ const Configure: NextPage = () => {
             onChange={(event) => {
               setSubjectSelection(event.target.value);
             }}
-            disabled={true} // TODO: enable when updating existing subjects is implemented
           >
             <option value="Add New Subject">Add New Subject</option>
             {subjects.data?.map((subject) => (
@@ -256,15 +258,15 @@ const Configure: NextPage = () => {
           <label className="h-8 text-lg font-bold text-zinc-200 max-sm:order-1 max-sm:w-1/2">
             Subject Name
           </label>
-          {form.formState.errors.subjectName && (
+          {form.formState.errors.name && (
             <p className="text-red-500 max-sm:order-3">
-              {form.formState.errors.subjectName.message}
+              {form.formState.errors.name.message}
             </p>
           )}
           <input
             type="text"
             className="w-40 border-2 max-sm:order-2 max-sm:w-1/2"
-            {...form.register("subjectName")}
+            {...form.register("name")}
           />
         </div>
         {fieldCategoryInput.showInput === true && (
@@ -303,7 +305,7 @@ const Configure: NextPage = () => {
                       <select
                         aria-label="field category"
                         className="w-40 overflow-clip border-2"
-                        value={field.category}
+                        value={field.category || "unassigned"}
                         onChange={(event) =>
                           selectCategoryHandler(event, fieldIndex)
                         }
@@ -452,16 +454,6 @@ const Configure: NextPage = () => {
             if (subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
             } else {
-              //filter out fields with an id from the values
-              // const filteredValues = {
-              //   ...values,
-              //   entries: {
-              //     ...values.entries,
-              //     fields: values.entries[0]?.fields.map((field) => {
-              //       field.fieldInputs.filter((input) => input.id === undefined);
-              //     }),
-              //   },
-              // };
               await updateSubject.mutateAsync(values);
             }
           })}

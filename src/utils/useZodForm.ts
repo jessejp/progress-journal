@@ -25,18 +25,17 @@ export const entryValidationSchema = z.object({
 });
 
 export const subjectValidationSchema = z.object({
-  subjectId: z.string(),
-  subjectName: z.string().min(1).max(50),
+  id: z.string(),
+  name: z.string().min(1).max(50),
   entries: z.array(
     z.object({
       template: z.boolean(),
-      categories: z.optional(z.string()),
-      entryId: z.optional(z.string()),
+      categories: z.optional(z.string().nullable()),
+      id: z.string(),
       fields: z.array(
         z.object({
           name: z.string().min(1).max(50),
-          id: z.optional(z.string()),
-          category: z.optional(z.string()),
+          category: z.optional(z.string().nullable()),
           fieldInputs: z.array(
             z.object({
               id: z.optional(z.string()),
