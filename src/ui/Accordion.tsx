@@ -21,7 +21,7 @@ const Accordion: React.FC<AccordionProps> = ({ title, children }) => {
         <h3 className="text-lg">{title}</h3>
         <div className="mx-2 font-bold">{isOpen ? "-" : "+"}</div>
       </div>
-      {isOpen && <div className="">{children}</div>}
+      {isOpen && <>{children}</>}
     </div>
   );
 };

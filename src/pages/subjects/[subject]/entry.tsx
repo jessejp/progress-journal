@@ -102,7 +102,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
             return (
               <div
                 className={clsx(
-                  "flex w-full flex-col items-start gap-2 bg-slate-600 px-4 py-2",
+                  "flex flex-row flex-wrap justify-around gap-2 bg-slate-600 px-4 py-2 sm:justify-start",
                   {
                     hidden:
                       selectedFilter !== "all" &&
@@ -118,29 +118,69 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                   switch (input.inputType) {
                     case "TEXTAREA":
                       return (
-                        <textarea
-                          key={input.id}
-                          className="h-32 bg-slate-800 text-slate-200"
-                          {...form.register(
-                            `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
-                          )}
-                        />
+                        <div className="flex w-full flex-col rounded bg-slate-700 p-2 md:w-10/12">
+                          <label className="text-sm text-zinc-300">
+                            {input.inputHelper || "textarea"}
+                          </label>
+                          <textarea
+                            key={input.id}
+                            className="h-32 bg-slate-800 text-slate-200"
+                            {...form.register(
+                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
+                            )}
+                          />
+                        </div>
                       );
                     case "NUMBER":
                       return (
-                        <div key={input.id} className="flex flex-row gap-1">
-                          <input
-                            key={input.id}
-                            type="number"
-                            className="w-14 bg-slate-800 p-1 text-center text-slate-200"
-                            {...form.register(
-                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                              { valueAsNumber: true }
-                            )}
-                          />
-                          <span className="bg-slate-700 p-1 px-2 text-slate-200">
+                        <div
+                          key={input.id}
+                          className="flex flex-row items-center gap-1 rounded bg-slate-700 p-1"
+                        >
+                          <div className="flex flex-col justify-center w-10 gap-1">
+                            <button
+                              className="w-full bg-slate-600 font-bold text-slate-200"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                const currentValue = form.getValues(
+                                  `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                                );
+                                form.setValue(
+                                  `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                  currentValue ? currentValue + 1 : 1
+                                );
+                              }}
+                            >
+                              +
+                            </button>
+                            <input
+                              key={input.id}
+                              type="number"
+                              className=" bg-slate-800 p-1 text-center text-slate-200"
+                              {...form.register(
+                                `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                { valueAsNumber: true }
+                              )}
+                            />
+                            <button
+                              className="w-full bg-slate-600 font-bold text-slate-200"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                const currentValue = form.getValues(
+                                  `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                                );
+                                form.setValue(
+                                  `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                  currentValue ? currentValue - 1 : 0
+                                );
+                              }}
+                            >
+                              -
+                            </button>
+                          </div>
+                          <label className="text-sm text-zinc-300">
                             {input.inputHelper}
-                          </span>
+                          </label>
                         </div>
                       );
                     case "BOOLEAN":
