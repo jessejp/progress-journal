@@ -10,6 +10,7 @@ import MainContent from "../../../ui/MainContent";
 import { trpc } from "../../../utils/trpc";
 import { useZodForm, entryValidationSchema } from "../../../utils/useZodForm";
 import clsx from "clsx";
+import Accordion from "../../../ui/Accordion";
 
 const Entry: NextPage<{ subject: string }> = ({ subject }) => {
   const router = useRouter();
@@ -63,6 +64,11 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     }
   }, [data, form]);
 
+  const watchForm = form.watch();
+  useEffect(() => {
+    console.log(watchForm);
+  }, [watchForm]);
+
   if (!data || !data.entries.length) return <div>No data</div>;
 
   return (
@@ -101,118 +107,114 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
-                className={clsx(
-                  "flex flex-row flex-wrap justify-around gap-2 bg-slate-600 px-4 py-2 sm:justify-start",
-                  {
-                    hidden:
-                      selectedFilter !== "all" &&
-                      field.category !== selectedFilter,
-                  }
-                )}
+                className={clsx({
+                  hidden:
+                    selectedFilter !== "all" &&
+                    field.category !== selectedFilter,
+                })}
                 key={field.id}
               >
-                <label className="w-full text-zinc-200" htmlFor={field.name}>
-                  {field.name}
-                </label>
-                {field.fieldInputs.map((input, inputIndex) => {
-                  switch (input.inputType) {
-                    case "TEXTAREA":
-                      return (
-                        <div className="flex w-full flex-col rounded bg-slate-700 p-2 md:w-10/12">
-                          <label className="text-sm text-zinc-300">
-                            {input.inputHelper || "textarea"}
-                          </label>
-                          <textarea
+                <Accordion title={field.name}>
+                  {field.fieldInputs.map((input, inputIndex) => {
+                    switch (input.inputType) {
+                      case "TEXTAREA":
+                        return (
+                          <div className="flex w-full flex-col rounded bg-slate-700 p-2 md:w-10/12">
+                            <label className="text-sm text-zinc-300">
+                              {input.inputHelper || "textarea"}
+                            </label>
+                            <textarea
+                              key={input.id}
+                              className="h-32 bg-slate-800 text-slate-200"
+                              {...form.register(
+                                `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
+                              )}
+                            />
+                          </div>
+                        );
+                      case "NUMBER":
+                        return (
+                          <div
                             key={input.id}
-                            className="h-32 bg-slate-800 text-slate-200"
-                            {...form.register(
-                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
-                            )}
-                          />
-                        </div>
-                      );
-                    case "NUMBER":
-                      return (
-                        <div
-                          key={input.id}
-                          className="flex flex-row items-center gap-1 rounded bg-slate-700 p-1"
-                        >
-                          <div className="flex flex-col justify-center w-10 gap-1">
-                            <button
-                              className="w-full bg-slate-600 font-bold text-slate-200"
-                              onClick={(event) => {
-                                event.preventDefault();
-                                const currentValue = form.getValues(
-                                  `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
-                                );
-                                form.setValue(
+                            className="flex flex-row items-center gap-1 rounded bg-slate-700 p-1"
+                          >
+                            <div className="flex w-10 flex-col justify-center gap-1">
+                              <button
+                                className="w-full bg-slate-600 font-bold text-slate-200"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  const currentValue = form.getValues(
+                                    `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                                  );
+                                  form.setValue(
+                                    `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                    currentValue ? currentValue + 1 : 1
+                                  );
+                                }}
+                              >
+                                +
+                              </button>
+                              <input
+                                key={input.id}
+                                type="number"
+                                className=" bg-slate-800 p-1 text-center text-slate-200"
+                                {...form.register(
                                   `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                  currentValue ? currentValue + 1 : 1
-                                );
-                              }}
-                            >
-                              +
-                            </button>
+                                  { valueAsNumber: true }
+                                )}
+                              />
+                              <button
+                                className="w-full bg-slate-600 font-bold text-slate-200"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  const currentValue = form.getValues(
+                                    `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                                  );
+                                  form.setValue(
+                                    `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                    currentValue ? currentValue - 1 : 0
+                                  );
+                                }}
+                              >
+                                -
+                              </button>
+                            </div>
+                            <label className="text-sm text-zinc-300">
+                              {input.inputHelper}
+                            </label>
+                          </div>
+                        );
+                      case "BOOLEAN":
+                        return (
+                          <React.Fragment key={input.id}>
                             <input
                               key={input.id}
-                              type="number"
-                              className=" bg-slate-800 p-1 text-center text-slate-200"
+                              type="checkbox"
+                              className=" bg-slate-800 text-slate-200"
+                              {...form.register(
+                                `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
+                              )}
+                            />
+                          </React.Fragment>
+                        );
+                      case "RANGE":
+                        return (
+                          <React.Fragment key={input.id}>
+                            <input
+                              type="range"
+                              className=" bg-slate-800 text-slate-200"
                               {...form.register(
                                 `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
                                 { valueAsNumber: true }
                               )}
                             />
-                            <button
-                              className="w-full bg-slate-600 font-bold text-slate-200"
-                              onClick={(event) => {
-                                event.preventDefault();
-                                const currentValue = form.getValues(
-                                  `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
-                                );
-                                form.setValue(
-                                  `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                  currentValue ? currentValue - 1 : 0
-                                );
-                              }}
-                            >
-                              -
-                            </button>
-                          </div>
-                          <label className="text-sm text-zinc-300">
-                            {input.inputHelper}
-                          </label>
-                        </div>
-                      );
-                    case "BOOLEAN":
-                      return (
-                        <React.Fragment key={input.id}>
-                          <input
-                            key={input.id}
-                            type="checkbox"
-                            className=" bg-slate-800 text-slate-200"
-                            {...form.register(
-                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
-                            )}
-                          />
-                        </React.Fragment>
-                      );
-                    case "RANGE":
-                      return (
-                        <React.Fragment key={input.id}>
-                          <input
-                            type="range"
-                            className=" bg-slate-800 text-slate-200"
-                            {...form.register(
-                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                              { valueAsNumber: true }
-                            )}
-                          />
-                        </React.Fragment>
-                      );
-                    default:
-                      return null;
-                  }
-                })}
+                          </React.Fragment>
+                        );
+                      default:
+                        return null;
+                    }
+                  })}
+                </Accordion>
               </div>
             );
           })}
