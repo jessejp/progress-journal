@@ -40,7 +40,21 @@ export const subjectRouter = router({
                       id: field.id,
                     },
                     data: {
+                      name: field.name,
                       category: field.category,
+                      fieldInputs: {
+                        upsert: field.fieldInputs.map((fieldInput) => ({
+                          where: {
+                            id: fieldInput.id,
+                          },
+                          update: {
+                            ...fieldInput,
+                          },
+                          create: {
+                            ...fieldInput,
+                          },
+                        })),
+                      },
                     },
                   })),
                 },

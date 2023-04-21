@@ -172,16 +172,14 @@ const Configure: NextPage = () => {
 
     const fieldTemplateData = () => {
       switch (fieldTemplate) {
-        case "journal":
-          return [{ inputType: "TEXTAREA" }];
         case "weight training":
           return [
-            { inputType: "NUMBER", inputHelper: "kg" },
-            { inputType: "NUMBER", inputHelper: "reps" },
-            { inputType: "NUMBER", inputHelper: "sets" },
+            { inputType: "NUMBER", inputHelper: "kg", id: "" },
+            { inputType: "NUMBER", inputHelper: "reps", id: "" },
+            { inputType: "NUMBER", inputHelper: "sets", id: "" },
           ];
         default:
-          return [{ inputType: "TEXTAREA" }];
+          return [{ inputType: "TEXTAREA", id: "" }];
       }
     };
 
@@ -211,6 +209,7 @@ const Configure: NextPage = () => {
 
     const currentForm = watchFields;
     currentForm.entries[0]?.fields[fieldIndex]?.fieldInputs.push({
+      id: "",
       inputType: "BOOLEAN",
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
@@ -236,7 +235,7 @@ const Configure: NextPage = () => {
   return (
     <Layout page="configure">
       <Heading>Profile</Heading>
-      <form className="flex w-full flex-col overflow-scroll">
+      <form className="flex w-full flex-col overflow-scroll p-2">
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
           <label className="h-8 text-lg font-bold text-zinc-200 max-sm:order-1 max-sm:w-1/2">
             Select Subject
