@@ -35,11 +35,11 @@ export const subjectRouter = router({
               data: {
                 categories: entry.categories,
                 fields: {
-                  update: entry.fields.map((field) => ({
+                  upsert: entry.fields.map((field) => ({
                     where: {
                       id: field.id,
                     },
-                    data: {
+                    update: {
                       name: field.name,
                       category: field.category,
                       fieldInputs: {
@@ -51,8 +51,19 @@ export const subjectRouter = router({
                             ...fieldInput,
                           },
                           create: {
-                            ...fieldInput,
+                            inputType: fieldInput.inputType,
+                            inputHelper: fieldInput.inputHelper || null,
                           },
+                        })),
+                      },
+                    },
+                    create: {
+                      name: field.name,
+                      category: field.category,
+                      fieldInputs: {
+                        create: field.fieldInputs.map((fieldInput) => ({
+                          inputType: fieldInput.inputType,
+                          inputHelper: fieldInput.inputHelper || null,
                         })),
                       },
                     },

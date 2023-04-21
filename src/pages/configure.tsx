@@ -357,7 +357,7 @@ const Configure: NextPage = () => {
                               `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
                             )}
                             disabled={
-                              subjectSelection !== "Add New Subject" &&
+                              input.id !== "" &&
                               form.formState.dirtyFields?.entries?.[0]
                                 ?.fields?.[fieldIndex]?.fieldInputs?.[
                                 inputIndex
