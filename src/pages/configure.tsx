@@ -50,11 +50,12 @@ const Configure: NextPage = () => {
   const form = useZodForm({
     schema: subjectValidationSchema,
     defaultValues: {
-      subjectId: subjectSelection,
-      subjectName: "",
+      id: subjectSelection,
+      name: "",
       entries: [
         {
           template: true,
+          id: "",
           categories: fieldCategories.join(),
           fields: [
             {
@@ -86,16 +87,17 @@ const Configure: NextPage = () => {
     }
 
     if (isFetched) {
-      console.log("form reset");
       form.reset(
         {
-          subjectName: data?.name,
-          //entries: data?.entries,
+          name: data?.name,
+          id: data?.id,
+          entries: data?.entries,
         },
         { keepDefaultValues: true }
       );
+      setFieldCategories(data?.entries[0]?.categories?.split(",") || []);
     }
-  }, [isFetched, data, form, subjectSelection]);
+  }, [isFetched, data, form, subjectSelection, setFieldCategories]);
 
   const selectCategoryHandler = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -170,21 +172,20 @@ const Configure: NextPage = () => {
 
     const fieldTemplateData = () => {
       switch (fieldTemplate) {
-        case "journal":
-          return [{ inputType: "TEXTAREA" }];
         case "weight training":
           return [
-            { inputType: "NUMBER", inputHelper: "kg" },
-            { inputType: "NUMBER", inputHelper: "reps" },
-            { inputType: "NUMBER", inputHelper: "sets" },
+            { inputType: "NUMBER", inputHelper: "kg", id: "" },
+            { inputType: "NUMBER", inputHelper: "reps", id: "" },
+            { inputType: "NUMBER", inputHelper: "sets", id: "" },
           ];
         default:
-          return [{ inputType: "TEXTAREA" }];
+          return [{ inputType: "TEXTAREA", id: "" }];
       }
     };
 
     currentForm.entries[0]?.fields.push({
       name: "",
+      id: "",
       fieldInputs: fieldTemplateData(),
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
@@ -208,6 +209,7 @@ const Configure: NextPage = () => {
 
     const currentForm = watchFields;
     currentForm.entries[0]?.fields[fieldIndex]?.fieldInputs.push({
+      id: "",
       inputType: "BOOLEAN",
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
@@ -228,12 +230,14 @@ const Configure: NextPage = () => {
   //   console.log("watchfields", watchFields);
   // }, [watchFields]);
 
+  // console.log("form", form.formState.errors);
+
   return (
     <Layout page="configure">
       <Heading>Profile</Heading>
-      <form className="flex w-full flex-col overflow-scroll">
-        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
-          <label className="h-8 text-lg font-bold text-zinc-200 max-sm:order-1 max-sm:w-1/2">
+      <form className="flex w-full flex-col overflow-scroll p-2">
+        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
+          <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
             Select Subject
           </label>
           <select
@@ -242,7 +246,6 @@ const Configure: NextPage = () => {
             onChange={(event) => {
               setSubjectSelection(event.target.value);
             }}
-            disabled={true} // TODO: enable when updating existing subjects is implemented
           >
             <option value="Add New Subject">Add New Subject</option>
             {subjects.data?.map((subject) => (
@@ -252,27 +255,30 @@ const Configure: NextPage = () => {
             ))}
           </select>
         </div>
-        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
-          <label className="h-8 text-lg font-bold text-zinc-200 max-sm:order-1 max-sm:w-1/2">
+        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
+          <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
             Subject Name
           </label>
-          {form.formState.errors.subjectName && (
+          {form.formState.errors.name && (
             <p className="text-red-500 max-sm:order-3">
-              {form.formState.errors.subjectName.message}
+              {form.formState.errors.name.message}
             </p>
           )}
           <input
             type="text"
             className="w-40 border-2 max-sm:order-2 max-sm:w-1/2"
-            {...form.register("subjectName")}
+            {...form.register("name")}
           />
         </div>
         {fieldCategoryInput.showInput === true && (
-          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between">
+          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2 rounded bg-slate-600 p-4">
+            <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
+              Category Name
+            </label>
             <input
               type="text"
               maxLength={12}
-              className="w-40 overflow-clip border-2"
+              className="order-2 w-40 overflow-clip border-2"
               placeholder="category name"
               value={fieldCategoryInput.value}
               autoFocus={true}
@@ -287,7 +293,7 @@ const Configure: NextPage = () => {
               onClick={(event) => {
                 addCategoryHandler(event);
               }}
-              className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+              className="text-l order-3 w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
             >
               Add Category
             </button>
@@ -297,13 +303,14 @@ const Configure: NextPage = () => {
           watchFields.entries[0].fields.map((field, fieldIndex, fieldArray) => {
             return (
               <React.Fragment key={fieldIndex}>
-                <div className="my-2 rounded bg-slate-500 p-4">
-                  <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2">
-                    <div className="flex h-10 flex-row items-center gap-4">
+                <div className="my-2 flex flex-row flex-wrap items-center gap-2 rounded bg-slate-600 p-4">
+                  <div className="mb-4 w-full flex-grow">
+                    <div className="flex w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
+                      <label className="text-sm text-zinc-300">Category</label>
                       <select
                         aria-label="field category"
                         className="w-40 overflow-clip border-2"
-                        value={field.category}
+                        value={field.category || "unassigned"}
                         onChange={(event) =>
                           selectCategoryHandler(event, fieldIndex)
                         }
@@ -328,10 +335,8 @@ const Configure: NextPage = () => {
                         </button>
                       )}
                   </div>
-                  <div className="mb-4 mt-2 flex flex-row flex-wrap justify-start gap-2">
-                    <label className="h-8 w-1/3 flex-grow-0 overflow-clip text-lg font-bold text-zinc-200">
-                      Name
-                    </label>
+                  <div className="flex h-20 w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
+                    <label className="text-sm text-zinc-300">Name</label>
                     <input
                       type="text"
                       className="w-40 max-w-xs border-2"
@@ -340,80 +345,82 @@ const Configure: NextPage = () => {
                   </div>
                   {field?.fieldInputs?.map((input, inputIndex, inputArray) => {
                     return (
-                      <div
-                        className="mb-4 mt-2 flex flex-row flex-wrap justify-start gap-2"
-                        key={inputIndex}
-                      >
-                        <label className="h-8 w-1/3 flex-grow-0 text-lg font-bold text-zinc-200">
-                          Input Type
-                        </label>
-                        <div className="flex flex-grow gap-4">
-                          <select
-                            className="w-fit border-2"
-                            {...form.register(
-                              `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
-                            )}
-                            disabled={
-                              subjectSelection !== "Add New Subject" &&
-                              form.formState.dirtyFields?.entries?.[0]
-                                ?.fields?.[fieldIndex]?.fieldInputs?.[
-                                inputIndex
-                              ]?.id !== undefined
-                            }
-                          >
-                            <option value={input?.inputType}>
-                              {input?.inputType}
-                            </option>
-                            {inputTypes
-                              .filter((type) => type !== input?.inputType)
-                              .map((type) => {
-                                return (
-                                  <option key={type} value={type}>
-                                    {type}
-                                  </option>
-                                );
-                              })}
-                          </select>
-                          {input?.inputType === "NUMBER" && (
-                            <input
-                              className="w-24"
-                              type="text"
-                              placeholder="kg, lbs, etc."
+                      <>
+                        <div
+                          className="flex h-20 w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2"
+                          key={inputIndex}
+                        >
+                          <label className="text-sm text-zinc-300">
+                            Input Type
+                          </label>
+                          <div className="flex flex-grow gap-4">
+                            <select
+                              className="w-fit border-2"
                               {...form.register(
-                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
                               )}
-                            ></input>
-                          )}
-                        </div>
-                        <div className="flex flex-grow-0 gap-2">
-                          {inputArray.length > 1 &&
-                            inputIndex === inputArray.length - 1 &&
-                            subjectSelection === "Add New Subject" && (
-                              <button
-                                className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                                onClick={(event) =>
-                                  removeFieldInput(
-                                    event,
-                                    fieldIndex,
-                                    inputIndex
-                                  )
-                                }
-                              >
-                                X
-                              </button>
-                            )}
-                          {inputIndex === inputArray.length - 1 && (
-                            <button
-                              className="rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
-                              onClick={(event) =>
-                                addFieldInput(event, fieldIndex)
+                              disabled={
+                                input.id !== "" &&
+                                form.formState.dirtyFields?.entries?.[0]
+                                  ?.fields?.[fieldIndex]?.fieldInputs?.[
+                                  inputIndex
+                                ]?.id !== undefined
                               }
                             >
-                              +
-                            </button>
-                          )}
+                              <option value={input?.inputType}>
+                                {input?.inputType}
+                              </option>
+                              {inputTypes
+                                .filter((type) => type !== input?.inputType)
+                                .map((type) => {
+                                  return (
+                                    <option key={type} value={type}>
+                                      {type}
+                                    </option>
+                                  );
+                                })}
+                            </select>
+                            {input?.inputType === "NUMBER" && (
+                              <input
+                                className="w-24"
+                                type="text"
+                                placeholder="kg, lbs, etc."
+                                {...form.register(
+                                  `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                                )}
+                              ></input>
+                            )}
+                          </div>
+                          <div className="flex flex-grow-0 gap-2">
+                            {inputArray.length > 1 &&
+                              inputIndex === inputArray.length - 1 &&
+                              subjectSelection === "Add New Subject" && (
+                                <button
+                                  className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
+                                  onClick={(event) =>
+                                    removeFieldInput(
+                                      event,
+                                      fieldIndex,
+                                      inputIndex
+                                    )
+                                  }
+                                >
+                                  X
+                                </button>
+                              )}
+                          </div>
                         </div>
-                      </div>
+                        {inputIndex === inputArray.length - 1 && (
+                          <button
+                            className="h-fit rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
+                            onClick={(event) =>
+                              addFieldInput(event, fieldIndex)
+                            }
+                          >
+                            +
+                          </button>
+                        )}
+                      </>
                     );
                   })}
                 </div>
@@ -452,16 +459,6 @@ const Configure: NextPage = () => {
             if (subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
             } else {
-              //filter out fields with an id from the values
-              // const filteredValues = {
-              //   ...values,
-              //   entries: {
-              //     ...values.entries,
-              //     fields: values.entries[0]?.fields.map((field) => {
-              //       field.fieldInputs.filter((input) => input.id === undefined);
-              //     }),
-              //   },
-              // };
               await updateSubject.mutateAsync(values);
             }
           })}

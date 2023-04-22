@@ -7,52 +7,80 @@ export const subjectRouter = router({
   updateSubject: protectedProcedure
     .input(subjectValidationSchema)
     .mutation(async ({ ctx, input }) => {
-      await ctx.prisma.subject
-        .update({
-          where: {
-            id: input.subjectId,
-          },
-          data: {
-            name: input.subjectName,
-            userId: ctx.session.user.id,
-            entries: {
-              update: {
-                where: {
-                  id: input?.entries[0]?.entryId,
+      await ctx.prisma.subject.update({
+        where: {
+          id: input.id,
+        },
+        include: {
+          entries: {
+            where: {
+              template: true,
+            },
+            include: {
+              fields: {
+                include: {
+                  fieldInputs: true,
                 },
-                data: input.entries.map((entry) => ({
-                  template: entry.template,
-                  fields: {
-                    upsert: {
-                      update: input?.entries[0]?.fields.map((field) => ({
-                        name: field.name,
-                        fieldInputs: {
-                          create: field.fieldInputs.map((fieldInput) => ({
-                            inputType: fieldInput.inputType,
-                            inputHelper: fieldInput.inputHelper,
-                          })),
-                        },
-                      })),
-                    },
-                  },
-                })),
               },
             },
           },
-        })
-        .catch((err) => {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: `Could not update subject ${err}`,
-          });
-        });
+        },
+        data: {
+          name: input.name,
+          entries: {
+            update: input.entries.map((entry) => ({
+              where: {
+                id: entry.id,
+              },
+              data: {
+                categories: entry.categories,
+                fields: {
+                  upsert: entry.fields.map((field) => ({
+                    where: {
+                      id: field.id,
+                    },
+                    update: {
+                      name: field.name,
+                      category: field.category,
+                      fieldInputs: {
+                        upsert: field.fieldInputs.map((fieldInput) => ({
+                          where: {
+                            id: fieldInput.id,
+                          },
+                          update: {
+                            ...fieldInput,
+                          },
+                          create: {
+                            inputType: fieldInput.inputType,
+                            inputHelper: fieldInput.inputHelper || null,
+                          },
+                        })),
+                      },
+                    },
+                    create: {
+                      name: field.name,
+                      category: field.category,
+                      fieldInputs: {
+                        create: field.fieldInputs.map((fieldInput) => ({
+                          inputType: fieldInput.inputType,
+                          inputHelper: fieldInput.inputHelper || null,
+                        })),
+                      },
+                    },
+                  })),
+                },
+              },
+            })),
+          },
+        },
+      });
     }),
   addSubject: protectedProcedure
     .input(subjectValidationSchema)
     .mutation(async ({ ctx, input }) => {
       await ctx.prisma.subject.create({
         data: {
-          name: input.subjectName,
+          name: input.name,
           userId: ctx.session.user.id,
           entries: {
             create: input.entries.map((entry) => ({

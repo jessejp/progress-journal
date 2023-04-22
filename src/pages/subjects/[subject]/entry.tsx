@@ -10,6 +10,7 @@ import MainContent from "../../../ui/MainContent";
 import { trpc } from "../../../utils/trpc";
 import { useZodForm, entryValidationSchema } from "../../../utils/useZodForm";
 import clsx from "clsx";
+import Accordion from "../../../ui/Accordion";
 
 const Entry: NextPage<{ subject: string }> = ({ subject }) => {
   const router = useRouter();
@@ -63,6 +64,11 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     }
   }, [data, form]);
 
+  const watchForm = form.watch();
+  useEffect(() => {
+    console.log(watchForm);
+  }, [watchForm]);
+
   if (!data || !data.entries.length) return <div>No data</div>;
 
   return (
@@ -70,7 +76,12 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
       <Heading>New Entry</Heading>
       <MainContent>
         <div className="flex flex-row gap-4">
-          <div className="rounded bg-slate-600 p-2">
+          <div
+            className={clsx("rounded p-2", {
+              "bg-slate-600": selectedFilter === "all",
+              "bg-slate-700": selectedFilter !== "all",
+            })}
+          >
             <input
               type="radio"
               name="filter"
@@ -83,7 +94,13 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           </div>
           {data?.entries[0]?.categories?.split(",").map((category) => {
             return (
-              <div className="rounded bg-slate-600 p-2" key={category}>
+              <div
+                className={clsx("rounded p-2", {
+                  "bg-slate-600": selectedFilter === category,
+                  "bg-slate-700": selectedFilter !== category,
+                })}
+                key={category}
+              >
                 <input
                   type="radio"
                   name="filter"
@@ -97,82 +114,118 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           })}
         </div>
         <div className="mt-4" />
-        <form className="flex flex-col gap-2">
+        <form className="flex w-full flex-col gap-2 sm:w-9/12">
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
-                className={clsx(
-                  "flex w-full flex-col items-start gap-2 bg-slate-600 px-4 py-2",
-                  {
-                    hidden:
-                      selectedFilter !== "all" &&
-                      field.category !== selectedFilter,
-                  }
-                )}
+                className={clsx({
+                  hidden:
+                    selectedFilter !== "all" &&
+                    field.category !== selectedFilter,
+                })}
                 key={field.id}
               >
-                <label className="w-full text-zinc-200" htmlFor={field.name}>
-                  {field.name}
-                </label>
-                {field.fieldInputs.map((input, inputIndex) => {
-                  switch (input.inputType) {
-                    case "TEXTAREA":
-                      return (
-                        <textarea
-                          key={input.id}
-                          className="h-32 bg-slate-800 text-slate-200"
-                          {...form.register(
-                            `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
-                          )}
-                        />
-                      );
-                    case "NUMBER":
-                      return (
-                        <div key={input.id} className="flex flex-row gap-1">
-                          <input
+                <Accordion title={field.name}>
+                  {field.fieldInputs.map((input, inputIndex) => {
+                    switch (input.inputType) {
+                      case "TEXTAREA":
+                        return (
+                          <div className="flex w-full flex-col rounded bg-slate-700 p-2 md:w-10/12">
+                            <label className="text-sm text-zinc-300">
+                              {input.inputHelper || "textarea"}
+                            </label>
+                            <textarea
+                              key={input.id}
+                              className="h-32 bg-slate-800 text-slate-200"
+                              {...form.register(
+                                `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
+                              )}
+                            />
+                          </div>
+                        );
+                      case "NUMBER":
+                        return (
+                          <div
                             key={input.id}
-                            type="number"
-                            className="w-14 bg-slate-800 p-1 text-center text-slate-200"
-                            {...form.register(
-                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                              { valueAsNumber: true }
-                            )}
-                          />
-                          <span className="bg-slate-700 p-1 px-2 text-slate-200">
-                            {input.inputHelper}
-                          </span>
-                        </div>
-                      );
-                    case "BOOLEAN":
-                      return (
-                        <React.Fragment key={input.id}>
-                          <input
-                            key={input.id}
-                            type="checkbox"
-                            className=" bg-slate-800 text-slate-200"
-                            {...form.register(
-                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
-                            )}
-                          />
-                        </React.Fragment>
-                      );
-                    case "RANGE":
-                      return (
-                        <React.Fragment key={input.id}>
-                          <input
-                            type="range"
-                            className=" bg-slate-800 text-slate-200"
-                            {...form.register(
-                              `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                              { valueAsNumber: true }
-                            )}
-                          />
-                        </React.Fragment>
-                      );
-                    default:
-                      return null;
-                  }
-                })}
+                            className="flex flex-row items-center gap-1 rounded bg-slate-700 p-1"
+                          >
+                            <div className="flex w-10 flex-col justify-center gap-1">
+                              <button
+                                className="w-full bg-slate-600 font-bold text-slate-200"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  const currentValue = form.getValues(
+                                    `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                                  );
+                                  form.setValue(
+                                    `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                    currentValue ? currentValue + 1 : 1
+                                  );
+                                }}
+                              >
+                                +
+                              </button>
+                              <input
+                                key={input.id}
+                                type="number"
+                                className=" bg-slate-800 p-1 text-center text-slate-200"
+                                {...form.register(
+                                  `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                  { valueAsNumber: true }
+                                )}
+                              />
+                              <button
+                                className="w-full bg-slate-600 font-bold text-slate-200"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  const currentValue = form.getValues(
+                                    `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                                  );
+                                  form.setValue(
+                                    `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                    currentValue ? currentValue - 1 : 0
+                                  );
+                                }}
+                              >
+                                -
+                              </button>
+                            </div>
+                            <label className="text-sm text-zinc-300">
+                              {input.inputHelper}
+                            </label>
+                          </div>
+                        );
+                      case "BOOLEAN":
+                        return (
+                          <React.Fragment key={input.id}>
+                            <input
+                              key={input.id}
+                              type="checkbox"
+                              className=" bg-slate-800 text-slate-200"
+                              {...form.register(
+                                `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
+                              )}
+                            />
+                          </React.Fragment>
+                        );
+                      case "RANGE":
+                        return (
+                          <React.Fragment key={input.id}>
+                            <input
+                              type="range"
+                              className=" bg-slate-800 text-slate-200"
+                              {...form.register(
+                                `fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                { valueAsNumber: true }
+                              )}
+                            />
+                          </React.Fragment>
+                        );
+                      default:
+                        return null;
+                    }
+                  })}
+                </Accordion>
               </div>
             );
           })}
