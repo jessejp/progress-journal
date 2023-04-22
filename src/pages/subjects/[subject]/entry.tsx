@@ -76,7 +76,12 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
       <Heading>New Entry</Heading>
       <MainContent>
         <div className="flex flex-row gap-4">
-          <div className="rounded bg-slate-600 p-2">
+          <div
+            className={clsx("rounded p-2", {
+              "bg-slate-600": selectedFilter === "all",
+              "bg-slate-700": selectedFilter !== "all",
+            })}
+          >
             <input
               type="radio"
               name="filter"
@@ -89,7 +94,13 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           </div>
           {data?.entries[0]?.categories?.split(",").map((category) => {
             return (
-              <div className="rounded bg-slate-600 p-2" key={category}>
+              <div
+                className={clsx("rounded p-2", {
+                  "bg-slate-600": selectedFilter === category,
+                  "bg-slate-700": selectedFilter !== category,
+                })}
+                key={category}
+              >
                 <input
                   type="radio"
                   name="filter"
@@ -103,7 +114,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           })}
         </div>
         <div className="mt-4" />
-        <form className="flex flex-col gap-2">
+        <form className="flex w-full flex-col gap-2 sm:w-9/12">
           {data?.entries[0]?.fields.map((field, fieldIndex) => {
             return (
               <div
