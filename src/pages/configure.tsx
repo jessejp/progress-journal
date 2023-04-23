@@ -304,7 +304,7 @@ const Configure: NextPage = () => {
             return (
               <React.Fragment key={fieldIndex}>
                 <div className="my-2 flex flex-row flex-wrap items-center gap-2 rounded bg-slate-600 p-4">
-                  <div className="mb-4 w-full flex-grow">
+                  <div className="flex flex-row items-center gap-2 mb-4 w-full flex-grow">
                     <div className="flex w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
                       <label className="text-sm text-zinc-300">Category</label>
                       <select
@@ -328,7 +328,7 @@ const Configure: NextPage = () => {
                       fieldIndex > 0 &&
                       subjectSelection === "Add New Subject" && (
                         <button
-                          className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
+                          className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
                           onClick={(event) => removeField(event, fieldIndex)}
                         >
                           X
@@ -345,15 +345,12 @@ const Configure: NextPage = () => {
                   </div>
                   {field?.fieldInputs?.map((input, inputIndex, inputArray) => {
                     return (
-                      <>
-                        <div
-                          className="flex h-20 w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2"
-                          key={inputIndex}
-                        >
+                      <React.Fragment key={inputIndex}>
+                        <div className="flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
                           <label className="text-sm text-zinc-300">
                             Input Type
                           </label>
-                          <div className="flex flex-grow gap-4">
+                          <div className="flex flex-grow flex-wrap gap-4">
                             <select
                               className="w-fit border-2"
                               {...form.register(
@@ -390,29 +387,29 @@ const Configure: NextPage = () => {
                                 )}
                               ></input>
                             )}
-                          </div>
-                          <div className="flex flex-grow-0 gap-2">
-                            {inputArray.length > 1 &&
-                              inputIndex === inputArray.length - 1 &&
-                              subjectSelection === "Add New Subject" && (
-                                <button
-                                  className="rounded  bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                                  onClick={(event) =>
-                                    removeFieldInput(
-                                      event,
-                                      fieldIndex,
-                                      inputIndex
-                                    )
-                                  }
-                                >
-                                  X
-                                </button>
-                              )}
+                            <div className="flex flex-grow-0 gap-2">
+                              {inputArray.length > 1 &&
+                                inputIndex === inputArray.length - 1 &&
+                                subjectSelection === "Add New Subject" && (
+                                  <button
+                                    className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
+                                    onClick={(event) =>
+                                      removeFieldInput(
+                                        event,
+                                        fieldIndex,
+                                        inputIndex
+                                      )
+                                    }
+                                  >
+                                    X
+                                  </button>
+                                )}
+                            </div>
                           </div>
                         </div>
                         {inputIndex === inputArray.length - 1 && (
                           <button
-                            className="h-fit rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
+                            className="h-fit rounded bg-blue-500 px-4 py-2 align-middle text-xl font-bold text-white hover:bg-blue-700"
                             onClick={(event) =>
                               addFieldInput(event, fieldIndex)
                             }
@@ -420,7 +417,7 @@ const Configure: NextPage = () => {
                             +
                           </button>
                         )}
-                      </>
+                      </React.Fragment>
                     );
                   })}
                 </div>
