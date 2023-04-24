@@ -34,7 +34,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
                   <Button
                     key={entry.id}
                     link={`/subjects/${subject}/${entry.id}`}
-                    intent="open"
+                    intent="selection"
                     style="small"
                   >
                     Entry: {date}

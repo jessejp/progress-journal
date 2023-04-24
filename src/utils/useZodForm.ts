@@ -4,6 +4,7 @@ import type { UseFormProps } from "react-hook-form";
 import { z } from "zod";
 
 export const fieldInputValidation = z.object({
+  id: z.string(),
   fieldId: z.string(),
   valueNumber: z.optional(z.number().nullable()),
   valueString: z.optional(z.string().max(510).nullable()),
@@ -15,6 +16,7 @@ export const fieldInputValidation = z.object({
 export const fieldValidationSchema = z.object({
   name: z.string().min(1).max(36),
   category: z.optional(z.string()),
+  id: z.string(),
   fieldInputs: z.array(fieldInputValidation),
 });
 

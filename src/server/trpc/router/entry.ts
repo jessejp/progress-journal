@@ -1,8 +1,8 @@
 import { router, protectedProcedure } from "../trpc";
 import z from "zod";
 import {
-  entryValidationSchema,
   fieldInputValidation,
+  subjectValidationSchema,
 } from "../../../utils/useZodForm";
 
 export const entryRouter = router({
@@ -59,13 +59,13 @@ export const entryRouter = router({
       });
     }),
   addEntry: protectedProcedure
-    .input(entryValidationSchema)
+    .input(subjectValidationSchema)
     .mutation(({ input, ctx }) => {
       return ctx.prisma.entry.create({
         data: {
-          subjectId: input.subjectId,
+          subjectId: input.id,
           fields: {
-            create: input.fields.map((field) => ({
+            create: input.entries[0]?.fields.map((field) => ({
               name: field.name,
               fieldInputs: {
                 create: field.fieldInputs.map((fieldInput) => ({
