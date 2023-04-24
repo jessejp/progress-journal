@@ -304,7 +304,7 @@ const Configure: NextPage = () => {
             return (
               <React.Fragment key={fieldIndex}>
                 <div className="my-2 flex flex-row flex-wrap items-center gap-2 rounded bg-slate-600 p-4">
-                  <div className="flex flex-row items-center gap-2 mb-4 w-full flex-grow">
+                  <div className="mb-4 flex w-full flex-grow flex-row items-center gap-2">
                     <div className="flex w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
                       <label className="text-sm text-zinc-300">Category</label>
                       <select
@@ -424,12 +424,12 @@ const Configure: NextPage = () => {
                 {fieldIndex === fieldArray.length - 1 && (
                   <div className="mt-4 flex w-full flex-row justify-center">
                     <button
-                      className="w-fit rounded bg-blue-500 px-4 py-2 text-xl font-bold text-white hover:bg-blue-700"
+                      className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
                       onClick={(event) =>
                         addField(event, fieldTemplateSelection)
                       }
                     >
-                      + add field
+                      New Field
                     </button>
                     <select
                       value={fieldTemplateSelection}
