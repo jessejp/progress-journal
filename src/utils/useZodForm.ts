@@ -15,26 +15,17 @@ export const fieldInputValidation = z
     valueString: z.optional(z.string().max(510).nullable()),
     valueBoolean: z.optional(z.boolean().nullable()),
     inputType: z.enum(inputTypes),
-    inputHelper: z.string().nullable(),
-  })
-  .refine(
-    (schema) => {
-      switch (schema.inputType) {
-        case "BOOLEAN":
-          return schema.inputHelper === null;
-        case "NUMBER":
-          return schema.inputHelper === null;
-        case "RANGE":
-          return schema.inputHelper === null;
-        case "TEXTAREA":
-          return true;
-      }
-    },
-    (schema) => ({
-      message: `Input type ${schema.inputType} requires input helper`,
-    })
-  );
-
+    inputHelper: z.string().nullable()
+  }).superRefine((value, ctx) => {
+    if ((value.inputType === "NUMBER" || value.inputType === "BOOLEAN" || value.inputType === "RANGE") && !value.inputHelper) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Label is required for ${value.inputType} input type`,
+        params: { inputHelper: value.inputHelper },
+      })
+    }
+  });
+ 
 export const fieldValidationSchema = z.object({
   id: z.string(),
   entryId: z.string(),

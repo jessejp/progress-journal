@@ -11,6 +11,7 @@ import {
   inputTypes,
 } from "../utils/useZodForm";
 import React, { useEffect, useState } from "react";
+import clsx from "clsx";
 
 const inputType = {
   TEXTAREA: inputTypes[0],
@@ -403,18 +404,30 @@ const Configure: NextPage = () => {
                         </button>
                       )}
                   </div>
-                  <div className="flex h-20 w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
+                  <div className="flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
                     <label className="text-sm text-zinc-300">Name</label>
                     <input
                       type="text"
                       className="w-40 max-w-xs border-2"
                       {...form.register(`entries.0.fields.${fieldIndex}.name`)}
                     />
+                      {form.formState.errors.entries?.[0]?.fields?.[
+                            fieldIndex
+                          ]?.name && (
+                            <p className="text-red-500 max-sm:order-3">
+                              {
+                                form.formState.errors.entries?.[0]?.fields?.[
+                                  fieldIndex
+                                ]?.name?.message
+                              }
+                            </p>
+                          )}
                   </div>
                   {field?.fieldInputs?.map((input, inputIndex, inputArray) => {
                     return (
                       <React.Fragment key={inputIndex}>
-                        <div className="flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
+                        <div className={clsx("flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
+                        {"border-2 border-rose-700": form.formState.errors.entries?.[0]?.fields?.[fieldIndex]?.fieldInputs?.[inputIndex]})}>
                           <label className="text-sm text-zinc-300">
                             Input Type
                           </label>
@@ -440,7 +453,7 @@ const Configure: NextPage = () => {
                                 .map((type) => {
                                   return (
                                     <option key={type} value={type}>
-                                      {type}
+                                      {type === "BOOLEAN" ? "YES/NO" : type}
                                     </option>
                                   );
                                 })}
@@ -457,7 +470,7 @@ const Configure: NextPage = () => {
                                       ? "kg, lbs, etc." // NUMBER
                                       : input.inputType === "RANGE"
                                       ? "Subjective" // RANGE
-                                      : "Question" // BOOLEAN
+                                      : "Question?" // BOOLEAN
                                   }
                                   {...form.register(
                                     `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
@@ -489,6 +502,18 @@ const Configure: NextPage = () => {
                                 )}
                             </div>
                           </div>
+
+                          {form.formState.errors.entries?.[0]?.fields?.[
+                            fieldIndex
+                          ]?.fieldInputs?.[inputIndex] && (
+                            <p className="text-red-500 max-sm:order-3">
+                              {
+                                form.formState.errors.entries?.[0]?.fields?.[
+                                  fieldIndex
+                                ]?.fieldInputs?.[inputIndex]?.message
+                              }
+                            </p>
+                          )}
                         </div>
                         {inputIndex === inputArray.length - 1 && (
                           <button
