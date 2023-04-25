@@ -130,6 +130,9 @@ export const subjectRouter = router({
         },
         include: {
           entries: {
+            where: {
+              template: true
+            },
             include: {
               fields: {
                 include: {
