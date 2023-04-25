@@ -325,19 +325,21 @@ const Configure: NextPage = () => {
           </select>
         </div>
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
-          <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
+          <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
             Subject Name
           </label>
-          {form.formState.errors.name && (
-            <p className="text-red-500 max-sm:order-3">
-              {form.formState.errors.name.message}
-            </p>
-          )}
           <input
             type="text"
-            className="w-40 border-2 max-sm:order-2 max-sm:w-1/2"
+            className="w-40 border-2 max-sm:w-1/2"
             {...form.register("name")}
           />
+          {form.formState.errors.name && (
+            <div className="flex mt-1 w-full flex-grow justify-end">
+              <p className="w-fit text-red-500 max-sm:order-3">
+                {form.formState.errors.name.message}
+              </p>
+            </div>
+          )}
         </div>
         {fieldCategoryInput.showInput === true && (
           <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2 rounded bg-slate-600 p-4">
@@ -404,30 +406,45 @@ const Configure: NextPage = () => {
                         </button>
                       )}
                   </div>
-                  <div className="flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
+                  <div className={clsx(
+                            "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
+                            {
+                              "border-2 border-rose-700":
+                              form.formState.errors.entries?.[0]?.fields?.[fieldIndex]
+                              ?.name,
+                            }
+                          )}>
                     <label className="text-sm text-zinc-300">Name</label>
                     <input
                       type="text"
                       className="w-40 max-w-xs border-2"
                       {...form.register(`entries.0.fields.${fieldIndex}.name`)}
                     />
-                      {form.formState.errors.entries?.[0]?.fields?.[
+                    {form.formState.errors.entries?.[0]?.fields?.[fieldIndex]
+                      ?.name && (
+                      <p className="text-red-500 max-sm:order-3">
+                        {
+                          form.formState.errors.entries?.[0]?.fields?.[
                             fieldIndex
-                          ]?.name && (
-                            <p className="text-red-500 max-sm:order-3">
-                              {
-                                form.formState.errors.entries?.[0]?.fields?.[
-                                  fieldIndex
-                                ]?.name?.message
-                              }
-                            </p>
-                          )}
+                          ]?.name?.message
+                        }
+                      </p>
+                    )}
                   </div>
                   {field?.fieldInputs?.map((input, inputIndex, inputArray) => {
                     return (
                       <React.Fragment key={inputIndex}>
-                        <div className={clsx("flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
-                        {"border-2 border-rose-700": form.formState.errors.entries?.[0]?.fields?.[fieldIndex]?.fieldInputs?.[inputIndex]})}>
+                        <div
+                          className={clsx(
+                            "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
+                            {
+                              "border-2 border-rose-700":
+                                form.formState.errors.entries?.[0]?.fields?.[
+                                  fieldIndex
+                                ]?.fieldInputs?.[inputIndex],
+                            }
+                          )}
+                        >
                           <label className="text-sm text-zinc-300">
                             Input Type
                           </label>
