@@ -8,7 +8,11 @@ import Heading from "../../../ui/Heading";
 import ButtonContainer from "../../../ui/ButtonContainer";
 import MainContent from "../../../ui/MainContent";
 import { trpc } from "../../../utils/trpc";
-import { useZodForm, subjectValidationSchema } from "../../../utils/useZodForm";
+import {
+  useZodForm,
+  subjectValidationSchema,
+  stringToInputType,
+} from "../../../utils/useZodForm";
 import clsx from "clsx";
 import Accordion from "../../../ui/Accordion";
 import { useFieldArray } from "react-hook-form";
@@ -28,7 +32,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     { refetchOnWindowFocus: false }
   );
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
-  
+
   const addEntry = trpc.entry.addEntry.useMutation({
     onSuccess: async () => {
       console.log("onSuccess");
@@ -74,7 +78,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                     valueBoolean:
                       input.inputType === "BOOLEAN" ? false : undefined,
                     inputHelper: input.inputHelper,
-                    inputType: input.inputType,
+                    inputType: stringToInputType(input.inputType),
                   };
                 }),
               };
@@ -142,176 +146,191 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
         <div className="mt-4" />
         <form className="flex w-full flex-col gap-2 sm:w-9/12">
           {!!watchForm?.entries[0]?.fields &&
-            watchForm?.entries[0]?.fields.map((field, fieldIndex) => {
-              return (
-                <div
-                  className={clsx({
-                    hidden:
-                      selectedFilter !== "all" &&
-                      field.category !== selectedFilter,
-                  })}
-                  key={fieldIndex}
-                >
-                  <Accordion title={field.name}>
-                    {field.fieldInputs.map((input, inputIndex) => {
-                      switch (input.inputType) {
-                        case "TEXTAREA":
-                          return (
-                            <div
-                              className="flex w-full flex-col rounded bg-slate-700 p-2 md:w-10/12"
-                              key={input.id}
-                            >
-                              <label className="text-sm text-zinc-300">
-                                {input.inputHelper || "textarea"}
-                              </label>
-                              <textarea
-                                className="h-32 bg-slate-800 text-slate-200"
-                                {...form.register(
-                                  `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
-                                )}
-                              />
-                            </div>
-                          );
-                        case "NUMBER":
-                          return (
-                            <div
-                              key={input.id}
-                              className="flex flex-grow-0 flex-row items-center gap-1 rounded bg-slate-700 p-1"
-                            >
-                              <div className="flex w-10 flex-col justify-center gap-1">
-                                <button
-                                  className="w-full bg-slate-600 font-bold text-slate-200"
-                                  onClick={(event) => {
-                                    event.preventDefault();
-                                    const currentValue = form.getValues(
-                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
-                                    );
-                                    form.setValue(
-                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                      currentValue ? currentValue + 1 : 1
-                                    );
-                                  }}
-                                >
-                                  +
-                                </button>
-                                <input
-                                  type="number"
-                                  className=" bg-slate-800 p-1 text-center text-slate-200"
-                                  {...form.register(
-                                    `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                    { valueAsNumber: true }
-                                  )}
-                                />
-                                <button
-                                  className="w-full bg-slate-600 font-bold text-slate-200"
-                                  onClick={(event) => {
-                                    event.preventDefault();
-                                    const currentValue = form.getValues(
-                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
-                                    );
-                                    form.setValue(
-                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                      currentValue ? currentValue - 1 : 0
-                                    );
-                                  }}
-                                >
-                                  -
-                                </button>
-                              </div>
-                              <label className="text-sm text-zinc-300">
-                                {input.inputHelper}
-                              </label>
-                            </div>
-                          );
-                        case "BOOLEAN":
-                          return (
-                            <div
-                              key={input.id}
-                              className="flex flex-grow-0 flex-row items-center gap-1 rounded bg-slate-700 p-1"
-                            >
-                              <label className="text-base text-zinc-300">
-                                {input.inputHelper}
-                              </label>
-                              <div className="flex w-10 flex-col justify-center gap-1">
-                                <input
-                                  type="checkbox"
-                                  className=" bg-slate-800 text-slate-200"
-                                  {...form.register(
-                                    `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
-                                  )}
-                                />
-                              </div>
-                            </div>
-                          );
-                        case "RANGE":
-                          const sliderValue =
-                            form.getValues(
-                              `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
-                            ) || 0;
-                          return (
-                            <div
-                              key={input.id}
-                              className="flex flex-grow flex-col items-center justify-evenly gap-2 rounded bg-slate-700 p-1"
-                            >
-                              <label className="text-lg font-bold text-zinc-300">
-                                {input.inputHelper}
-                              </label>
-                              <div className="flex flex-col items-center justify-center rounded-md bg-slate-300 p-0.5">
-                                <input
-                                  type="range"
-                                  className={clsx(
-                                    "h-1 w-2/3 scale-150 appearance-none rounded bg-gradient-to-r from-sky-500 to-rose-700 transition-accent duration-700",
-                                    { "accent-sky-300": sliderValue < 25 },
-                                    {
-                                      "accent-slate-100":
-                                        sliderValue >= 25 && sliderValue <= 75,
-                                    },
-                                    { "accent-red-500": sliderValue > 75 }
-                                  )}
-                                  {...form.register(
-                                    `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                    { valueAsNumber: true }
-                                  )}
-                                />
-                              </div>
-                              <div className="flex flex-row justify-center text-base text-slate-300">
-                                <span>{sliderValue}%</span>
-                              </div>
-                            </div>
-                          );
-                        default:
-                          return null;
-                      }
+            watchForm?.entries[0]?.fields.map(
+              (field, fieldIndex, fieldArray) => {
+                return (
+                  <div
+                    className={clsx({
+                      hidden:
+                        selectedFilter !== "all" &&
+                        field.category !== selectedFilter,
                     })}
-                    <div className="flex w-full justify-center">
-                      <button
-                        className="h-fit w-fit rounded bg-zinc-500 px-4 py-2 align-middle text-sm font-bold text-white hover:bg-blue-700"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          insert(fieldIndex + 1, {
-                            id: field.id,
-                            entryId: field.entryId,
-                            name: field.name,
-                            category: field.category,
-                            fieldInputs: field.fieldInputs.map((input) => {
-                              return {
-                                ...input,
-                              };
-                            }),
-                          });
-                        }}
-                      >
-                        🔁 Clone
-                      </button>
-                    </div>
-                  </Accordion>
-                </div>
-              );
-            })}
+                    key={fieldIndex}
+                  >
+                    <Accordion
+                      title={field.name}
+                      defaultOpen={fieldArray.length < 4}
+                    >
+                      {field.fieldInputs.map((input, inputIndex) => {
+                        switch (input.inputType) {
+                          case "TEXTAREA":
+                            return (
+                              <div
+                                className="flex w-full flex-col rounded bg-slate-700 p-2 md:w-10/12"
+                                key={input.id}
+                              >
+                                <label className="text-sm text-zinc-300">
+                                  {input.inputHelper || "textarea"}
+                                </label>
+                                <textarea
+                                  className="h-32 bg-slate-800 text-slate-200"
+                                  {...form.register(
+                                    `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
+                                  )}
+                                />
+                              </div>
+                            );
+                          case "NUMBER":
+                            return (
+                              <div
+                                key={input.id}
+                                className="flex flex-grow-0 flex-row items-center gap-1 rounded bg-slate-700 p-1"
+                              >
+                                <div className="flex w-10 flex-col justify-center gap-1">
+                                  <button
+                                    className="w-full bg-slate-600 font-bold text-slate-200"
+                                    onClick={(event) => {
+                                      event.preventDefault();
+                                      const currentValue = form.getValues(
+                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                                      );
+                                      form.setValue(
+                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                        currentValue ? currentValue + 1 : 1
+                                      );
+                                    }}
+                                  >
+                                    +
+                                  </button>
+                                  <input
+                                    type="number"
+                                    className=" bg-slate-800 p-1 text-center text-slate-200"
+                                    {...form.register(
+                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                      { valueAsNumber: true }
+                                    )}
+                                  />
+                                  <button
+                                    className="w-full bg-slate-600 font-bold text-slate-200"
+                                    onClick={(event) => {
+                                      event.preventDefault();
+                                      const currentValue = form.getValues(
+                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                                      );
+                                      form.setValue(
+                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                        currentValue ? currentValue - 1 : 0
+                                      );
+                                    }}
+                                  >
+                                    -
+                                  </button>
+                                </div>
+                                <label className="text-sm text-zinc-300">
+                                  {input.inputHelper}
+                                </label>
+                              </div>
+                            );
+                          case "BOOLEAN":
+                            return (
+                              <div
+                                key={input.id}
+                                className="flex flex-grow-0 flex-col items-center gap-1 rounded bg-slate-700 p-3"
+                              >
+                                <label className="ml-2 text-base font-medium text-zinc-300">
+                                  {input.inputHelper}
+                                </label>
+                                <div
+                                  className={clsx(
+                                    "flex flex-row items-center gap-1 rounded px-3 py-2",
+                                    { "bg-slate-600 text-zinc-300": !input.valueBoolean },
+                                    { "bg-green-700 text-zinc-100": !!input.valueBoolean }
+                                  )}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="h-5 w-5"
+                                    {...form.register(
+                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
+                                    )}
+                                  />
+                                  <span className="font-bold">
+                                    {input.valueBoolean ? "Yes" : "No"}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          case "RANGE":
+                            const sliderValue =
+                              form.getValues(
+                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                              ) || 0;
+                            return (
+                              <div
+                                key={input.id}
+                                className="flex flex-grow flex-col items-center justify-evenly gap-2 rounded bg-slate-700 p-1"
+                              >
+                                <label className="text-lg font-bold text-zinc-300">
+                                  {input.inputHelper}
+                                </label>
+                                <div className="flex flex-col items-center justify-center rounded-md bg-slate-300 p-0.5">
+                                  <input
+                                    type="range"
+                                    className={clsx(
+                                      "h-1 w-2/3 scale-150 appearance-none rounded bg-gradient-to-r from-sky-500 to-rose-700 transition-accent duration-700",
+                                      { "accent-sky-300": sliderValue < 25 },
+                                      {
+                                        "accent-slate-100":
+                                          sliderValue >= 25 &&
+                                          sliderValue <= 75,
+                                      },
+                                      { "accent-red-500": sliderValue > 75 }
+                                    )}
+                                    {...form.register(
+                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                      { valueAsNumber: true }
+                                    )}
+                                  />
+                                </div>
+                                <div className="flex flex-row justify-center text-base text-slate-300">
+                                  <span>{sliderValue}%</span>
+                                </div>
+                              </div>
+                            );
+                          default:
+                            return null;
+                        }
+                      })}
+                      <div className="flex w-full justify-center">
+                        <button
+                          className="h-fit w-fit rounded bg-slate-500 px-3 py-2 align-middle text-sm font-bold text-white hover:bg-blue-700"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            insert(fieldIndex + 1, {
+                              id: field.id,
+                              entryId: field.entryId,
+                              name: field.name,
+                              category: field.category,
+                              fieldInputs: field.fieldInputs.map((input) => {
+                                return {
+                                  ...input,
+                                };
+                              }),
+                            });
+                          }}
+                        >
+                          🔁 Clone
+                        </button>
+                      </div>
+                    </Accordion>
+                  </div>
+                );
+              }
+            )}
         </form>
       </MainContent>
       <ButtonContainer>
-        <Button intent="cancel" link="/">
+        <Button intent="cancel" link={`/subjects/${subject}`}>
           Back
         </Button>
         <Button
@@ -325,7 +344,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
             }
           )}
         >
-          Next
+          Save
         </Button>
       </ButtonContainer>
     </Layout>

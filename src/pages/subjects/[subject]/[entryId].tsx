@@ -29,23 +29,29 @@ const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
             {data?.entries[0]?.fields.map((field) => {
               return (
                 <div key={field.id}>
-                  <div>{field.name}</div>
+                  <h2>{field.name}</h2>
                   {field.fieldInputs.map((input) => {
                     return (
                       <div key={input.id} className="text-slate-300">
                         {input.inputType === "TEXTAREA" &&
                           input.valueString && <span>{input.valueString}</span>}
-                        {(input.inputType === "NUMBER" ||
-                          input.inputType === "RANGE") &&
-                          input.valueNumber && (
-                            <span>{`${input.valueNumber} ${
-                              input.inputHelper ? input.inputHelper : ""
-                            }`}</span>
+                        {input.inputType === "NUMBER" &&
+                          input.valueNumber !== null && (
+                            <span>{`${input.valueNumber}${input.inputHelper}`}</span>
                           )}
-                        {input.inputType === "BOOLEAN" &&
-                          input.inputType !== null && (
+                        {input.inputType === "RANGE" &&
+                          input.valueNumber !== null && (
+                            <>
+                              <h3>{input.inputHelper}</h3>
+                              <span>{`${input.valueNumber}%`}</span>
+                            </>
+                          )}
+                        {input.inputType === "BOOLEAN" && (
+                          <>
+                            <h3>{input.inputHelper}</h3>
                             <span>{input.valueBoolean ? "Yes" : "No"}</span>
-                          )}
+                          </>
+                        )}
                       </div>
                     );
                   })}

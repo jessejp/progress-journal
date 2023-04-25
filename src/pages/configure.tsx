@@ -9,29 +9,12 @@ import {
   useZodForm,
   subjectValidationSchema,
   inputTypes,
+  inputTypeOption,
+  stringToInputType,
 } from "../utils/useZodForm";
 import React, { useEffect, useState } from "react";
 import clsx from "clsx";
-
-const inputType = {
-  TEXTAREA: inputTypes[0],
-  NUMBER: inputTypes[1],
-  BOOLEAN: inputTypes[2],
-  RANGE: inputTypes[3],
-};
-
-const inputTypeSwitch = (inputTypeString: string) => {
-  switch (inputTypeString) {
-    case "TEXTAREA":
-      return inputType["TEXTAREA"];
-    case "NUMBER":
-      return inputType["NUMBER"];
-    case "BOOLEAN":
-      return inputType["BOOLEAN"];
-    case "RANGE":
-      return inputType["RANGE"];
-  }
-};
+import MainContent from "../ui/MainContent";
 
 const Configure: NextPage = () => {
   const router = useRouter();
@@ -86,7 +69,7 @@ const Configure: NextPage = () => {
               name: "Journal",
               fieldInputs: [
                 {
-                  inputType: inputType.TEXTAREA,
+                  inputType: inputTypeOption.TEXTAREA,
                   inputHelper: null,
                   id: "",
                   fieldId: "",
@@ -129,8 +112,8 @@ const Configure: NextPage = () => {
               fieldInputs: field.fieldInputs.map((input) => {
                 return {
                   ...input,
-                  inputType: inputTypeSwitch(input.inputType),
-                  inputHelper: input.inputHelper || undefined,
+                  inputType: stringToInputType(input.inputType),
+                  inputHelper: input.inputHelper,
                 };
               }),
             })),
@@ -218,19 +201,19 @@ const Configure: NextPage = () => {
         case "weight training":
           return [
             {
-              inputType: inputType.NUMBER,
+              inputType: inputTypeOption.NUMBER,
               inputHelper: "kg",
               id: "",
               fieldId: "",
             },
             {
-              inputType: inputType.NUMBER,
+              inputType: inputTypeOption.NUMBER,
               inputHelper: "reps",
               id: "",
               fieldId: "",
             },
             {
-              inputType: inputType.NUMBER,
+              inputType: inputTypeOption.NUMBER,
               inputHelper: "sets",
               id: "",
               fieldId: "",
@@ -239,7 +222,7 @@ const Configure: NextPage = () => {
         default:
           return [
             {
-              inputType: inputType.TEXTAREA,
+              inputType: inputTypeOption.TEXTAREA,
               inputHelper: null,
               id: "",
               fieldId: "",
@@ -278,7 +261,7 @@ const Configure: NextPage = () => {
     currentForm.entries[0]?.fields[fieldIndex]?.fieldInputs.push({
       id: "",
       fieldId: currentForm.entries[0]?.fields[fieldIndex]?.id || "",
-      inputType: inputType.NUMBER,
+      inputType: inputTypeOption.NUMBER,
       inputHelper: "",
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
@@ -300,6 +283,14 @@ const Configure: NextPage = () => {
   }, [watchFields]);
 
   console.log("form", form.formState.errors);
+
+  if (updateSubject.isLoading)
+    return (
+      <Layout page="configure">
+        <Heading>Configure Subject</Heading>
+        <MainContent><p className="text-zinc-100 text-2xl">Loading</p></MainContent>
+      </Layout>
+    );
 
   return (
     <Layout page="configure">
@@ -334,7 +325,7 @@ const Configure: NextPage = () => {
             {...form.register("name")}
           />
           {form.formState.errors.name && (
-            <div className="flex mt-1 w-full flex-grow justify-end">
+            <div className="mt-1 flex w-full flex-grow justify-end">
               <p className="w-fit text-red-500 max-sm:order-3">
                 {form.formState.errors.name.message}
               </p>
@@ -406,14 +397,17 @@ const Configure: NextPage = () => {
                         </button>
                       )}
                   </div>
-                  <div className={clsx(
-                            "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
-                            {
-                              "border-2 border-rose-700":
-                              form.formState.errors.entries?.[0]?.fields?.[fieldIndex]
-                              ?.name,
-                            }
-                          )}>
+                  <div
+                    className={clsx(
+                      "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
+                      {
+                        "border-2 border-rose-700":
+                          form.formState.errors.entries?.[0]?.fields?.[
+                            fieldIndex
+                          ]?.name,
+                      }
+                    )}
+                  >
                     <label className="text-sm text-zinc-300">Name</label>
                     <input
                       type="text"

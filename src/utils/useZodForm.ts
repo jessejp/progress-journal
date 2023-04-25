@@ -7,6 +7,26 @@ export const inputTypes = ["TEXTAREA", "NUMBER", "BOOLEAN", "RANGE"] as const;
 
 export type InputType = (typeof inputTypes)[number];
 
+export const inputTypeOption = {
+  TEXTAREA: inputTypes[0],
+  NUMBER: inputTypes[1],
+  BOOLEAN: inputTypes[2],
+  RANGE: inputTypes[3],
+};
+
+export const stringToInputType = (inputTypeString: string) => {
+  switch (inputTypeString) {
+    case "TEXTAREA":
+      return inputTypeOption["TEXTAREA"];
+    case "NUMBER":
+      return inputTypeOption["NUMBER"];
+    case "BOOLEAN":
+      return inputTypeOption["BOOLEAN"];
+    case "RANGE":
+      return inputTypeOption["RANGE"];
+  }
+};
+
 export const fieldInputValidation = z
   .object({
     id: z.string(),
