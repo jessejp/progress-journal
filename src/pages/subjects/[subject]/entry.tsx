@@ -50,14 +50,16 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
         name: data?.name,
         entries: [
           {
-            template: false,
             id: data?.entries[0]?.id,
+            subjectId: data?.id,
+            template: false,
             categories: data?.entries[0]?.categories,
             fields: data?.entries[0]?.fields.map((field) => {
               return {
+                id: field.id,
+                entryId: data?.entries[0]?.id,
                 name: field.name,
                 category: field.category,
-                id: field.id,
                 fieldInputs: field.fieldInputs.map((input) => {
                   return {
                     id: input.id,
@@ -288,6 +290,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                           event.preventDefault();
                           insert(fieldIndex + 1, {
                             id: field.id,
+                            entryId: field.entryId,
                             name: field.name,
                             category: field.category,
                             fieldInputs: field.fieldInputs.map((input) => {

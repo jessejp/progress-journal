@@ -12,6 +12,26 @@ import {
 } from "../utils/useZodForm";
 import React, { useEffect, useState } from "react";
 
+const inputType = {
+  TEXTAREA: inputTypes[0],
+  NUMBER: inputTypes[1],
+  BOOLEAN: inputTypes[2],
+  RANGE: inputTypes[3],
+};
+
+const inputTypeSwitch = (inputTypeString: string) => {
+  switch (inputTypeString) {
+    case "TEXTAREA":
+      return inputType["TEXTAREA"];
+    case "NUMBER":
+      return inputType["NUMBER"];
+    case "BOOLEAN":
+      return inputType["BOOLEAN"];
+    case "RANGE":
+      return inputType["RANGE"];
+  }
+};
+
 const Configure: NextPage = () => {
   const router = useRouter();
   const subjects = trpc.subject.getSubjects.useQuery(undefined, {
@@ -54,13 +74,23 @@ const Configure: NextPage = () => {
       name: "",
       entries: [
         {
-          template: true,
           id: "",
+          subjectId: subjectSelection,
+          template: true,
           categories: fieldCategories.join(),
           fields: [
             {
+              id: "",
+              entryId: "",
               name: "Journal",
-              fieldInputs: [{ inputType: "TEXTAREA" }],
+              fieldInputs: [
+                {
+                  inputType: inputType.TEXTAREA,
+                  inputHelper: null,
+                  id: "",
+                  fieldId: "",
+                },
+              ],
             },
           ],
         },
@@ -91,7 +121,19 @@ const Configure: NextPage = () => {
         {
           name: data?.name,
           id: data?.id,
-          entries: data?.entries,
+          entries: data?.entries.map((entry) => ({
+            ...entry,
+            fields: entry.fields.map((field) => ({
+              ...field,
+              fieldInputs: field.fieldInputs.map((input) => {
+                return {
+                  ...input,
+                  inputType: inputTypeSwitch(input.inputType),
+                  inputHelper: input.inputHelper || undefined,
+                };
+              }),
+            })),
+          })),
         },
         { keepDefaultValues: true }
       );
@@ -174,18 +216,41 @@ const Configure: NextPage = () => {
       switch (fieldTemplate) {
         case "weight training":
           return [
-            { inputType: "NUMBER", inputHelper: "kg", id: "" },
-            { inputType: "NUMBER", inputHelper: "reps", id: "" },
-            { inputType: "NUMBER", inputHelper: "sets", id: "" },
+            {
+              inputType: inputType.NUMBER,
+              inputHelper: "kg",
+              id: "",
+              fieldId: "",
+            },
+            {
+              inputType: inputType.NUMBER,
+              inputHelper: "reps",
+              id: "",
+              fieldId: "",
+            },
+            {
+              inputType: inputType.NUMBER,
+              inputHelper: "sets",
+              id: "",
+              fieldId: "",
+            },
           ];
         default:
-          return [{ inputType: "TEXTAREA", id: "" }];
+          return [
+            {
+              inputType: inputType.TEXTAREA,
+              inputHelper: null,
+              id: "",
+              fieldId: "",
+            },
+          ];
       }
     };
 
     currentForm.entries[0]?.fields.push({
-      name: "",
       id: "",
+      entryId: currentForm.entries[0]?.id,
+      name: "",
       fieldInputs: fieldTemplateData(),
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
@@ -208,9 +273,12 @@ const Configure: NextPage = () => {
     event.preventDefault();
 
     const currentForm = watchFields;
+
     currentForm.entries[0]?.fields[fieldIndex]?.fieldInputs.push({
       id: "",
-      inputType: "BOOLEAN",
+      fieldId: currentForm.entries[0]?.fields[fieldIndex]?.id || "",
+      inputType: inputType.NUMBER,
+      inputHelper: "",
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
@@ -226,11 +294,11 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
-  // useEffect(() => {
-  //   console.log("watchfields", watchFields);
-  // }, [watchFields]);
+  useEffect(() => {
+    console.log("watchfields", watchFields);
+  }, [watchFields]);
 
-  // console.log("form", form.formState.errors);
+  console.log("form", form.formState.errors);
 
   return (
     <Layout page="configure">
