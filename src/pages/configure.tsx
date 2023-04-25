@@ -234,7 +234,7 @@ const Configure: NextPage = () => {
 
   return (
     <Layout page="configure">
-      <Heading>Profile</Heading>
+      <Heading>Configure Subject</Heading>
       <form className="flex w-full flex-col overflow-scroll p-2">
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
           <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
@@ -377,15 +377,30 @@ const Configure: NextPage = () => {
                                   );
                                 })}
                             </select>
-                            {input?.inputType === "NUMBER" && (
-                              <input
-                                className="w-24"
-                                type="text"
-                                placeholder="kg, lbs, etc."
-                                {...form.register(
-                                  `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                            {(input?.inputType === "NUMBER" ||
+                              input?.inputType === "RANGE" ||
+                              input?.inputType === "BOOLEAN") && (
+                              <>
+                                <input
+                                  className="w-24"
+                                  type="text"
+                                  placeholder={
+                                    input.inputType === "NUMBER"
+                                      ? "kg, lbs, etc." // NUMBER
+                                      : input.inputType === "RANGE"
+                                      ? "Subjective" // RANGE
+                                      : "Question" // BOOLEAN
+                                  }
+                                  {...form.register(
+                                    `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                                  )}
+                                />
+                                {input?.inputType === "RANGE" && (
+                                  <span className="self-center text-zinc-300">
+                                    0-100%
+                                  </span>
                                 )}
-                              ></input>
+                              </>
                             )}
                             <div className="flex flex-grow-0 gap-2">
                               {inputArray.length > 1 &&

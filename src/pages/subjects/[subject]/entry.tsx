@@ -12,10 +12,14 @@ import { useZodForm, subjectValidationSchema } from "../../../utils/useZodForm";
 import clsx from "clsx";
 import Accordion from "../../../ui/Accordion";
 import { useFieldArray } from "react-hook-form";
+import { createServerSideHelpers } from "@trpc/react-query/server";
+import { createContextInner } from "../../../server/trpc/context";
+import { appRouter } from "../../../server/trpc/router/_app";
+import superjson from "superjson";
 
 const Entry: NextPage<{ subject: string }> = ({ subject }) => {
   const router = useRouter();
-  const { data } = trpc.entry.getEntry.useQuery(
+  const { data, isFetched } = trpc.entry.getEntry.useQuery(
     {
       subjectName: subject,
       template: true,
@@ -24,7 +28,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     { refetchOnWindowFocus: false }
   );
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
-
+  
   const addEntry = trpc.entry.addEntry.useMutation({
     onSuccess: async () => {
       console.log("onSuccess");
@@ -40,7 +44,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
   });
 
   useEffect(() => {
-    if (data?.id && !form.formState.defaultValues) {
+    if (!!data?.id && isFetched) {
       form.reset({
         id: data?.id,
         name: data?.name,
@@ -77,12 +81,9 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
         ],
       });
     }
-  }, [data, form]);
+  }, [data, form, isFetched]);
 
   const watchForm = form.watch();
-  useEffect(() => {
-    console.log(watchForm);
-  }, [watchForm]);
 
   const { insert } = useFieldArray({
     control: form.control,
@@ -222,52 +223,83 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                           );
                         case "BOOLEAN":
                           return (
-                            <React.Fragment key={input.id}>
-                              <input
-                                type="checkbox"
-                                className=" bg-slate-800 text-slate-200"
-                                {...form.register(
-                                  `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
-                                )}
-                              />
-                            </React.Fragment>
+                            <div
+                              key={input.id}
+                              className="flex flex-grow-0 flex-row items-center gap-1 rounded bg-slate-700 p-1"
+                            >
+                              <label className="text-base text-zinc-300">
+                                {input.inputHelper}
+                              </label>
+                              <div className="flex w-10 flex-col justify-center gap-1">
+                                <input
+                                  type="checkbox"
+                                  className=" bg-slate-800 text-slate-200"
+                                  {...form.register(
+                                    `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
+                                  )}
+                                />
+                              </div>
+                            </div>
                           );
                         case "RANGE":
+                          const sliderValue =
+                            form.getValues(
+                              `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                            ) || 0;
                           return (
-                            <React.Fragment key={input.id}>
-                              <input
-                                type="range"
-                                className=" bg-slate-800 text-slate-200"
-                                {...form.register(
-                                  `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                  { valueAsNumber: true }
-                                )}
-                              />
-                            </React.Fragment>
+                            <div
+                              key={input.id}
+                              className="flex flex-grow flex-col items-center justify-evenly gap-2 rounded bg-slate-700 p-1"
+                            >
+                              <label className="text-lg font-bold text-zinc-300">
+                                {input.inputHelper}
+                              </label>
+                              <div className="flex flex-col items-center justify-center rounded-md bg-slate-300 p-0.5">
+                                <input
+                                  type="range"
+                                  className={clsx(
+                                    "h-1 w-2/3 scale-150 appearance-none rounded bg-gradient-to-r from-sky-500 to-rose-700 transition-accent duration-700",
+                                    { "accent-sky-300": sliderValue < 25 },
+                                    {
+                                      "accent-slate-100":
+                                        sliderValue >= 25 && sliderValue <= 75,
+                                    },
+                                    { "accent-red-500": sliderValue > 75 }
+                                  )}
+                                  {...form.register(
+                                    `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                    { valueAsNumber: true }
+                                  )}
+                                />
+                              </div>
+                              <div className="flex flex-row justify-center text-base text-slate-300">
+                                <span>{sliderValue}%</span>
+                              </div>
+                            </div>
                           );
                         default:
                           return null;
                       }
                     })}
-                    <div className="flex justify-center w-full">
-                    <button
-                      className="text-sm h-fit w-fit rounded bg-zinc-500 px-4 py-2 align-middle font-bold text-white hover:bg-blue-700"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        insert(fieldIndex + 1, {
-                          id: field.id,
-                          name: field.name,
-                          category: field.category,
-                          fieldInputs: field.fieldInputs.map((input) => {
-                            return {
-                              ...input,
-                            };
-                          }),
-                        });
-                      }}
-                    >
-                      🔁 Clone
-                    </button>
+                    <div className="flex w-full justify-center">
+                      <button
+                        className="h-fit w-fit rounded bg-zinc-500 px-4 py-2 align-middle text-sm font-bold text-white hover:bg-blue-700"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          insert(fieldIndex + 1, {
+                            id: field.id,
+                            name: field.name,
+                            category: field.category,
+                            fieldInputs: field.fieldInputs.map((input) => {
+                              return {
+                                ...input,
+                              };
+                            }),
+                          });
+                        }}
+                      >
+                        🔁 Clone
+                      </button>
                     </div>
                   </Accordion>
                 </div>
@@ -307,10 +339,24 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export async function getStaticProps(
   context: GetStaticPropsContext<{ subject: string }>
 ) {
+  const ctxInner = await createContextInner({ session: null });
+  const ssg = await createServerSideHelpers({
+    router: appRouter,
+    ctx: { ...ctxInner },
+    transformer: superjson,
+  });
+
   const subject = context.params?.subject as string;
+
+  await ssg.entry.getEntry.prefetch({
+    subjectName: subject,
+    entryId: undefined,
+    template: true,
+  });
 
   return {
     props: {
+      trpcState: ssg.dehydrate(),
       subject: subject,
     },
   };

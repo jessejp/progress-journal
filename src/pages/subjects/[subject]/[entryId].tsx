@@ -19,6 +19,7 @@ const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
     entryId: entryId,
     template: false,
   });
+
   return (
     <Layout page="Entry">
       <Heading>Read Entry</Heading>

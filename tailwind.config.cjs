@@ -9,6 +9,9 @@ module.exports = {
       },
       minHeight: {
         20: "5rem",
+      },
+      transitionProperty: {
+        accent: "accent-color",
       }
     },
   },
