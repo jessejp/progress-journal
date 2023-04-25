@@ -3,56 +3,69 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { UseFormProps } from "react-hook-form";
 import { z } from "zod";
 
-export const fieldInputValidation = z.object({
-  id: z.string(),
-  fieldId: z.string(),
-  valueNumber: z.optional(z.number().nullable()),
-  valueString: z.optional(z.string().max(510).nullable()),
-  valueBoolean: z.optional(z.boolean().nullable()),
-  inputHelper: z.optional(z.string().max(12).nullable()),
-  inputType: z.string(),
-});
+export const inputTypes = ["TEXTAREA", "NUMBER", "BOOLEAN", "RANGE"] as const;
 
+export type InputType = (typeof inputTypes)[number];
+
+export const inputTypeOption = {
+  TEXTAREA: inputTypes[0],
+  NUMBER: inputTypes[1],
+  BOOLEAN: inputTypes[2],
+  RANGE: inputTypes[3],
+};
+
+export const stringToInputType = (inputTypeString: string) => {
+  switch (inputTypeString) {
+    case "TEXTAREA":
+      return inputTypeOption["TEXTAREA"];
+    case "NUMBER":
+      return inputTypeOption["NUMBER"];
+    case "BOOLEAN":
+      return inputTypeOption["BOOLEAN"];
+    case "RANGE":
+      return inputTypeOption["RANGE"];
+  }
+};
+
+export const fieldInputValidation = z
+  .object({
+    id: z.string(),
+    fieldId: z.string(),
+    valueNumber: z.optional(z.number().nullable()),
+    valueString: z.optional(z.string().max(510).nullable()),
+    valueBoolean: z.optional(z.boolean().nullable()),
+    inputType: z.enum(inputTypes),
+    inputHelper: z.string().nullable()
+  }).superRefine((value, ctx) => {
+    if ((value.inputType === "NUMBER" || value.inputType === "BOOLEAN" || value.inputType === "RANGE") && !value.inputHelper) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Label is required for ${value.inputType} input type`,
+        params: { inputHelper: value.inputHelper },
+      })
+    }
+  });
+ 
 export const fieldValidationSchema = z.object({
-  name: z.string().min(1).max(36),
-  category: z.optional(z.string()),
   id: z.string(),
+  entryId: z.string(),
+  name: z.string().min(1).max(36),
+  category: z.optional(z.string().max(12).nullable()),
   fieldInputs: z.array(fieldInputValidation),
 });
 
 export const entryValidationSchema = z.object({
+  id: z.string(),
   subjectId: z.string(),
-  categories: z.optional(z.string()),
+  categories: z.optional(z.string().max(64).nullable()),
+  template: z.boolean(),
   fields: z.array(fieldValidationSchema),
 });
 
 export const subjectValidationSchema = z.object({
   id: z.string(),
   name: z.string().min(1).max(50),
-  entries: z.array(
-    z.object({
-      template: z.boolean(),
-      categories: z.optional(z.string().nullable()),
-      id: z.string(),
-      fields: z.array(
-        z.object({
-          name: z.string().min(1).max(50),
-          category: z.optional(z.string().nullable()),
-          id: z.string(),
-          fieldInputs: z.array(
-            z.object({
-              id: z.string(),
-              valueNumber: z.optional(z.number().nullable()),
-              valueString: z.optional(z.string().max(510).nullable()),
-              valueBoolean: z.optional(z.boolean().nullable()),
-              inputHelper: z.optional(z.string().max(36).nullable()),
-              inputType: z.string(),
-            })
-          ),
-        })
-      ),
-    })
-  ),
+  entries: z.array(entryValidationSchema),
 });
 
 export const useZodForm = <TSchema extends z.ZodType>(
@@ -67,5 +80,3 @@ export const useZodForm = <TSchema extends z.ZodType>(
 
   return form;
 };
-
-export const inputTypes = ["TEXTAREA", "NUMBER", "BOOLEAN", "RANGE"] as const;

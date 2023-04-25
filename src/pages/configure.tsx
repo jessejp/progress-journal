@@ -9,8 +9,12 @@ import {
   useZodForm,
   subjectValidationSchema,
   inputTypes,
+  inputTypeOption,
+  stringToInputType,
 } from "../utils/useZodForm";
 import React, { useEffect, useState } from "react";
+import clsx from "clsx";
+import MainContent from "../ui/MainContent";
 
 const Configure: NextPage = () => {
   const router = useRouter();
@@ -54,13 +58,23 @@ const Configure: NextPage = () => {
       name: "",
       entries: [
         {
-          template: true,
           id: "",
+          subjectId: subjectSelection,
+          template: true,
           categories: fieldCategories.join(),
           fields: [
             {
+              id: "",
+              entryId: "",
               name: "Journal",
-              fieldInputs: [{ inputType: "TEXTAREA" }],
+              fieldInputs: [
+                {
+                  inputType: inputTypeOption.TEXTAREA,
+                  inputHelper: null,
+                  id: "",
+                  fieldId: "",
+                },
+              ],
             },
           ],
         },
@@ -91,7 +105,19 @@ const Configure: NextPage = () => {
         {
           name: data?.name,
           id: data?.id,
-          entries: data?.entries,
+          entries: data?.entries.map((entry) => ({
+            ...entry,
+            fields: entry.fields.map((field) => ({
+              ...field,
+              fieldInputs: field.fieldInputs.map((input) => {
+                return {
+                  ...input,
+                  inputType: stringToInputType(input.inputType),
+                  inputHelper: input.inputHelper,
+                };
+              }),
+            })),
+          })),
         },
         { keepDefaultValues: true }
       );
@@ -174,18 +200,41 @@ const Configure: NextPage = () => {
       switch (fieldTemplate) {
         case "weight training":
           return [
-            { inputType: "NUMBER", inputHelper: "kg", id: "" },
-            { inputType: "NUMBER", inputHelper: "reps", id: "" },
-            { inputType: "NUMBER", inputHelper: "sets", id: "" },
+            {
+              inputType: inputTypeOption.NUMBER,
+              inputHelper: "kg",
+              id: "",
+              fieldId: "",
+            },
+            {
+              inputType: inputTypeOption.NUMBER,
+              inputHelper: "reps",
+              id: "",
+              fieldId: "",
+            },
+            {
+              inputType: inputTypeOption.NUMBER,
+              inputHelper: "sets",
+              id: "",
+              fieldId: "",
+            },
           ];
         default:
-          return [{ inputType: "TEXTAREA", id: "" }];
+          return [
+            {
+              inputType: inputTypeOption.TEXTAREA,
+              inputHelper: null,
+              id: "",
+              fieldId: "",
+            },
+          ];
       }
     };
 
     currentForm.entries[0]?.fields.push({
-      name: "",
       id: "",
+      entryId: currentForm.entries[0]?.id,
+      name: "",
       fieldInputs: fieldTemplateData(),
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
@@ -208,9 +257,12 @@ const Configure: NextPage = () => {
     event.preventDefault();
 
     const currentForm = watchFields;
+
     currentForm.entries[0]?.fields[fieldIndex]?.fieldInputs.push({
       id: "",
-      inputType: "BOOLEAN",
+      fieldId: currentForm.entries[0]?.fields[fieldIndex]?.id || "",
+      inputType: inputTypeOption.NUMBER,
+      inputHelper: "",
     });
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
@@ -226,15 +278,23 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
-  // useEffect(() => {
-  //   console.log("watchfields", watchFields);
-  // }, [watchFields]);
+  useEffect(() => {
+    console.log("watchfields", watchFields);
+  }, [watchFields]);
 
-  // console.log("form", form.formState.errors);
+  console.log("form", form.formState.errors);
+
+  if (updateSubject.isLoading)
+    return (
+      <Layout page="configure">
+        <Heading>Configure Subject</Heading>
+        <MainContent><p className="text-zinc-100 text-2xl">Loading</p></MainContent>
+      </Layout>
+    );
 
   return (
     <Layout page="configure">
-      <Heading>Profile</Heading>
+      <Heading>Configure Subject</Heading>
       <form className="flex w-full flex-col overflow-scroll p-2">
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
           <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
@@ -256,19 +316,21 @@ const Configure: NextPage = () => {
           </select>
         </div>
         <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
-          <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
+          <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
             Subject Name
           </label>
-          {form.formState.errors.name && (
-            <p className="text-red-500 max-sm:order-3">
-              {form.formState.errors.name.message}
-            </p>
-          )}
           <input
             type="text"
-            className="w-40 border-2 max-sm:order-2 max-sm:w-1/2"
+            className="w-40 border-2 max-sm:w-1/2"
             {...form.register("name")}
           />
+          {form.formState.errors.name && (
+            <div className="mt-1 flex w-full flex-grow justify-end">
+              <p className="w-fit text-red-500 max-sm:order-3">
+                {form.formState.errors.name.message}
+              </p>
+            </div>
+          )}
         </div>
         {fieldCategoryInput.showInput === true && (
           <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2 rounded bg-slate-600 p-4">
@@ -335,18 +397,48 @@ const Configure: NextPage = () => {
                         </button>
                       )}
                   </div>
-                  <div className="flex h-20 w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
+                  <div
+                    className={clsx(
+                      "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
+                      {
+                        "border-2 border-rose-700":
+                          form.formState.errors.entries?.[0]?.fields?.[
+                            fieldIndex
+                          ]?.name,
+                      }
+                    )}
+                  >
                     <label className="text-sm text-zinc-300">Name</label>
                     <input
                       type="text"
                       className="w-40 max-w-xs border-2"
                       {...form.register(`entries.0.fields.${fieldIndex}.name`)}
                     />
+                    {form.formState.errors.entries?.[0]?.fields?.[fieldIndex]
+                      ?.name && (
+                      <p className="text-red-500 max-sm:order-3">
+                        {
+                          form.formState.errors.entries?.[0]?.fields?.[
+                            fieldIndex
+                          ]?.name?.message
+                        }
+                      </p>
+                    )}
                   </div>
                   {field?.fieldInputs?.map((input, inputIndex, inputArray) => {
                     return (
                       <React.Fragment key={inputIndex}>
-                        <div className="flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
+                        <div
+                          className={clsx(
+                            "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
+                            {
+                              "border-2 border-rose-700":
+                                form.formState.errors.entries?.[0]?.fields?.[
+                                  fieldIndex
+                                ]?.fieldInputs?.[inputIndex],
+                            }
+                          )}
+                        >
                           <label className="text-sm text-zinc-300">
                             Input Type
                           </label>
@@ -372,20 +464,35 @@ const Configure: NextPage = () => {
                                 .map((type) => {
                                   return (
                                     <option key={type} value={type}>
-                                      {type}
+                                      {type === "BOOLEAN" ? "YES/NO" : type}
                                     </option>
                                   );
                                 })}
                             </select>
-                            {input?.inputType === "NUMBER" && (
-                              <input
-                                className="w-24"
-                                type="text"
-                                placeholder="kg, lbs, etc."
-                                {...form.register(
-                                  `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                            {(input?.inputType === "NUMBER" ||
+                              input?.inputType === "RANGE" ||
+                              input?.inputType === "BOOLEAN") && (
+                              <>
+                                <input
+                                  className="w-24"
+                                  type="text"
+                                  placeholder={
+                                    input.inputType === "NUMBER"
+                                      ? "kg, lbs, etc." // NUMBER
+                                      : input.inputType === "RANGE"
+                                      ? "Subjective" // RANGE
+                                      : "Question?" // BOOLEAN
+                                  }
+                                  {...form.register(
+                                    `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                                  )}
+                                />
+                                {input?.inputType === "RANGE" && (
+                                  <span className="self-center text-zinc-300">
+                                    0-100%
+                                  </span>
                                 )}
-                              ></input>
+                              </>
                             )}
                             <div className="flex flex-grow-0 gap-2">
                               {inputArray.length > 1 &&
@@ -406,6 +513,18 @@ const Configure: NextPage = () => {
                                 )}
                             </div>
                           </div>
+
+                          {form.formState.errors.entries?.[0]?.fields?.[
+                            fieldIndex
+                          ]?.fieldInputs?.[inputIndex] && (
+                            <p className="text-red-500 max-sm:order-3">
+                              {
+                                form.formState.errors.entries?.[0]?.fields?.[
+                                  fieldIndex
+                                ]?.fieldInputs?.[inputIndex]?.message
+                              }
+                            </p>
+                          )}
                         </div>
                         {inputIndex === inputArray.length - 1 && (
                           <button

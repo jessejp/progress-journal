@@ -48,7 +48,7 @@ export const subjectRouter = router({
                             id: fieldInput.id,
                           },
                           update: {
-                            ...fieldInput,
+                            inputHelper: fieldInput.inputHelper,
                           },
                           create: {
                             inputType: fieldInput.inputType,
