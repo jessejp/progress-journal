@@ -161,6 +161,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                       title={field.name}
                       defaultOpen={fieldArray.length < 4}
                     >
+                      <div className="mb-4 flex w-full flex-grow flex-row flex-wrap justify-evenly sm:justify-center gap-2">
                       {field.fieldInputs.map((input, inputIndex) => {
                         switch (input.inputType) {
                           case "TEXTAREA":
@@ -301,6 +302,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                             return null;
                         }
                       })}
+                      </div>
                       <div className="flex w-full justify-center">
                         <button
                           className="h-fit w-fit rounded bg-slate-500 px-3 py-2 align-middle text-sm font-bold text-white hover:bg-blue-700"

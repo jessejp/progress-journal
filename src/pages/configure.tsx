@@ -15,6 +15,7 @@ import {
 import React, { useEffect, useState } from "react";
 import clsx from "clsx";
 import MainContent from "../ui/MainContent";
+import Accordion from "../ui/Accordion";
 
 const Configure: NextPage = () => {
   const router = useRouter();
@@ -278,156 +279,135 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
-  // useEffect(() => {
-  //   console.log("watchfields", watchFields);
-  // }, [watchFields]);
+  useEffect(() => {
+    console.log("watchfields", watchFields);
+  }, [watchFields]);
 
-  // console.log("form", form.formState.errors);
+  console.log("form", form.formState.errors);
 
   if (updateSubject.isLoading)
     return (
       <Layout page="configure">
         <Heading>Configure Subject</Heading>
-        <MainContent><p className="text-zinc-100 text-2xl">Loading</p></MainContent>
+        <MainContent>
+          <p className="text-2xl text-zinc-100">Loading</p>
+        </MainContent>
       </Layout>
     );
 
   return (
     <Layout page="configure">
       <Heading>Configure Subject</Heading>
-      <form className="flex w-full flex-col overflow-scroll p-2">
-        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
-          <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
-            Select Subject
-          </label>
-          <select
-            className="w-40 overflow-clip border-2 max-sm:order-2 max-sm:w-1/2"
-            value={subjectSelection}
-            onChange={(event) => {
-              setSubjectSelection(event.target.value);
-            }}
-          >
-            <option value="Add New Subject">Add New Subject</option>
-            {subjects.data?.map((subject) => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
-          <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
-            Subject Name
-          </label>
-          <input
-            type="text"
-            className="w-40 border-2 max-sm:w-1/2"
-            {...form.register("name")}
-          />
-          {form.formState.errors.name && (
-            <div className="mt-1 flex w-full flex-grow justify-end">
-              <p className="w-fit text-red-500 max-sm:order-3">
-                {form.formState.errors.name.message}
-              </p>
-            </div>
-          )}
-        </div>
-        {fieldCategoryInput.showInput === true && (
-          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2 rounded bg-slate-600 p-4">
+      <MainContent>
+        <form className="flex w-full flex-col p-2">
+          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
             <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
-              Category Name
+              Select Subject
+            </label>
+            <select
+              className="w-40 overflow-clip border-2 max-sm:order-2 max-sm:w-1/2"
+              value={subjectSelection}
+              onChange={(event) => {
+                setSubjectSelection(event.target.value);
+              }}
+            >
+              <option value="Add New Subject">Add New Subject</option>
+              {subjects.data?.map((subject) => (
+                <option key={subject.id} value={subject.id}>
+                  {subject.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
+            <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
+              Subject Name
             </label>
             <input
               type="text"
-              maxLength={12}
-              className="order-2 w-40 overflow-clip border-2"
-              placeholder="category name"
-              value={fieldCategoryInput.value}
-              autoFocus={true}
-              onChange={(event) => {
-                setFieldCategoryInput((prev) => ({
-                  ...prev,
-                  value: event.target.value,
-                }));
-              }}
+              className="w-40 border-2 max-sm:w-1/2"
+              {...form.register("name")}
             />
-            <button
-              onClick={(event) => {
-                addCategoryHandler(event);
-              }}
-              className="text-l order-3 w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-            >
-              Add Category
-            </button>
+            {form.formState.errors.name && (
+              <div className="mt-1 flex w-full flex-grow justify-end">
+                <p className="w-fit text-red-500 max-sm:order-3">
+                  {form.formState.errors.name.message}
+                </p>
+              </div>
+            )}
           </div>
-        )}
-        {watchFields.entries[0]?.fields.length &&
-          watchFields.entries[0].fields.map((field, fieldIndex, fieldArray) => {
-            return (
-              <React.Fragment key={fieldIndex}>
-                <div className="my-2 flex flex-row flex-wrap items-center gap-2 rounded bg-slate-600 p-4">
-                  <div className="mb-4 flex w-full flex-grow flex-row items-center gap-2">
-                    <div className="flex w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
-                      <label className="text-sm text-zinc-300">Category</label>
-                      <select
-                        aria-label="field category"
-                        className="w-40 overflow-clip border-2"
-                        value={field.category || "unassigned"}
-                        onChange={(event) =>
-                          selectCategoryHandler(event, fieldIndex)
-                        }
-                      >
-                        <option value="unassigned">unassigned</option>
-                        {fieldCategories?.map((category) => (
-                          <option key={category} value={category}>
-                            {category}
-                          </option>
-                        ))}
-                        <option value="+ new category">+ new category</option>
-                      </select>
-                    </div>
-                    {fieldIndex === fieldArray.length - 1 &&
-                      fieldIndex > 0 &&
-                      subjectSelection === "Add New Subject" && (
-                        <button
-                          className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                          onClick={(event) => removeField(event, fieldIndex)}
-                        >
-                          X
-                        </button>
-                      )}
-                  </div>
-                  <div
-                    className={clsx(
-                      "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
-                      {
-                        "border-2 border-rose-700":
-                          form.formState.errors.entries?.[0]?.fields?.[
-                            fieldIndex
-                          ]?.name,
-                      }
-                    )}
-                  >
-                    <label className="text-sm text-zinc-300">Name</label>
-                    <input
-                      type="text"
-                      className="w-40 max-w-xs border-2"
-                      {...form.register(`entries.0.fields.${fieldIndex}.name`)}
-                    />
-                    {form.formState.errors.entries?.[0]?.fields?.[fieldIndex]
-                      ?.name && (
-                      <p className="text-red-500 max-sm:order-3">
-                        {
-                          form.formState.errors.entries?.[0]?.fields?.[
-                            fieldIndex
-                          ]?.name?.message
-                        }
-                      </p>
-                    )}
-                  </div>
-                  {field?.fieldInputs?.map((input, inputIndex, inputArray) => {
-                    return (
-                      <React.Fragment key={inputIndex}>
+          {fieldCategoryInput.showInput === true && (
+            <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2 rounded bg-slate-600 p-4">
+              <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
+                Category Name
+              </label>
+              <input
+                type="text"
+                maxLength={12}
+                className="order-2 w-40 overflow-clip border-2"
+                placeholder="category name"
+                value={fieldCategoryInput.value}
+                autoFocus={true}
+                onChange={(event) => {
+                  setFieldCategoryInput((prev) => ({
+                    ...prev,
+                    value: event.target.value,
+                  }));
+                }}
+              />
+              <button
+                onClick={(event) => {
+                  addCategoryHandler(event);
+                }}
+                className="text-l order-3 w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+              >
+                Add Category
+              </button>
+            </div>
+          )}
+          {watchFields.entries[0]?.fields.length &&
+            watchFields.entries[0].fields.map(
+              (field, fieldIndex, fieldArray) => {
+                return (
+                  <React.Fragment key={fieldIndex}>
+                    <Accordion title={field.name} >
+                        <div className="mb-4 flex w-full flex-grow flex-row items-center gap-2">
+                          <div className="flex w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
+                            <label className="text-sm text-zinc-300">
+                              Category
+                            </label>
+                            <select
+                              aria-label="field category"
+                              className="w-40 overflow-clip border-2"
+                              value={field.category || "unassigned"}
+                              onChange={(event) =>
+                                selectCategoryHandler(event, fieldIndex)
+                              }
+                            >
+                              <option value="unassigned">unassigned</option>
+                              {fieldCategories?.map((category) => (
+                                <option key={category} value={category}>
+                                  {category}
+                                </option>
+                              ))}
+                              <option value="+ new category">
+                                + new category
+                              </option>
+                            </select>
+                          </div>
+                          {fieldIndex === fieldArray.length - 1 &&
+                            fieldIndex > 0 &&
+                            subjectSelection === "Add New Subject" && (
+                              <button
+                                className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
+                                onClick={(event) =>
+                                  removeField(event, fieldIndex)
+                                }
+                              >
+                                X
+                              </button>
+                            )}
+                        </div>
                         <div
                           className={clsx(
                             "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
@@ -435,139 +415,184 @@ const Configure: NextPage = () => {
                               "border-2 border-rose-700":
                                 form.formState.errors.entries?.[0]?.fields?.[
                                   fieldIndex
-                                ]?.fieldInputs?.[inputIndex],
+                                ]?.name,
                             }
                           )}
                         >
-                          <label className="text-sm text-zinc-300">
-                            Input Type
-                          </label>
-                          <div className="flex flex-grow flex-wrap gap-4">
-                            <select
-                              className="w-fit border-2"
-                              {...form.register(
-                                `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
-                              )}
-                              disabled={
-                                input.id !== "" &&
-                                form.formState.dirtyFields?.entries?.[0]
-                                  ?.fields?.[fieldIndex]?.fieldInputs?.[
-                                  inputIndex
-                                ]?.id !== undefined
-                              }
-                            >
-                              <option value={input?.inputType}>
-                                {input?.inputType}
-                              </option>
-                              {inputTypes
-                                .filter((type) => type !== input?.inputType)
-                                .map((type) => {
-                                  return (
-                                    <option key={type} value={type}>
-                                      {type === "BOOLEAN" ? "YES/NO" : type}
-                                    </option>
-                                  );
-                                })}
-                            </select>
-                            {(input?.inputType === "NUMBER" ||
-                              input?.inputType === "RANGE" ||
-                              input?.inputType === "BOOLEAN") && (
-                              <>
-                                <input
-                                  className="w-24"
-                                  type="text"
-                                  placeholder={
-                                    input.inputType === "NUMBER"
-                                      ? "kg, lbs, etc." // NUMBER
-                                      : input.inputType === "RANGE"
-                                      ? "Subjective" // RANGE
-                                      : "Question?" // BOOLEAN
-                                  }
-                                  {...form.register(
-                                    `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
-                                  )}
-                                />
-                                {input?.inputType === "RANGE" && (
-                                  <span className="self-center text-zinc-300">
-                                    0-100%
-                                  </span>
-                                )}
-                              </>
+                          <label className="text-sm text-zinc-300">Name</label>
+                          <input
+                            type="text"
+                            className="w-40 max-w-xs border-2"
+                            {...form.register(
+                              `entries.0.fields.${fieldIndex}.name`
                             )}
-                            <div className="flex flex-grow-0 gap-2">
-                              {inputArray.length > 1 &&
-                                inputIndex === inputArray.length - 1 &&
-                                subjectSelection === "Add New Subject" && (
-                                  <button
-                                    className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
-                                    onClick={(event) =>
-                                      removeFieldInput(
-                                        event,
-                                        fieldIndex,
-                                        inputIndex
-                                      )
-                                    }
-                                  >
-                                    X
-                                  </button>
-                                )}
-                            </div>
-                          </div>
-
+                          />
                           {form.formState.errors.entries?.[0]?.fields?.[
                             fieldIndex
-                          ]?.fieldInputs?.[inputIndex] && (
+                          ]?.name && (
                             <p className="text-red-500 max-sm:order-3">
                               {
                                 form.formState.errors.entries?.[0]?.fields?.[
                                   fieldIndex
-                                ]?.fieldInputs?.[inputIndex]?.message
+                                ]?.name?.message
                               }
                             </p>
                           )}
                         </div>
-                        {inputIndex === inputArray.length - 1 && (
-                          <button
-                            className="h-fit rounded bg-blue-500 px-4 py-2 align-middle text-xl font-bold text-white hover:bg-blue-700"
-                            onClick={(event) =>
-                              addFieldInput(event, fieldIndex)
-                            }
-                          >
-                            +
-                          </button>
+                        {field?.fieldInputs?.map(
+                          (input, inputIndex, inputArray) => {
+                            return (
+                              <React.Fragment key={inputIndex}>
+                                <div
+                                  className={clsx(
+                                    "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
+                                    {
+                                      "border-2 border-rose-700":
+                                        form.formState.errors.entries?.[0]
+                                          ?.fields?.[fieldIndex]?.fieldInputs?.[
+                                          inputIndex
+                                        ],
+                                    }
+                                  )}
+                                >
+                                  <label className="text-sm text-zinc-300">
+                                    Input Type
+                                  </label>
+                                  <div className="flex flex-grow flex-wrap gap-4">
+                                    <select
+                                      className="w-fit border-2"
+                                      {...form.register(
+                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
+                                      )}
+                                      disabled={
+                                        input.id !== "" &&
+                                        form.formState.dirtyFields?.entries?.[0]
+                                          ?.fields?.[fieldIndex]?.fieldInputs?.[
+                                          inputIndex
+                                        ]?.id !== undefined
+                                      }
+                                    >
+                                      <option value={input?.inputType}>
+                                        {input?.inputType}
+                                      </option>
+                                      {inputTypes
+                                        .filter(
+                                          (type) => type !== input?.inputType
+                                        )
+                                        .map((type) => {
+                                          return (
+                                            <option key={type} value={type}>
+                                              {type === "BOOLEAN"
+                                                ? "YES/NO"
+                                                : type}
+                                            </option>
+                                          );
+                                        })}
+                                    </select>
+                                    {(input?.inputType === "NUMBER" ||
+                                      input?.inputType === "RANGE" ||
+                                      input?.inputType === "BOOLEAN") && (
+                                      <>
+                                        <input
+                                          className="w-24"
+                                          type="text"
+                                          placeholder={
+                                            input.inputType === "NUMBER"
+                                              ? "kg, lbs, etc." // NUMBER
+                                              : input.inputType === "RANGE"
+                                              ? "Subjective" // RANGE
+                                              : "Question?" // BOOLEAN
+                                          }
+                                          {...form.register(
+                                            `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                                          )}
+                                        />
+                                        {input?.inputType === "RANGE" && (
+                                          <span className="self-center text-zinc-300">
+                                            0-100%
+                                          </span>
+                                        )}
+                                      </>
+                                    )}
+                                    <div className="flex flex-grow-0 gap-2">
+                                      {inputArray.length > 1 &&
+                                        inputIndex === inputArray.length - 1 &&
+                                        subjectSelection ===
+                                          "Add New Subject" && (
+                                          <button
+                                            className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
+                                            onClick={(event) =>
+                                              removeFieldInput(
+                                                event,
+                                                fieldIndex,
+                                                inputIndex
+                                              )
+                                            }
+                                          >
+                                            X
+                                          </button>
+                                        )}
+                                    </div>
+                                  </div>
+
+                                  {form.formState.errors.entries?.[0]?.fields?.[
+                                    fieldIndex
+                                  ]?.fieldInputs?.[inputIndex] && (
+                                    <p className="text-red-500 max-sm:order-3">
+                                      {
+                                        form.formState.errors.entries?.[0]
+                                          ?.fields?.[fieldIndex]?.fieldInputs?.[
+                                          inputIndex
+                                        ]?.message
+                                      }
+                                    </p>
+                                  )}
+                                </div>
+                                {inputIndex === inputArray.length - 1 && (
+                                  <button
+                                    className="h-fit rounded bg-blue-500 px-4 py-2 align-middle text-xl font-bold text-white hover:bg-blue-700"
+                                    onClick={(event) =>
+                                      addFieldInput(event, fieldIndex)
+                                    }
+                                  >
+                                    +
+                                  </button>
+                                )}
+                              </React.Fragment>
+                            );
+                          }
                         )}
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-                {fieldIndex === fieldArray.length - 1 && (
-                  <div className="mt-4 flex w-full flex-row justify-center">
-                    <button
-                      className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-                      onClick={(event) =>
-                        addField(event, fieldTemplateSelection)
-                      }
-                    >
-                      New Field
-                    </button>
-                    <select
-                      value={fieldTemplateSelection}
-                      onChange={(event) => {
-                        setFieldTemplateSelection(event.target.value);
-                      }}
-                      className="w-fit border-2"
-                    >
-                      <option value="journal">default template</option>
-                      <option value="weight training">
-                        kg/reps/sets template
-                      </option>
-                    </select>
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
-      </form>
+                    </Accordion>
+                    {fieldIndex === fieldArray.length - 1 && (
+                      <div className="mt-4 flex w-full flex-row justify-center">
+                        <button
+                          className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                          onClick={(event) =>
+                            addField(event, fieldTemplateSelection)
+                          }
+                        >
+                          New Field
+                        </button>
+                        <select
+                          value={fieldTemplateSelection}
+                          onChange={(event) => {
+                            setFieldTemplateSelection(event.target.value);
+                          }}
+                          className="w-fit border-2"
+                        >
+                          <option value="journal">default template</option>
+                          <option value="weight training">
+                            kg/reps/sets template
+                          </option>
+                        </select>
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              }
+            )}
+        </form>
+      </MainContent>
       <ButtonContainer>
         <Button
           intent="accept"
