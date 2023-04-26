@@ -279,11 +279,11 @@ const Configure: NextPage = () => {
     form.reset({ ...currentForm }, { keepDefaultValues: true });
   };
 
-  useEffect(() => {
-    console.log("watchfields", watchFields);
-  }, [watchFields]);
+  // useEffect(() => {
+  //   console.log("watchfields", watchFields);
+  // }, [watchFields]);
 
-  console.log("form", form.formState.errors);
+  // console.log("form", form.formState.errors);
 
   if (updateSubject.isLoading)
     return (
