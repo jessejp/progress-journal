@@ -7,7 +7,11 @@ interface AccordionProps {
   defaultOpen?: boolean;
 }
 
-const Accordion: React.FC<AccordionProps> = ({ title, children, defaultOpen = false }) => {
+const Accordion: React.FC<AccordionProps> = ({
+  title,
+  children,
+  defaultOpen = false,
+}) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const toggleAccordion = () => {
@@ -16,10 +20,13 @@ const Accordion: React.FC<AccordionProps> = ({ title, children, defaultOpen = fa
 
   return (
     <div
-      className={clsx(" px-4 py-2", {
-        "bg-slate-700": !isOpen,
-        "bg-slate-600": !!isOpen,
-      })}
+      className={clsx(
+        "my-2 flex flex-row flex-wrap items-center gap-2 rounded bg-slate-600 p-4 sm:justify-start",
+        {
+          "bg-slate-700": !isOpen,
+          "bg-slate-600": !!isOpen,
+        }
+      )}
     >
       <div
         className="flex w-full grow flex-row justify-between align-middle text-lg"
@@ -29,9 +36,7 @@ const Accordion: React.FC<AccordionProps> = ({ title, children, defaultOpen = fa
         <div className="mx-2 font-bold">{isOpen ? "-" : "+"}</div>
       </div>
       {isOpen && (
-        <div className="mt-2 flex flex-row flex-wrap justify-evenly gap-2 sm:justify-start">
-          {children}
-        </div>
+          <>{children}</>
       )}
     </div>
   );
