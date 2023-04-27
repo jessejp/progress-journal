@@ -4,26 +4,59 @@ import type { UseFormProps } from "react-hook-form";
 import { z } from "zod";
 
 export const inputTypes = ["TEXTAREA", "NUMBER", "BOOLEAN", "RANGE"] as const;
+export const inputUnitTypes = [
+  "kg",
+  "reps",
+  "sets",
+  "km",
+  "meters",
+  "hours",
+  "minutes",
+  "maximum",
+  "minimum",
+] as const;
 
-export type InputType = (typeof inputTypes)[number];
+export type InputType = typeof inputTypes[number];
+export type InputUnitType = typeof inputUnitTypes[number];
 
 export const inputTypeOption = {
   TEXTAREA: inputTypes[0],
   NUMBER: inputTypes[1],
   BOOLEAN: inputTypes[2],
   RANGE: inputTypes[3],
+  kg: inputUnitTypes[0],
+  reps: inputUnitTypes[1],
+  sets: inputUnitTypes[2],
+  km: inputUnitTypes[3],
+  meters: inputUnitTypes[4],
+  hours: inputUnitTypes[5],
+  minutes: inputUnitTypes[6],
+  maximum: inputUnitTypes[7],
+  minimum: inputUnitTypes[8],
 };
 
 export const stringToInputType = (inputTypeString: string) => {
   switch (inputTypeString) {
     case "TEXTAREA":
-      return inputTypeOption["TEXTAREA"];
     case "NUMBER":
-      return inputTypeOption["NUMBER"];
     case "BOOLEAN":
-      return inputTypeOption["BOOLEAN"];
     case "RANGE":
-      return inputTypeOption["RANGE"];
+      return inputTypeOption[inputTypeString];
+  }
+};
+
+export const stringToInputUnitType = (inputUnitTypeString: string) => {
+  switch (inputUnitTypeString) {
+    case "kg":
+    case "reps":
+    case "sets":
+    case "km":
+    case "meters":
+    case "hours":
+    case "minutes":
+    case "maximum":
+    case "minimum":
+      return inputTypeOption[inputUnitTypeString];
   }
 };
 
@@ -35,17 +68,23 @@ export const fieldInputValidation = z
     valueString: z.optional(z.string().max(510).nullable()),
     valueBoolean: z.optional(z.boolean().nullable()),
     inputType: z.enum(inputTypes),
-    inputHelper: z.string().nullable()
-  }).superRefine((value, ctx) => {
-    if ((value.inputType === "NUMBER" || value.inputType === "BOOLEAN" || value.inputType === "RANGE") && !value.inputHelper) {
+    inputHelper: z.string().nullable(),
+  })
+  .superRefine((value, ctx) => {
+    if (
+      (value.inputType === "NUMBER" ||
+        value.inputType === "BOOLEAN" ||
+        value.inputType === "RANGE") &&
+      !value.inputHelper
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: `Label is required for ${value.inputType} input type`,
         params: { inputHelper: value.inputHelper },
-      })
+      });
     }
   });
- 
+
 export const fieldValidationSchema = z.object({
   id: z.string(),
   entryId: z.string(),
