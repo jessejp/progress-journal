@@ -102,7 +102,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     <Layout page="New Entry">
       <Heading>New Entry</Heading>
       <MainContent>
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-row flex-wrap gap-4">
           <div
             className={clsx("rounded p-2", {
               "bg-slate-500": selectedFilter === "all",
