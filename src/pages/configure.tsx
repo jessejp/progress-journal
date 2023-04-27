@@ -33,7 +33,7 @@ const Configure: NextPage = () => {
     fieldIndex: number | null;
   }>({
     showInput: false,
-    value: "",
+    value: "🦍",
     fieldIndex: null,
   });
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
@@ -164,19 +164,13 @@ const Configure: NextPage = () => {
         fieldIndex: fieldCategoryInput.fieldIndex,
       };
 
-      setFieldCategoryInput({
-        showInput: false,
-        value: "",
-        fieldIndex: null,
-      });
-
-      if (newCategory.fieldIndex !== null)
+      if (newCategory.fieldIndex !== null && newCategory.value !== "") {
         watchFields.entries[0]?.fields[newCategory.fieldIndex]?.category ===
         undefined
           ? form.register(
               `entries.0.fields.${newCategory.fieldIndex}.category`,
               {
-                value: newCategory.value.replaceAll(",", "").trim(),
+                value: newCategory.value,
               }
             )
           : form.setValue(
@@ -184,7 +178,16 @@ const Configure: NextPage = () => {
               newCategory.value
             );
 
-      return [...prev, newCategory.value];
+        setFieldCategoryInput({
+          showInput: false,
+          value: "",
+          fieldIndex: null,
+        });
+
+        return [...prev, newCategory.value];
+      } else {
+        return prev;
+      }
     });
   };
 
@@ -405,7 +408,7 @@ const Configure: NextPage = () => {
               />
               <label htmlFor="all">All</label>
             </div>
-            {fieldCategories.length > 1 &&
+            {fieldCategories.length > 0 &&
               fieldCategories.map((category, categoryIndex) => {
                 return (
                   <div
