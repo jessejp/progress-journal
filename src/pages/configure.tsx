@@ -11,6 +11,7 @@ import {
   inputTypes,
   inputTypeOption,
   stringToInputType,
+  inputUnitTypes,
 } from "../utils/useZodForm";
 import React, { useEffect, useState } from "react";
 import clsx from "clsx";
@@ -204,19 +205,25 @@ const Configure: NextPage = () => {
           return [
             {
               inputType: inputTypeOption.NUMBER,
-              inputHelper: "kg",
+              inputHelper: inputTypeOption.kg,
               id: "",
               fieldId: "",
             },
             {
               inputType: inputTypeOption.NUMBER,
-              inputHelper: "reps",
+              inputHelper: inputTypeOption.reps,
               id: "",
               fieldId: "",
             },
             {
               inputType: inputTypeOption.NUMBER,
-              inputHelper: "sets",
+              inputHelper: inputTypeOption.sets,
+              id: "",
+              fieldId: "",
+            },
+            {
+              inputType: inputTypeOption.RANGE,
+              inputHelper: "Effort",
               id: "",
               fieldId: "",
             },
@@ -342,8 +349,8 @@ const Configure: NextPage = () => {
               <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
                 Category Name
               </label>
-              <select 
-              className="appearance-none bg-gray-100 w-16 h-12 text-2xl text-center flex flex-row flex-wrap"
+              <select
+                className="flex h-12 w-16 appearance-none flex-row flex-wrap bg-gray-100 text-center text-2xl"
                 value={fieldCategoryInput.value}
                 autoFocus={true}
                 onChange={(event) => {
@@ -351,7 +358,8 @@ const Configure: NextPage = () => {
                     ...prev,
                     value: event.target.value,
                   }));
-                }}>
+                }}
+              >
                 <option value="🦍">🦍</option>
                 <option value="🐓">🐓</option>
                 <option value="🐳">🐳</option>
@@ -376,11 +384,11 @@ const Configure: NextPage = () => {
             </div>
           )}
 
-          <div className={clsx("flex flex-row flex-wrap gap-4",
-          {
-            hidden: fieldCategories.length === 0
-            }
-          )}>
+          <div
+            className={clsx("flex flex-row flex-wrap gap-4", {
+              hidden: fieldCategories.length === 0,
+            })}
+          >
             <div
               className={clsx("rounded p-2", {
                 "bg-slate-500": selectedFilter === "all",
@@ -399,25 +407,25 @@ const Configure: NextPage = () => {
             </div>
             {fieldCategories.length > 1 &&
               fieldCategories.map((category, categoryIndex) => {
-                  return (
-                    <div
-                      className={clsx("rounded p-2", {
-                        "bg-slate-500": selectedFilter === category,
-                        "bg-slate-700": selectedFilter !== category,
-                      })}
-                      key={`${category}${categoryIndex}`}
-                    >
-                      <input
-                        type="radio"
-                        name="filter"
-                        id={category}
-                        value={category}
-                        onChange={(e) => setSelectedFilter(e.target.value)}
-                      />
-                      <label htmlFor={category}>{category}</label>
-                    </div>
-                  );
-                })}
+                return (
+                  <div
+                    className={clsx("rounded p-2", {
+                      "bg-slate-500": selectedFilter === category,
+                      "bg-slate-700": selectedFilter !== category,
+                    })}
+                    key={`${category}${categoryIndex}`}
+                  >
+                    <input
+                      type="radio"
+                      name="filter"
+                      id={category}
+                      value={category}
+                      onChange={(e) => setSelectedFilter(e.target.value)}
+                    />
+                    <label htmlFor={category}>{category}</label>
+                  </div>
+                );
+              })}
           </div>
           {watchFields.entries[0]?.fields.length &&
             watchFields.entries[0].fields.map(
@@ -431,8 +439,11 @@ const Configure: NextPage = () => {
                         field.category !== selectedFilter,
                     })}
                   >
-                    <Accordion title={`${field.name}: ${field.category || "unassigned"}`}>
-                      <div className="mb-4 flex w-full flex-grow flex-row items-center gap-2">
+                    <Accordion
+                      title={`${field.name}: ${field.category || "unassigned"}`}
+                      defaultOpen={!field.id}
+                    >
+                      <div className="mb-4 flex w-full flex-grow flex-row items-center justify-between gap-2">
                         <div className="flex w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
                           <label className="text-sm text-zinc-300">
                             Category
@@ -550,17 +561,35 @@ const Configure: NextPage = () => {
                                         );
                                       })}
                                   </select>
-                                  {(input?.inputType === "NUMBER" ||
-                                    input?.inputType === "RANGE" ||
+                                  {input?.inputType === "NUMBER" && (
+                                    <select
+                                      value={input?.inputHelper || ""}
+                                      {...form.register(
+                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                                      )}
+                                    >
+                                      <option>{input.inputHelper}</option>
+                                      {inputUnitTypes
+                                        .filter(
+                                          (type) => type !== input?.inputHelper
+                                        )
+                                        .map((unit) => {
+                                          return (
+                                            <option key={unit} value={unit}>
+                                              {unit}
+                                            </option>
+                                          );
+                                        })}
+                                    </select>
+                                  )}
+                                  {(input?.inputType === "RANGE" ||
                                     input?.inputType === "BOOLEAN") && (
                                     <>
                                       <input
                                         className="w-24"
                                         type="text"
                                         placeholder={
-                                          input.inputType === "NUMBER"
-                                            ? "kg, lbs, etc." // NUMBER
-                                            : input.inputType === "RANGE"
+                                          input.inputType === "RANGE"
                                             ? "Subjective" // RANGE
                                             : "Question?" // BOOLEAN
                                         }
