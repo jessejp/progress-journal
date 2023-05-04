@@ -37,6 +37,8 @@ const Configure: NextPage = () => {
     fieldIndex: null,
   });
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
+  const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
+    useState(false);
 
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
@@ -131,8 +133,16 @@ const Configure: NextPage = () => {
         { keepDefaultValues: true }
       );
       setFieldCategories(data?.entries[0]?.categories?.split(",") || []);
+      setSubjectDeleteConfirmation(false);
     }
-  }, [isFetched, data, form, subjectSelection, setFieldCategories]);
+  }, [
+    isFetched,
+    data,
+    form,
+    subjectSelection,
+    setFieldCategories,
+    setSubjectDeleteConfirmation,
+  ]);
 
   const selectCategoryHandler = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -314,6 +324,44 @@ const Configure: NextPage = () => {
       <Heading>Configure Subject</Heading>
       <MainContent>
         <form className="flex w-full flex-col p-2">
+        {subjectSelection !== "Add New Subject" && (
+            <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
+              <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
+                Delete Subject
+              </label>
+              {!subjectDeleteConfirmation && (
+                <button
+                  className="rounded bg-zinc-500 px-2 py-1 text-xl font-bold text-white hover:bg-zinc-700"
+                  onClick={() => {
+                    setSubjectDeleteConfirmation(true);
+                  }}
+                >
+                  Delete Subject
+                </button>
+              )}
+              {!!subjectDeleteConfirmation && (
+                <>
+                  <button
+                    className="rounded bg-red-500 px-2 py-1 text-xl font-bold text-white hover:bg-red-700"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      deleteSubject.mutate({ id: subjectSelection });
+                    }}
+                  >
+                    Delete Subject
+                  </button>
+                  <button
+                    className="rounded bg-slate-500 px-2 py-1 text-xl font-bold text-white hover:bg-slate-700"
+                    onClick={() => {
+                      setSubjectDeleteConfirmation(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
+          )}
           <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
             <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
               Select Subject
@@ -333,22 +381,6 @@ const Configure: NextPage = () => {
               ))}
             </select>
           </div>
-          {subjectSelection !== "Add New Subject" && (
-            <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
-              <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
-                Delete Subject
-              </label>
-              <button
-                className="rounded bg-red-500 px-2 py-1 text-xl font-bold text-white hover:bg-red-700"
-                onClick={(event) => {
-                  event.preventDefault();
-                  deleteSubject.mutate({ id: subjectSelection });
-                }}
-              >
-                Delete Subject
-              </button>
-            </div>
-          )}
           <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
             <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
               Subject Name
