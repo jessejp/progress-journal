@@ -87,6 +87,12 @@ const Configure: NextPage = () => {
 
   const watchFields = form.watch();
 
+  const deleteSubject = trpc.subject.deleteSubject.useMutation({
+    onSuccess: async () => {
+      router.push("/");
+    },
+  });
+
   const subjectWithFields = trpc.subject.getSubject.useQuery(
     {
       id: subjectSelection,
@@ -327,6 +333,22 @@ const Configure: NextPage = () => {
               ))}
             </select>
           </div>
+          {subjectSelection !== "Add New Subject" && (
+            <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
+              <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
+                Delete Subject
+              </label>
+              <button
+                className="rounded bg-red-500 px-2 py-1 text-xl font-bold text-white hover:bg-red-700"
+                onClick={(event) => {
+                  event.preventDefault();
+                  deleteSubject.mutate({ id: subjectSelection });
+                }}
+              >
+                Delete Subject
+              </button>
+            </div>
+          )}
           <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
             <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
               Subject Name

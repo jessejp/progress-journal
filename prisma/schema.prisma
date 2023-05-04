@@ -17,7 +17,7 @@ model Subject {
   updatedAt DateTime @updatedAt
   name      String
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
   icon      String   @default("📝") @db.VarChar(4)
   entries   Entry[]
 
@@ -28,7 +28,7 @@ model Entry {
   id         String   @id @default(cuid())
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  Subject    Subject  @relation(fields: [subjectId], references: [id])
+  Subject    Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   subjectId  String
   fields     Field[]
   template   Boolean  @default(false)
@@ -41,7 +41,7 @@ model Field {
   id          String       @id @default(cuid())
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  entry       Entry?       @relation(fields: [entryId], references: [id])
+  entry       Entry?       @relation(fields: [entryId], references: [id], onDelete: Cascade)
   entryId     String
   name        String       @db.VarChar(36)
   category    String?      @db.VarChar(12) // used for filtering in new entry
@@ -54,7 +54,7 @@ model FieldInput {
   id           String   @id @default(cuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  field        Field    @relation(fields: [fieldId], references: [id])
+  field        Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
   fieldId      String
   valueNumber  Float?   @db.Float
   valueString  String?  @db.VarChar(510)
