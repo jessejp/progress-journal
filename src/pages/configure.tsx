@@ -39,6 +39,7 @@ const Configure: NextPage = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
     useState(false);
+  const [showCancelChangesButton, setShowCancelChangesButton] = useState(true);
 
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
@@ -105,7 +106,7 @@ const Configure: NextPage = () => {
     }
   );
 
-  const { isFetched, data } = subjectWithFields;
+  const { isFetched, data, refetch } = subjectWithFields;
   useEffect(() => {
     if (subjectSelection === "Add New Subject") {
       form.reset({ ...form.formState.defaultValues });
@@ -425,7 +426,6 @@ const Configure: NextPage = () => {
                 id="all"
                 value="all"
                 checked={selectedFilter === "all"}
-                defaultChecked
                 onChange={(e) => setSelectedFilter(e.target.value)}
               />
               <label htmlFor="all">All</label>
@@ -747,6 +747,21 @@ const Configure: NextPage = () => {
         </form>
       </MainContent>
       <ButtonContainer>
+        {!!showCancelChangesButton && (
+          <Button
+            intent="undo"
+            action={() => {
+              if (subjectSelection === "Add New Subject") {
+                form.reset({ ...form.formState.defaultValues });
+                setFieldCategories([]);
+              } else {
+                refetch();
+              }
+            }}
+          >
+            ↩Undo
+          </Button>
+        )}
         <Button
           intent="accept"
           action={form.handleSubmit(async (values) => {
