@@ -281,7 +281,19 @@ const Configure: NextPage = () => {
     event.preventDefault();
     form.unregister(`entries.0.fields.${fieldIndex}`);
     const currentForm = watchFields;
-    form.reset({ ...currentForm }, { keepDefaultValues: true });
+    console.log("currentForm", currentForm);
+    form.reset(
+      {
+        ...currentForm,
+        entries: [
+          {
+            ...currentForm.entries[0],
+            fields: currentForm.entries[0]?.fields.filter((field) => field),
+          },
+        ],
+      },
+      { keepDefaultValues: true }
+    );
   };
 
   const addFieldInput = (
