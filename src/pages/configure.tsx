@@ -39,7 +39,7 @@ const Configure: NextPage = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
     useState(false);
-  const [showCancelChangesButton, setShowCancelChangesButton] = useState(true);
+  const [showCancelChangesButton, setShowCancelChangesButton] = useState(false);
 
   // For deleting existing fields from DB
   const [deletedFields, setDeletedFields] = useState<Array<string>>([]);
@@ -155,6 +155,8 @@ const Configure: NextPage = () => {
 
     setSelectedFilter("all");
     setSubjectDeleteConfirmation(false);
+    setDeletedFields([]);
+    setShowCancelChangesButton(false);
   }, [
     isFetched,
     data,
@@ -293,7 +295,7 @@ const Configure: NextPage = () => {
     event.preventDefault();
     form.unregister(`entries.0.fields.${fieldIndex}`);
     const currentForm = watchFields;
-    console.log("currentForm", currentForm);
+
     form.reset(
       {
         ...currentForm,
@@ -476,7 +478,8 @@ const Configure: NextPage = () => {
                 );
               })}
           </div>
-          {watchFields.entries[0]?.fields.length &&
+          {watchFields.entries.length &&
+            watchFields.entries[0]?.fields.length &&
             watchFields.entries[0].fields.map(
               (field, fieldIndex, fieldArray) => {
                 return (
@@ -769,21 +772,18 @@ const Configure: NextPage = () => {
         </form>
       </MainContent>
       <ButtonContainer>
-        {!!showCancelChangesButton && (
-          <Button
-            intent="undo"
-            action={() => {
-              if (subjectSelection === "Add New Subject") {
-                form.reset({ ...form.formState.defaultValues });
-                setFieldCategories([]);
-              } else {
+        {!!showCancelChangesButton &&
+          subjectSelection !== "Add New Subject" && (
+            <Button
+              intent="undo"
+              action={() => {
+                setDeletedFields([]);
                 refetch();
-              }
-            }}
-          >
-            ↩Undo
-          </Button>
-        )}
+              }}
+            >
+              ↩Undo
+            </Button>
+          )}
         <Button
           intent="accept"
           action={form.handleSubmit(async (values) => {
