@@ -112,4 +112,16 @@ export const fieldRouter = router({
         },
       });
     }),
+  deleteFields: protectedProcedure
+    .input(z.object({ entryId: z.string(), fieldIds: z.array(z.string()) }))
+    .mutation(({ input, ctx }) => {
+      return ctx.prisma.field.deleteMany({
+        where: {
+          entryId: input.entryId,
+          id: {
+            in: input.fieldIds,
+          },
+        },
+      });
+    }),
 });

@@ -41,9 +41,15 @@ const Configure: NextPage = () => {
     useState(false);
   const [showCancelChangesButton, setShowCancelChangesButton] = useState(true);
 
+  // For deleting existing fields from DB
+  const [deletedFields, setDeletedFields] = useState<Array<string>>([]);
+
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
+    },
+    onError: async () => {
+      console.log("onError addSubject");
     },
   });
 
@@ -93,6 +99,12 @@ const Configure: NextPage = () => {
   const deleteSubject = trpc.subject.deleteSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
+    },
+  });
+
+  const deleteFields = trpc.field.deleteFields.useMutation({
+    onSuccess: async () => {
+      console.log("onSuccess deleteFields");
     },
   });
 
@@ -504,18 +516,16 @@ const Configure: NextPage = () => {
                             </option>
                           </select>
                         </div>
-                        {fieldIndex === fieldArray.length - 1 &&
-                          fieldIndex > 0 &&
-                          subjectSelection === "Add New Subject" && (
-                            <button
-                              className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                              onClick={(event) =>
-                                removeField(event, fieldIndex)
-                              }
-                            >
-                              X
-                            </button>
-                          )}
+                        <button
+                          className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
+                          onClick={(event) => {
+                            removeField(event, fieldIndex);
+                            !!field.id &&
+                              setDeletedFields((prev) => [...prev, field.id]);
+                          }}
+                        >
+                          X
+                        </button>
                       </div>
                       <div
                         className={clsx(
@@ -780,6 +790,12 @@ const Configure: NextPage = () => {
             if (subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
             } else {
+              if (deletedFields.length > 0 && !!values.entries[0]?.id)
+                await deleteFields.mutateAsync({
+                  entryId: values.entries[0].id,
+                  fieldIds: deletedFields,
+                });
+
               await updateSubject.mutateAsync(values);
             }
           })}
