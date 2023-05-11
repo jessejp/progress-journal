@@ -295,7 +295,7 @@ const Configure: NextPage = () => {
     event.preventDefault();
     form.unregister(`entries.0.fields.${fieldIndex}`);
     const currentForm = watchFields;
-
+    // Filter method is used to eliminate empty array values left by React Hook Form
     form.reset(
       {
         ...currentForm,
@@ -324,7 +324,12 @@ const Configure: NextPage = () => {
       inputType: inputTypeOption.NUMBER,
       inputHelper: "",
     });
-    form.reset({ ...currentForm }, { keepDefaultValues: true });
+    form.reset(
+      {
+        ...currentForm,
+      },
+      { keepDefaultValues: true }
+    );
   };
 
   const removeFieldInput = (
@@ -335,7 +340,24 @@ const Configure: NextPage = () => {
     event.preventDefault();
     form.unregister(`entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}`);
     const currentForm = watchFields;
-    form.reset({ ...currentForm }, { keepDefaultValues: true });
+    // Filter method is used to eliminate empty array values left by React Hook Form
+    form.reset(
+      {
+        ...currentForm,
+        entries: [
+          {
+            ...currentForm.entries[0],
+            fields: currentForm.entries[0]?.fields.map((field) => {
+              return {
+                ...field,
+                fieldInputs: field.fieldInputs.filter((input) => input),
+              };
+            }),
+          },
+        ],
+      },
+      { keepDefaultValues: true }
+    );
   };
 
   // useEffect(() => {
@@ -343,6 +365,7 @@ const Configure: NextPage = () => {
   // }, [watchFields]);
 
   // console.log("form", form.formState.errors);
+  // console.log("fieldCategories", fieldCategories);
 
   if (updateSubject.isLoading)
     return (
@@ -478,8 +501,8 @@ const Configure: NextPage = () => {
                 );
               })}
           </div>
-          {watchFields.entries.length &&
-            watchFields.entries[0]?.fields.length &&
+          {!!watchFields.entries.length &&
+            !!watchFields.entries[0]?.fields.length &&
             watchFields.entries[0].fields.map(
               (field, fieldIndex, fieldArray) => {
                 return (
@@ -519,16 +542,20 @@ const Configure: NextPage = () => {
                             </option>
                           </select>
                         </div>
-                        <button
-                          className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                          onClick={(event) => {
-                            removeField(event, fieldIndex);
-                            !!field.id &&
-                              setDeletedFields((prev) => [...prev, field.id]);
-                          }}
-                        >
-                          X
-                        </button>
+                        {fieldArray.length > 1 && (
+                          <button
+                            className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
+                            onClick={(event) => {
+                              removeField(event, fieldIndex);
+                              if (!!field.id) {
+                                setDeletedFields((prev) => [...prev, field.id]);
+                                setShowCancelChangesButton(true);
+                              }
+                            }}
+                          >
+                            X
+                          </button>
+                        )}
                       </div>
                       <div
                         className={clsx(
@@ -655,23 +682,20 @@ const Configure: NextPage = () => {
                                     </>
                                   )}
                                   <div className="flex flex-grow-0 gap-2">
-                                    {inputArray.length > 1 &&
-                                      inputIndex === inputArray.length - 1 &&
-                                      subjectSelection ===
-                                        "Add New Subject" && (
-                                        <button
-                                          className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
-                                          onClick={(event) =>
-                                            removeFieldInput(
-                                              event,
-                                              fieldIndex,
-                                              inputIndex
-                                            )
-                                          }
-                                        >
-                                          X
-                                        </button>
-                                      )}
+                                    {inputArray.length > 1 && !input.id && (
+                                      <button
+                                        className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
+                                        onClick={(event) =>
+                                          removeFieldInput(
+                                            event,
+                                            fieldIndex,
+                                            inputIndex
+                                          )
+                                        }
+                                      >
+                                        X
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
 
@@ -781,7 +805,7 @@ const Configure: NextPage = () => {
                 refetch();
               }}
             >
-              ↩Undo
+              ↩Cancel Changes
             </Button>
           )}
         <Button
