@@ -27,7 +27,7 @@ const Configure: NextPage = () => {
     useState("journal");
   const [subjectSelection, setSubjectSelection] = useState("Add New Subject");
   const [fieldCategories, setFieldCategories] = useState<Array<string>>([]);
-  const [fieldCategoryInput, setFieldCategoryInput] = useState<{
+  const [newCategorySelect, setNewCategorySelect] = useState<{
     showInput: boolean;
     fieldIndex: number | null;
   }>({
@@ -171,12 +171,12 @@ const Configure: NextPage = () => {
     fieldIndex: number
   ) => {
     if (event.target.value === "+ new category") {
-      setFieldCategoryInput({
+      setNewCategorySelect({
         showInput: true,
         fieldIndex,
       });
     } else {
-      setFieldCategoryInput((prev) => ({ ...prev, showInput: false }));
+      setNewCategorySelect((prev) => ({ ...prev, showInput: false }));
 
       if (!!event.target.value) {
         watchFields.entries[0]?.fields[fieldIndex]?.category === undefined
@@ -198,7 +198,7 @@ const Configure: NextPage = () => {
     setFieldCategories((prev) => {
       const newCategory = {
         value: fieldCategorySelection.current?.value,
-        fieldIndex: fieldCategoryInput.fieldIndex,
+        fieldIndex: newCategorySelect.fieldIndex,
       };
 
       if (newCategory.fieldIndex !== null && newCategory.value !== undefined) {
@@ -215,7 +215,7 @@ const Configure: NextPage = () => {
               newCategory.value
             );
 
-        setFieldCategoryInput({
+        setNewCategorySelect({
           showInput: false,
           fieldIndex: null,
         });
@@ -418,7 +418,7 @@ const Configure: NextPage = () => {
               </div>
             )}
           </div>
-          {fieldCategoryInput.showInput === true && (
+          {newCategorySelect.showInput === true && (
             <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2 rounded bg-slate-600 p-4">
               <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
                 Category Name
@@ -478,22 +478,37 @@ const Configure: NextPage = () => {
             {fieldCategories.length > 0 &&
               fieldCategories.map((category, categoryIndex) => {
                 return (
-                  <div
-                    className={clsx("rounded p-2", {
-                      "bg-slate-500": selectedFilter === category,
-                      "bg-slate-700": selectedFilter !== category,
-                    })}
-                    key={`${category}${categoryIndex}`}
-                  >
-                    <input
-                      type="radio"
-                      name="filter"
-                      id={category}
-                      value={category}
-                      onChange={(e) => setSelectedFilter(e.target.value)}
-                    />
-                    <label htmlFor={category}>{category}</label>
-                  </div>
+                  <React.Fragment key={`${category}${categoryIndex}`}>
+                    <div
+                      className={clsx("flex flex-row gap-1 rounded p-2", {
+                        "bg-slate-500": selectedFilter === category,
+                        "bg-slate-700": selectedFilter !== category,
+                      })}
+                    >
+                      <input
+                        type="radio"
+                        name="filter"
+                        id={category}
+                        value={category}
+                        onChange={(e) => setSelectedFilter(e.target.value)}
+                      />
+                      <label htmlFor={category}>{category}</label>
+                      {selectedFilter === category && (
+                        <Button
+                          action={() => {
+                            setFieldCategories(
+                              fieldCategories.filter((cat) => cat !== category)
+                            );
+                            setShowCancelChangesButton(true);
+                          }}
+                          intent="cancel"
+                          style="xsmall"
+                        >
+                          Delete category
+                        </Button>
+                      )}
+                    </div>
+                  </React.Fragment>
                 );
               })}
           </div>
