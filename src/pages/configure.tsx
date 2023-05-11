@@ -37,10 +37,19 @@ const Configure: NextPage = () => {
     fieldIndex: null,
   });
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
+  const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
+    useState(false);
+  const [showCancelChangesButton, setShowCancelChangesButton] = useState(false);
+
+  // For deleting existing fields from DB
+  const [deletedFields, setDeletedFields] = useState<Array<string>>([]);
 
   const addSubject = trpc.subject.addSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
+    },
+    onError: async () => {
+      console.log("onError addSubject");
     },
   });
 
@@ -87,6 +96,18 @@ const Configure: NextPage = () => {
 
   const watchFields = form.watch();
 
+  const deleteSubject = trpc.subject.deleteSubject.useMutation({
+    onSuccess: async () => {
+      router.push("/");
+    },
+  });
+
+  const deleteFields = trpc.field.deleteFields.useMutation({
+    onSuccess: async () => {
+      console.log("onSuccess deleteFields");
+    },
+  });
+
   const subjectWithFields = trpc.subject.getSubject.useQuery(
     {
       id: subjectSelection,
@@ -97,10 +118,11 @@ const Configure: NextPage = () => {
     }
   );
 
-  const { isFetched, data } = subjectWithFields;
+  const { isFetched, data, refetch } = subjectWithFields;
   useEffect(() => {
     if (subjectSelection === "Add New Subject") {
       form.reset({ ...form.formState.defaultValues });
+      setFieldCategories([]);
     }
 
     if (isFetched) {
@@ -124,9 +146,26 @@ const Configure: NextPage = () => {
         },
         { keepDefaultValues: true }
       );
-      setFieldCategories(data?.entries[0]?.categories?.split(",") || []);
+      setFieldCategories(
+        !data?.entries[0]?.categories
+          ? []
+          : data?.entries[0]?.categories?.split(",")
+      );
     }
-  }, [isFetched, data, form, subjectSelection, setFieldCategories]);
+
+    setSelectedFilter("all");
+    setSubjectDeleteConfirmation(false);
+    setDeletedFields([]);
+    setShowCancelChangesButton(false);
+  }, [
+    isFetched,
+    data,
+    form,
+    subjectSelection,
+    setFieldCategories,
+    setSubjectDeleteConfirmation,
+    setSelectedFilter,
+  ]);
 
   const selectCategoryHandler = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -259,7 +298,19 @@ const Configure: NextPage = () => {
     event.preventDefault();
     form.unregister(`entries.0.fields.${fieldIndex}`);
     const currentForm = watchFields;
-    form.reset({ ...currentForm }, { keepDefaultValues: true });
+    // Filter method is used to eliminate empty array values left by React Hook Form
+    form.reset(
+      {
+        ...currentForm,
+        entries: [
+          {
+            ...currentForm.entries[0],
+            fields: currentForm.entries[0]?.fields.filter((field) => field),
+          },
+        ],
+      },
+      { keepDefaultValues: true }
+    );
   };
 
   const addFieldInput = (
@@ -276,7 +327,12 @@ const Configure: NextPage = () => {
       inputType: inputTypeOption.NUMBER,
       inputHelper: "",
     });
-    form.reset({ ...currentForm }, { keepDefaultValues: true });
+    form.reset(
+      {
+        ...currentForm,
+      },
+      { keepDefaultValues: true }
+    );
   };
 
   const removeFieldInput = (
@@ -287,7 +343,24 @@ const Configure: NextPage = () => {
     event.preventDefault();
     form.unregister(`entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}`);
     const currentForm = watchFields;
-    form.reset({ ...currentForm }, { keepDefaultValues: true });
+    // Filter method is used to eliminate empty array values left by React Hook Form
+    form.reset(
+      {
+        ...currentForm,
+        entries: [
+          {
+            ...currentForm.entries[0],
+            fields: currentForm.entries[0]?.fields.map((field) => {
+              return {
+                ...field,
+                fieldInputs: field.fieldInputs.filter((input) => input),
+              };
+            }),
+          },
+        ],
+      },
+      { keepDefaultValues: true }
+    );
   };
 
   // useEffect(() => {
@@ -295,6 +368,7 @@ const Configure: NextPage = () => {
   // }, [watchFields]);
 
   // console.log("form", form.formState.errors);
+  // console.log("fieldCategories", fieldCategories);
 
   if (updateSubject.isLoading)
     return (
@@ -403,7 +477,7 @@ const Configure: NextPage = () => {
                 name="filter"
                 id="all"
                 value="all"
-                defaultChecked
+                checked={selectedFilter === "all"}
                 onChange={(e) => setSelectedFilter(e.target.value)}
               />
               <label htmlFor="all">All</label>
@@ -430,7 +504,8 @@ const Configure: NextPage = () => {
                 );
               })}
           </div>
-          {watchFields.entries[0]?.fields.length &&
+          {!!watchFields.entries.length &&
+            !!watchFields.entries[0]?.fields.length &&
             watchFields.entries[0].fields.map(
               (field, fieldIndex, fieldArray) => {
                 return (
@@ -470,18 +545,20 @@ const Configure: NextPage = () => {
                             </option>
                           </select>
                         </div>
-                        {fieldIndex === fieldArray.length - 1 &&
-                          fieldIndex > 0 &&
-                          subjectSelection === "Add New Subject" && (
-                            <button
-                              className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                              onClick={(event) =>
-                                removeField(event, fieldIndex)
+                        {fieldArray.length > 1 && (
+                          <button
+                            className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
+                            onClick={(event) => {
+                              removeField(event, fieldIndex);
+                              if (!!field.id) {
+                                setDeletedFields((prev) => [...prev, field.id]);
+                                setShowCancelChangesButton(true);
                               }
-                            >
-                              X
-                            </button>
-                          )}
+                            }}
+                          >
+                            X
+                          </button>
+                        )}
                       </div>
                       <div
                         className={clsx(
@@ -608,23 +685,20 @@ const Configure: NextPage = () => {
                                     </>
                                   )}
                                   <div className="flex flex-grow-0 gap-2">
-                                    {inputArray.length > 1 &&
-                                      inputIndex === inputArray.length - 1 &&
-                                      subjectSelection ===
-                                        "Add New Subject" && (
-                                        <button
-                                          className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
-                                          onClick={(event) =>
-                                            removeFieldInput(
-                                              event,
-                                              fieldIndex,
-                                              inputIndex
-                                            )
-                                          }
-                                        >
-                                          X
-                                        </button>
-                                      )}
+                                    {inputArray.length > 1 && !input.id && (
+                                      <button
+                                        className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
+                                        onClick={(event) =>
+                                          removeFieldInput(
+                                            event,
+                                            fieldIndex,
+                                            inputIndex
+                                          )
+                                        }
+                                      >
+                                        X
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
 
@@ -684,15 +758,71 @@ const Configure: NextPage = () => {
                 );
               }
             )}
+          {subjectSelection !== "Add New Subject" && (
+            <div className="mt-4 flex scale-75 flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
+              <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
+                Delete Subject
+              </label>
+              {!subjectDeleteConfirmation && (
+                <button
+                  className="rounded bg-zinc-500 px-2 py-1 text-xl font-bold text-white hover:bg-zinc-700"
+                  onClick={() => {
+                    setSubjectDeleteConfirmation(true);
+                  }}
+                >
+                  Delete Subject
+                </button>
+              )}
+              {!!subjectDeleteConfirmation && (
+                <>
+                  <button
+                    className="rounded bg-red-500 px-2 py-1 text-xl font-bold text-white hover:bg-red-700"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      deleteSubject.mutate({ id: subjectSelection });
+                    }}
+                  >
+                    Delete Subject
+                  </button>
+                  <button
+                    className="rounded bg-slate-500 px-2 py-1 text-xl font-bold text-white hover:bg-slate-700"
+                    onClick={() => {
+                      setSubjectDeleteConfirmation(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </form>
       </MainContent>
       <ButtonContainer>
+        {!!showCancelChangesButton &&
+          subjectSelection !== "Add New Subject" && (
+            <Button
+              intent="undo"
+              action={() => {
+                setDeletedFields([]);
+                refetch();
+              }}
+            >
+              ↩Cancel Changes
+            </Button>
+          )}
         <Button
           intent="accept"
           action={form.handleSubmit(async (values) => {
             if (subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
             } else {
+              if (deletedFields.length > 0 && !!values.entries[0]?.id)
+                await deleteFields.mutateAsync({
+                  entryId: values.entries[0].id,
+                  fieldIds: deletedFields,
+                });
+
               await updateSubject.mutateAsync(values);
             }
           })}

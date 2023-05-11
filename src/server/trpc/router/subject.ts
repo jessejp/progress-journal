@@ -131,7 +131,7 @@ export const subjectRouter = router({
         include: {
           entries: {
             where: {
-              template: true
+              template: true,
             },
             include: {
               fields: {
@@ -142,6 +142,21 @@ export const subjectRouter = router({
             },
           },
         },
+      });
+
+      if (!subject)
+        throw new TRPCError({ code: "NOT_FOUND", message: "No subject found" });
+
+      return subject;
+    }),
+  deleteSubject: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const subject = await ctx.prisma.subject.deleteMany({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        }
       });
 
       if (!subject)
