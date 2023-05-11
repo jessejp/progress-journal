@@ -13,7 +13,7 @@ import {
   stringToInputType,
   inputUnitTypes,
 } from "../utils/useZodForm";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import MainContent from "../ui/MainContent";
 import Accordion from "../ui/Accordion";
@@ -27,15 +27,14 @@ const Configure: NextPage = () => {
     useState("journal");
   const [subjectSelection, setSubjectSelection] = useState("Add New Subject");
   const [fieldCategories, setFieldCategories] = useState<Array<string>>([]);
-  const [fieldCategoryInput, setFieldCategoryInput] = useState<{
+  const [newCategorySelect, setNewCategorySelect] = useState<{
     showInput: boolean;
-    value: string;
     fieldIndex: number | null;
   }>({
     showInput: false,
-    value: "🦍",
     fieldIndex: null,
   });
+  const fieldCategorySelection = useRef<HTMLSelectElement>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
     useState(false);
@@ -172,13 +171,12 @@ const Configure: NextPage = () => {
     fieldIndex: number
   ) => {
     if (event.target.value === "+ new category") {
-      setFieldCategoryInput((prev) => ({
-        ...prev,
+      setNewCategorySelect({
         showInput: true,
         fieldIndex,
-      }));
+      });
     } else {
-      setFieldCategoryInput((prev) => ({ ...prev, showInput: false }));
+      setNewCategorySelect((prev) => ({ ...prev, showInput: false }));
 
       if (!!event.target.value) {
         watchFields.entries[0]?.fields[fieldIndex]?.category === undefined
@@ -199,11 +197,11 @@ const Configure: NextPage = () => {
     event.preventDefault();
     setFieldCategories((prev) => {
       const newCategory = {
-        value: fieldCategoryInput.value,
-        fieldIndex: fieldCategoryInput.fieldIndex,
+        value: fieldCategorySelection.current?.value,
+        fieldIndex: newCategorySelect.fieldIndex,
       };
 
-      if (newCategory.fieldIndex !== null && newCategory.value !== "") {
+      if (newCategory.fieldIndex !== null && newCategory.value !== undefined) {
         watchFields.entries[0]?.fields[newCategory.fieldIndex]?.category ===
         undefined
           ? form.register(
@@ -217,9 +215,8 @@ const Configure: NextPage = () => {
               newCategory.value
             );
 
-        setFieldCategoryInput({
+        setNewCategorySelect({
           showInput: false,
-          value: "",
           fieldIndex: null,
         });
 
@@ -421,23 +418,19 @@ const Configure: NextPage = () => {
               </div>
             )}
           </div>
-          {fieldCategoryInput.showInput === true && (
+          {newCategorySelect.showInput === true && (
             <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2 rounded bg-slate-600 p-4">
               <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
                 Category Name
               </label>
               <select
                 className="flex h-12 w-16 appearance-none flex-row flex-wrap bg-gray-100 text-center text-2xl"
-                value={fieldCategoryInput.value}
                 autoFocus={true}
-                onChange={(event) => {
-                  setFieldCategoryInput((prev) => ({
-                    ...prev,
-                    value: event.target.value,
-                  }));
-                }}
+                ref={fieldCategorySelection}
               >
-                <option value="🦍">🦍</option>
+                <option selected value="🦍">
+                  🦍
+                </option>
                 <option value="🐓">🐓</option>
                 <option value="🐳">🐳</option>
                 <option value="🐶">🐶</option>
@@ -485,22 +478,37 @@ const Configure: NextPage = () => {
             {fieldCategories.length > 0 &&
               fieldCategories.map((category, categoryIndex) => {
                 return (
-                  <div
-                    className={clsx("rounded p-2", {
-                      "bg-slate-500": selectedFilter === category,
-                      "bg-slate-700": selectedFilter !== category,
-                    })}
-                    key={`${category}${categoryIndex}`}
-                  >
-                    <input
-                      type="radio"
-                      name="filter"
-                      id={category}
-                      value={category}
-                      onChange={(e) => setSelectedFilter(e.target.value)}
-                    />
-                    <label htmlFor={category}>{category}</label>
-                  </div>
+                  <React.Fragment key={`${category}${categoryIndex}`}>
+                    <div
+                      className={clsx("flex flex-row gap-1 rounded p-2", {
+                        "bg-slate-500": selectedFilter === category,
+                        "bg-slate-700": selectedFilter !== category,
+                      })}
+                    >
+                      <input
+                        type="radio"
+                        name="filter"
+                        id={category}
+                        value={category}
+                        onChange={(e) => setSelectedFilter(e.target.value)}
+                      />
+                      <label htmlFor={category}>{category}</label>
+                      {selectedFilter === category && (
+                        <Button
+                          action={() => {
+                            setFieldCategories(
+                              fieldCategories.filter((cat) => cat !== category)
+                            );
+                            setShowCancelChangesButton(true);
+                          }}
+                          intent="cancel"
+                          style="xsmall"
+                        >
+                          Delete category
+                        </Button>
+                      )}
+                    </div>
+                  </React.Fragment>
                 );
               })}
           </div>
