@@ -13,7 +13,7 @@ import {
   stringToInputType,
   inputUnitTypes,
 } from "../utils/useZodForm";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import MainContent from "../ui/MainContent";
 import Accordion from "../ui/Accordion";
@@ -29,13 +29,12 @@ const Configure: NextPage = () => {
   const [fieldCategories, setFieldCategories] = useState<Array<string>>([]);
   const [fieldCategoryInput, setFieldCategoryInput] = useState<{
     showInput: boolean;
-    value: string;
     fieldIndex: number | null;
   }>({
     showInput: false,
-    value: "🦍",
     fieldIndex: null,
   });
+  const fieldCategorySelection = useRef<HTMLSelectElement>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
     useState(false);
@@ -172,11 +171,10 @@ const Configure: NextPage = () => {
     fieldIndex: number
   ) => {
     if (event.target.value === "+ new category") {
-      setFieldCategoryInput((prev) => ({
-        ...prev,
+      setFieldCategoryInput({
         showInput: true,
         fieldIndex,
-      }));
+      });
     } else {
       setFieldCategoryInput((prev) => ({ ...prev, showInput: false }));
 
@@ -199,11 +197,11 @@ const Configure: NextPage = () => {
     event.preventDefault();
     setFieldCategories((prev) => {
       const newCategory = {
-        value: fieldCategoryInput.value,
+        value: fieldCategorySelection.current?.value,
         fieldIndex: fieldCategoryInput.fieldIndex,
       };
 
-      if (newCategory.fieldIndex !== null && newCategory.value !== "") {
+      if (newCategory.fieldIndex !== null && newCategory.value !== undefined) {
         watchFields.entries[0]?.fields[newCategory.fieldIndex]?.category ===
         undefined
           ? form.register(
@@ -219,7 +217,6 @@ const Configure: NextPage = () => {
 
         setFieldCategoryInput({
           showInput: false,
-          value: "",
           fieldIndex: null,
         });
 
@@ -428,16 +425,12 @@ const Configure: NextPage = () => {
               </label>
               <select
                 className="flex h-12 w-16 appearance-none flex-row flex-wrap bg-gray-100 text-center text-2xl"
-                value={fieldCategoryInput.value}
                 autoFocus={true}
-                onChange={(event) => {
-                  setFieldCategoryInput((prev) => ({
-                    ...prev,
-                    value: event.target.value,
-                  }));
-                }}
+                ref={fieldCategorySelection}
               >
-                <option value="🦍">🦍</option>
+                <option selected value="🦍">
+                  🦍
+                </option>
                 <option value="🐓">🐓</option>
                 <option value="🐳">🐳</option>
                 <option value="🐶">🐶</option>
