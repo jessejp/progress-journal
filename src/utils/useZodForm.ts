@@ -93,6 +93,8 @@ export const fieldValidationSchema = z.object({
   fieldInputs: z.array(fieldInputValidation),
 });
 
+export type fieldType = z.infer<typeof fieldValidationSchema>;
+
 export const entryValidationSchema = z.object({
   id: z.string(),
   subjectId: z.string(),
