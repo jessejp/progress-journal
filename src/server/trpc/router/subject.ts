@@ -74,6 +74,20 @@ export const subjectRouter = router({
           },
         },
       });
+
+      input.entries.map((entry) =>
+        entry.fields.map(
+          async (field) =>
+            await ctx.prisma.field.updateMany({
+              where: {
+                templateId: field.id,
+              },
+              data: {
+                name: field.name,
+              },
+            })
+        )
+      );
     }),
   addSubject: protectedProcedure
     .input(subjectValidationSchema)
@@ -156,7 +170,7 @@ export const subjectRouter = router({
         where: {
           id: input.id,
           userId: ctx.session.user.id,
-        }
+        },
       });
 
       if (!subject)

@@ -67,6 +67,7 @@ export const entryRouter = router({
           fields: {
             create: input.entries[0]?.fields.map((field) => ({
               name: field.name,
+              templateId: field.id,
               fieldInputs: {
                 create: field.fieldInputs.map((fieldInput) => ({
                   valueNumber: fieldInput.valueNumber,

@@ -87,6 +87,7 @@ export const fieldInputValidation = z
 
 export const fieldValidationSchema = z.object({
   id: z.string(),
+  templateId: z.optional(z.string().nullable()),
   entryId: z.string(),
   name: z.string().min(1).max(36),
   category: z.optional(z.string().max(12).nullable()),
