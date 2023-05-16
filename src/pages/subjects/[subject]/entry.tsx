@@ -86,6 +86,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
 
   const watchForm = form.watch();
 
+  const { dirtyFields } = form.formState;
   const { insert } = useFieldArray({
     control: form.control,
     name: "entries.0.fields",
@@ -219,7 +220,8 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                         );
                                         form.setValue(
                                           `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                          currentValue ? currentValue + 1 : 1
+                                          currentValue ? currentValue + 1 : 1,
+                                          { shouldDirty: true }
                                         );
                                       }}
                                     >
@@ -242,7 +244,8 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                         );
                                         form.setValue(
                                           `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                          currentValue ? currentValue - 1 : 0
+                                          currentValue ? currentValue - 1 : 0,
+                                          { shouldDirty: true }
                                         );
                                       }}
                                     >
@@ -356,6 +359,19 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           intent="accept"
           action={form.handleSubmit(
             async (values) => {
+              const fieldIndexes: number[] = [];
+              if (!!dirtyFields.entries)
+                dirtyFields?.entries[0]?.fields?.map((field, fieldIndex) => {
+                  fieldIndexes.push(fieldIndex);
+                });
+
+              if (!!values.entries[0])
+                values.entries[0].fields = values.entries[0].fields.filter(
+                  (_, fieldIndex) => {
+                    return fieldIndexes.includes(fieldIndex);
+                  }
+                );
+
               await addEntry.mutateAsync(values);
             },
             (err) => {
