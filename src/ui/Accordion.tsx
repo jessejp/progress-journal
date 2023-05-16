@@ -4,7 +4,7 @@ import React, { useState } from "react";
 interface AccordionProps {
   title: string;
   children: React.ReactNode;
-  defaultOpen?: boolean;
+  defaultOpen: boolean;
 }
 
 const Accordion: React.FC<AccordionProps> = ({
