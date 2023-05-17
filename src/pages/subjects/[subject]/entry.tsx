@@ -283,7 +283,11 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                       type="checkbox"
                                       className="h-5 w-5"
                                       {...form.register(
-                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
+                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`,
+                                        {
+                                          setValueAs: () =>
+                                            !!input.valueBoolean,
+                                        }
                                       )}
                                     />
                                     <span className="font-bold">
@@ -356,27 +360,35 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           Back
         </Button>
         <Button
-          intent="accept"
+          intent={`${!!dirtyFields.entries ? "accept" : "disabled"}`}
           action={form.handleSubmit(
             async (values) => {
               const fieldIndexes: number[] = [];
               if (!!dirtyFields.entries)
-                dirtyFields?.entries[0]?.fields?.map((field, fieldIndex) => {
+                dirtyFields?.entries[0]?.fields?.map((_, fieldIndex) => {
                   fieldIndexes.push(fieldIndex);
                 });
 
-              if (!!values.entries[0])
+              if (!!values.entries[0] && fieldIndexes.length > 0) {
                 values.entries[0].fields = values.entries[0].fields.filter(
-                  (_, fieldIndex) => {
-                    return fieldIndexes.includes(fieldIndex);
-                  }
+                  (_, fieldIndex) => fieldIndexes.includes(fieldIndex)
                 );
+
+                values.entries[0].fields.map((field) => {
+                  field.fieldInputs = field.fieldInputs.filter((input) => {
+                    return [
+                      input.valueString,
+                      input.valueNumber,
+                      input.valueBoolean,
+                    ].some((value) => value !== undefined && value !== null);
+                  });
+                });
+              }
 
               await addEntry.mutateAsync(values);
             },
             (err) => {
               console.log("on invalid", err);
-              alert(`Error: ${err}`);
             }
           )}
         >

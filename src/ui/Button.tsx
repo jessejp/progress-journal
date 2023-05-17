@@ -3,7 +3,7 @@ import clsx from "clsx";
 import Link from "next/link";
 
 interface Props {
-  intent: "open" | "accept" | "cancel" | "selection" | "undo";
+  intent: "open" | "accept" | "cancel" | "selection"| "disabled" | "undo";
   action?: MouseEventHandler | undefined;
   link?: string;
   style?: "default" | "small" | "xsmall";
@@ -25,6 +25,7 @@ const Button: React.FC<PropsWithChildren<Props>> = ({
     { "bg-red-500 hover:bg-red-700": intent === "cancel" },
     { "bg-indigo-500 hover:bg-indigo-700": intent === "undo" },
     { "bg-slate-500 hover:bg-slate-700": intent === "selection" },
+    { "bg-slate-700 hover:bg-slate-900": intent === "disabled" },
   ];
 
   if (action) {
