@@ -210,7 +210,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                   key={input.id}
                                   className="flex flex-grow-0 flex-row items-center gap-1 rounded bg-slate-700 p-1"
                                 >
-                                  <div className="flex w-10 flex-col justify-center gap-1">
+                                  <div className="flex w-12 flex-col justify-center gap-1">
                                     <button
                                       className="w-full bg-slate-600 font-bold text-slate-200"
                                       onClick={(event) => {

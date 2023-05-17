@@ -122,6 +122,7 @@ const Configure: NextPage = () => {
     if (subjectSelection === "Add New Subject") {
       form.reset({ ...form.formState.defaultValues });
       setFieldCategories([]);
+      setShowCancelChangesButton(false);
     }
 
     if (isFetched) {
@@ -150,12 +151,12 @@ const Configure: NextPage = () => {
           ? []
           : data?.entries[0]?.categories?.split(",")
       );
+      setShowCancelChangesButton(true);
     }
 
     setSelectedFilter("all");
     setSubjectDeleteConfirmation(false);
     setDeletedFields([]);
-    setShowCancelChangesButton(false);
   }, [
     isFetched,
     data,
@@ -499,7 +500,6 @@ const Configure: NextPage = () => {
                             setFieldCategories(
                               fieldCategories.filter((cat) => cat !== category)
                             );
-                            setShowCancelChangesButton(true);
                           }}
                           intent="cancel"
                           style="xsmall"
@@ -560,7 +560,6 @@ const Configure: NextPage = () => {
                               removeField(event, fieldIndex);
                               if (!!field.id) {
                                 setDeletedFields((prev) => [...prev, field.id]);
-                                setShowCancelChangesButton(true);
                               }
                             }}
                           >

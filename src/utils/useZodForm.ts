@@ -14,10 +14,11 @@ export const inputUnitTypes = [
   "minutes",
   "maximum",
   "minimum",
+  "average",
 ] as const;
 
-export type InputType = typeof inputTypes[number];
-export type InputUnitType = typeof inputUnitTypes[number];
+export type InputType = (typeof inputTypes)[number];
+export type InputUnitType = (typeof inputUnitTypes)[number];
 
 export const inputTypeOption = {
   TEXTAREA: inputTypes[0],
@@ -33,6 +34,7 @@ export const inputTypeOption = {
   minutes: inputUnitTypes[6],
   maximum: inputUnitTypes[7],
   minimum: inputUnitTypes[8],
+  average: inputUnitTypes[9],
 };
 
 export const stringToInputType = (inputTypeString: string) => {
@@ -56,6 +58,7 @@ export const stringToInputUnitType = (inputUnitTypeString: string) => {
     case "minutes":
     case "maximum":
     case "minimum":
+    case "average":
       return inputTypeOption[inputUnitTypeString];
   }
 };
