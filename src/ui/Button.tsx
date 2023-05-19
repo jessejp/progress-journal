@@ -32,7 +32,7 @@ const Button: React.FC<PropsWithChildren<Props>> = ({
     return (
       <button
         onClick={action}
-        className={clsx("rounded font-bold text-white", ...variants)}
+        className={clsx("flex self-center rounded font-bold text-white", ...variants)}
       >
         {children}
       </button>
@@ -41,7 +41,7 @@ const Button: React.FC<PropsWithChildren<Props>> = ({
     return (
       <Link
         href={link}
-        className={clsx("rounded font-bold text-white", ...variants)}
+        className={clsx("flex self-center rounded font-bold text-white", ...variants)}
       >
         {children}
       </Link>
