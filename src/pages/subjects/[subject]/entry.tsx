@@ -229,7 +229,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                     </button>
                                     <input
                                       type="number"
-                                      className=" bg-slate-800 p-1 text-center text-slate-200"
+                                      className="bg-slate-800 p-1 text-center text-slate-200"
                                       {...form.register(
                                         `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
                                         { valueAsNumber: true }
@@ -304,7 +304,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                               return (
                                 <div
                                   key={input.id}
-                                  className="flex flex-grow flex-col items-center justify-evenly gap-2 rounded bg-slate-700 p-1"
+                                  className="flex flex-col items-center justify-evenly gap-2 rounded bg-slate-700 px-3 py-1"
                                 >
                                   <label className="text-lg font-bold text-zinc-300">
                                     {input.inputHelper}
