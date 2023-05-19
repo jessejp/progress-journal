@@ -28,36 +28,40 @@ const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
           <div className="flex flex-col gap-4">
             {data?.entries[0]?.fields.map((field) => {
               return (
-                <div className=" text-slate-300" key={field.id}>
+                <div
+                  className=" rounded bg-slate-700 p-3 text-slate-300"
+                  key={field.id}
+                >
                   <h2 className="text-lg">{field.name}</h2>
-                  {field.fieldInputs.map((input) => {
-                    return (
-                      <div key={input.id}>
-                        {input.inputType === "TEXTAREA" && (
-                          <div className="w-full rounded-md bg-slate-700 p-3">
-                            <p>{input.valueString}</p>
-                          </div>
-                        )}
-                        {input.inputType === "NUMBER" && (
-                          <div className="w-fit rounded-md bg-slate-700 p-3">
-                            <p>{`${input.valueNumber}${input.inputHelper}`}</p>
-                          </div>
-                        )}
-                        {input.inputType === "RANGE" && (
-                          <>
-                            <h3>{input.inputHelper}</h3>
-                            <span>{`${input.valueNumber}%`}</span>
-                          </>
-                        )}
-                        {input.inputType === "BOOLEAN" && (
-                          <>
-                            <h3>{input.inputHelper}</h3>
-                            <span>{input.valueBoolean ? "Yes" : "No"}</span>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
+                  <div className="flex flex-wrap gap-4 ">
+                    {field.fieldInputs.map((input) => {
+                      return (
+                        <div key={input.id}>
+                          {input.inputType === "TEXTAREA" && (
+                            <div className="w-full">
+                              <p>{input.valueString}</p>
+                            </div>
+                          )}
+                          {input.inputType === "NUMBER" && (
+                            <div className="w-fit">
+                              <p>{`${input.valueNumber} ${input.inputHelper}`}</p>
+                            </div>
+                          )}
+                          {input.inputType === "RANGE" && (
+                            <div className="w-fit">
+                              <p>{`${input.valueNumber} ${input.inputHelper}`}</p>
+                            </div>
+                          )}
+                          {input.inputType === "BOOLEAN" && (
+                            <div className="w-fit">
+                              <p>{`${input.inputHelper}`}</p>
+                              <p>{input.valueBoolean ? "Yes" : "No"}</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
