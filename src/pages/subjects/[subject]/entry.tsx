@@ -210,7 +210,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                   key={input.id}
                                   className="flex flex-grow-0 flex-row items-center gap-1 rounded bg-slate-700 p-1"
                                 >
-                                  <div className="flex w-10 flex-col justify-center gap-1">
+                                  <div className="flex w-12 flex-col justify-center gap-1">
                                     <button
                                       className="w-full bg-slate-600 font-bold text-slate-200"
                                       onClick={(event) => {
@@ -229,7 +229,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                     </button>
                                     <input
                                       type="number"
-                                      className=" bg-slate-800 p-1 text-center text-slate-200"
+                                      className="bg-slate-800 p-1 text-center text-slate-200"
                                       {...form.register(
                                         `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
                                         { valueAsNumber: true }
@@ -283,7 +283,11 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                       type="checkbox"
                                       className="h-5 w-5"
                                       {...form.register(
-                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`
+                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueBoolean`,
+                                        {
+                                          setValueAs: () =>
+                                            !!input.valueBoolean,
+                                        }
                                       )}
                                     />
                                     <span className="font-bold">
@@ -300,7 +304,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                               return (
                                 <div
                                   key={input.id}
-                                  className="flex flex-grow flex-col items-center justify-evenly gap-2 rounded bg-slate-700 p-1"
+                                  className="flex flex-col items-center justify-evenly gap-2 rounded bg-slate-700 px-3 py-1"
                                 >
                                   <label className="text-lg font-bold text-zinc-300">
                                     {input.inputHelper}
@@ -356,27 +360,35 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           Back
         </Button>
         <Button
-          intent="accept"
+          intent={`${!!dirtyFields.entries ? "accept" : "disabled"}`}
           action={form.handleSubmit(
             async (values) => {
               const fieldIndexes: number[] = [];
               if (!!dirtyFields.entries)
-                dirtyFields?.entries[0]?.fields?.map((field, fieldIndex) => {
+                dirtyFields?.entries[0]?.fields?.map((_, fieldIndex) => {
                   fieldIndexes.push(fieldIndex);
                 });
 
-              if (!!values.entries[0])
+              if (!!values.entries[0] && fieldIndexes.length > 0) {
                 values.entries[0].fields = values.entries[0].fields.filter(
-                  (_, fieldIndex) => {
-                    return fieldIndexes.includes(fieldIndex);
-                  }
+                  (_, fieldIndex) => fieldIndexes.includes(fieldIndex)
                 );
+
+                values.entries[0].fields.map((field) => {
+                  field.fieldInputs = field.fieldInputs.filter((input) => {
+                    return [
+                      input.valueString,
+                      input.valueNumber,
+                      input.valueBoolean,
+                    ].some((value) => value !== undefined && value !== null);
+                  });
+                });
+              }
 
               await addEntry.mutateAsync(values);
             },
             (err) => {
               console.log("on invalid", err);
-              alert(`Error: ${err}`);
             }
           )}
         >

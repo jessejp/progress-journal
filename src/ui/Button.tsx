@@ -3,7 +3,7 @@ import clsx from "clsx";
 import Link from "next/link";
 
 interface Props {
-  intent: "open" | "accept" | "cancel" | "selection" | "undo";
+  intent: "open" | "accept" | "cancel" | "selection"| "disabled" | "undo";
   action?: MouseEventHandler | undefined;
   link?: string;
   style?: "default" | "small" | "xsmall";
@@ -25,13 +25,14 @@ const Button: React.FC<PropsWithChildren<Props>> = ({
     { "bg-red-500 hover:bg-red-700": intent === "cancel" },
     { "bg-indigo-500 hover:bg-indigo-700": intent === "undo" },
     { "bg-slate-500 hover:bg-slate-700": intent === "selection" },
+    { "bg-slate-700 hover:bg-slate-900": intent === "disabled" },
   ];
 
   if (action) {
     return (
       <button
         onClick={action}
-        className={clsx("rounded font-bold text-white", ...variants)}
+        className={clsx("flex self-center rounded font-bold text-white", ...variants)}
       >
         {children}
       </button>
@@ -40,7 +41,7 @@ const Button: React.FC<PropsWithChildren<Props>> = ({
     return (
       <Link
         href={link}
-        className={clsx("rounded font-bold text-white", ...variants)}
+        className={clsx("flex self-center rounded font-bold text-white", ...variants)}
       >
         {children}
       </Link>
