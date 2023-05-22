@@ -29,36 +29,44 @@ const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
             {data?.entries[0]?.fields.map((field) => {
               return (
                 <div
-                  className=" rounded bg-slate-700 p-3 text-slate-300"
+                  className="rounded bg-slate-600 p-3 text-slate-300"
                   key={field.id}
                 >
                   <h2 className="text-lg">{field.name}</h2>
-                  <div className="flex flex-wrap gap-4 ">
+                  <div className="flex flex-wrap gap-2">
                     {field.fieldInputs.map((input) => {
                       return (
-                        <div key={input.id}>
+                        <React.Fragment key={input.id}>
                           {input.inputType === "TEXTAREA" && (
-                            <div className="w-full">
+                            <div className="w-full rounded bg-slate-700 p-2">
                               <p>{input.valueString}</p>
                             </div>
                           )}
                           {input.inputType === "NUMBER" && (
-                            <div className="w-fit">
+                            <div className="w-fit rounded bg-slate-700 p-2">
                               <p>{`${input.valueNumber} ${input.inputHelper}`}</p>
                             </div>
                           )}
                           {input.inputType === "RANGE" && (
-                            <div className="w-fit">
-                              <p>{`${input.valueNumber} ${input.inputHelper}`}</p>
+                            <div className="w-fit rounded bg-slate-700 p-2">
+                              <p>{`${input.valueNumber}% ${input.inputHelper}`}</p>
                             </div>
                           )}
                           {input.inputType === "BOOLEAN" && (
-                            <div className="w-fit">
-                              <p>{`${input.inputHelper}`}</p>
-                              <p>{input.valueBoolean ? "Yes" : "No"}</p>
+                            <div className="w-fit rounded bg-slate-700 p-2">
+                              <p>
+                                {`${input.inputHelper}: `}
+                                <b>
+                                  {input.valueBoolean ? (
+                                    <span className="text-green-500">Yes</span>
+                                  ) : (
+                                    "No"
+                                  )}
+                                </b>
+                              </p>
                             </div>
                           )}
-                        </div>
+                        </React.Fragment>
                       );
                     })}
                   </div>
