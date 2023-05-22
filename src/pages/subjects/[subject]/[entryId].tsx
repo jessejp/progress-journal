@@ -9,6 +9,7 @@ import Button from "../../../ui/Button";
 import ButtonContainer from "../../../ui/ButtonContainer";
 import MainContent from "../../../ui/MainContent";
 import { createContextInner } from "../../../server/trpc/context";
+import React from "react";
 
 const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
   subject,

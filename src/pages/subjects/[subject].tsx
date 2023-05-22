@@ -11,22 +11,92 @@ import { prisma } from "../../server/db/client";
 import superjson from "superjson";
 import type { GetStaticPaths, GetStaticPropsContext } from "next";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import FieldLineChart from "../../ui/charts/FieldLineChart";
 
 const Subject: NextPage<{ subject: string }> = ({ subject }) => {
-  const { data } = trpc.entry.getEntries.useQuery({
-    subjectName: subject,
-  });
+  const [selectedField, setSelectedField] = useState<string>("Select a field");
+  const [showChart, setShowChart] = useState<boolean>(false);
+  const SubjectEntries = trpc.entry.getEntries.useQuery(
+    {
+      subjectName: subject,
+    },
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
-  if (!data) return <div>404 Not Found</div>;
+  const SubjectFields = trpc.entry.getEntry.useQuery(
+    {
+      subjectName: subject,
+      entryId: SubjectEntries.data?.find((entry) => entry.template === true)
+        ?.id as string,
+      template: true,
+    },
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const ChartFields = trpc.chart.getFieldsByTemplateId.useQuery(
+    {
+      templateId: selectedField,
+    },
+    {
+      enabled: selectedField !== "Select a field",
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    }
+  );
+
+  const { isFetched } = ChartFields;
+
+  useEffect(() => {
+    if (selectedField !== "Select a field" && isFetched)
+      setShowChart(isFetched);
+  }, [selectedField, isFetched, ChartFields.data]);
+
+  if (!SubjectEntries.data) return <div>404 Not Found</div>;
+  console.log(showChart);
 
   return (
     <Layout page={"Subject"}>
       <Heading>{subject}</Heading>
       <MainContent>
         <div className="flex flex-col gap-2">
-          {!data.length && <div>No entries yet</div>}
-          {!!data.length &&
-            data
+          <select onChange={(event) => setSelectedField(event.target.value)}>
+            <option value={"Select a field"}>Select a field</option>
+            {SubjectFields.data?.entries[0]?.fields.map((field) => {
+              return (
+                <option key={field.id} value={field.id}>
+                  {field.name}
+                </option>
+              );
+            })}
+          </select>
+
+          {showChart && (
+            <FieldLineChart
+              data={ChartFields.data?.map((field) => {
+                return {
+                  date: dayjs(field.createdAt).format("DD/MM/YYYY HH-mm"),
+                  weight: field.fieldInputs.find(
+                    (input) => input.inputHelper === "kg"
+                  )?.valueNumber,
+                  reps: field.fieldInputs.find(
+                    (input) => input.inputHelper === "reps"
+                  )?.valueNumber,
+                  sets: field.fieldInputs.find(
+                    (input) => input.inputHelper === "sets"
+                  )?.valueNumber,
+                };
+              })}
+            />
+          )}
+
+          {!SubjectEntries.data.length && <div>No entries yet</div>}
+          {!!SubjectEntries.data.length &&
+            SubjectEntries.data
               .filter((entry) => entry.template === false)
               .map((entry) => {
                 const date = dayjs(entry.createdAt).format("DD/MM/YYYY HH-mm");
@@ -40,7 +110,8 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
                     Entry: {date}
                   </Button>
                 );
-              }).reverse()}
+              })
+              .reverse()}
         </div>
       </MainContent>
       <ButtonContainer>

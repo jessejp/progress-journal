@@ -11,11 +11,16 @@ export const entryRouter = router({
       z.object({
         subjectName: z.string(),
       })
-    ).output(z.array(z.object({
-      id: z.string(),
-      template: z.boolean(),
-      createdAt: z.date(),
-    })))
+    )
+    .output(
+      z.array(
+        z.object({
+          id: z.string(),
+          template: z.boolean(),
+          createdAt: z.date(),
+        })
+      )
+    )
     .query(async ({ input, ctx }) => {
       const subject = await ctx.prisma.subject.findFirst({
         where: {
