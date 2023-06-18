@@ -52,67 +52,72 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
   const { isFetched } = ChartFields;
 
   useEffect(() => {
-    if (selectedField !== "Select a field" && isFetched)
-      setShowChart(isFetched);
+    setShowChart(isFetched);
   }, [selectedField, isFetched, ChartFields.data]);
 
   if (!SubjectEntries.data) return <div>404 Not Found</div>;
-  console.log(showChart);
 
   return (
     <Layout page={"Subject"}>
       <Heading>{subject}</Heading>
       <MainContent>
-        <div className="flex flex-col gap-2">
-          <select onChange={(event) => setSelectedField(event.target.value)}>
-            <option value={"Select a field"}>Select a field</option>
-            {SubjectFields.data?.entries[0]?.fields.map((field) => {
-              return (
-                <option key={field.id} value={field.id}>
-                  {field.name}
-                </option>
-              );
+        <select
+          className="focus:shadow-outline max-w-sm appearance-none rounded border px-3 py-2 leading-tight text-gray-700 focus:outline-none"
+          onChange={(event) => setSelectedField(event.target.value)}
+        >
+          <option value={"Select a field"}>Select a field</option>
+          {SubjectFields.data?.entries[0]?.fields.map((field) => {
+            return (
+              <option key={field.id} value={field.id}>
+                {field.name}
+              </option>
+            );
+          })}
+        </select>
+
+        {showChart && (
+          <FieldLineChart
+            data={ChartFields.data?.map((field) => {
+              const weight = field.fieldInputs.find(
+                (input) => input.inputHelper === "kg"
+              )?.valueNumber;
+              const reps = field.fieldInputs.find(
+                (input) => input.inputHelper === "reps"
+              )?.valueNumber;
+              const sets = field.fieldInputs.find(
+                (input) => input.inputHelper === "sets"
+              )?.valueNumber;
+
+              if (!weight && !reps && !sets) return null;
+
+              return {
+                date: dayjs(field.createdAt).format("DD/MM/YYYY"),
+                weight,
+                reps,
+                sets,
+              };
             })}
-          </select>
+          />
+        )}
 
-          {showChart && (
-            <FieldLineChart
-              data={ChartFields.data?.map((field) => {
-                return {
-                  date: dayjs(field.createdAt).format("DD/MM/YYYY HH-mm"),
-                  weight: field.fieldInputs.find(
-                    (input) => input.inputHelper === "kg"
-                  )?.valueNumber,
-                  reps: field.fieldInputs.find(
-                    (input) => input.inputHelper === "reps"
-                  )?.valueNumber,
-                  sets: field.fieldInputs.find(
-                    (input) => input.inputHelper === "sets"
-                  )?.valueNumber,
-                };
-              })}
-            />
-          )}
-
-          {!SubjectEntries.data.length && <div>No entries yet</div>}
-          {!!SubjectEntries.data.length &&
-            SubjectEntries.data
-              .filter((entry) => entry.template === false)
-              .map((entry) => {
-                const date = dayjs(entry.createdAt).format("DD/MM/YYYY HH-mm");
-                return (
-                  <Button
-                    key={entry.id}
-                    link={`/subjects/${subject}/${entry.id}`}
-                    intent="selection"
-                    style="small"
-                  >
-                    Entry: {date}
-                  </Button>
-                );
-              })
-              .reverse()}
-        </div>
+        {!SubjectEntries.data.length && <div>No entries yet</div>}
+        {!!SubjectEntries.data.length &&
+          SubjectEntries.data
+            .filter((entry) => entry.template === false)
+            .map((entry) => {
+              const date = dayjs(entry.createdAt).format("DD/MM/YYYY HH-mm");
+              return (
+                <Button
+                  key={entry.id}
+                  link={`/subjects/${subject}/${entry.id}`}
+                  intent="selection"
+                  style="small"
+                >
+                  Entry: {date}
+                </Button>
+              );
+            })
+            .reverse()}
       </MainContent>
       <ButtonContainer>
         {/*  <Button intent="cancel" link="/">
