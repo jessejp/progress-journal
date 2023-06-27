@@ -91,6 +91,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
               if (!weight && !reps && !sets) return null;
 
               return {
+                entryId: field.entryId,
                 date: dayjs(field.createdAt).format("DD/MM/YYYY"),
                 weight,
                 reps,
