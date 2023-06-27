@@ -100,7 +100,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
             })}
           />
         )}
-
+        <div className="flex flex-col gap-3">
         {!SubjectEntries.data.length && <div>No entries yet</div>}
         {!!SubjectEntries.data.length &&
           SubjectEntries.data
@@ -119,6 +119,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
               );
             })
             .reverse()}
+            </div>
       </MainContent>
       <ButtonContainer>
         {/*  <Button intent="cancel" link="/">

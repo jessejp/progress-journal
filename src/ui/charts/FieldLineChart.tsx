@@ -107,13 +107,13 @@ const FieldLineChart: React.FC<ChartProps> = ({ data }) => {
         <Tooltip />
         <Legend />
         <Line
+          name="Weight Average"
           type="monotone"
           dataKey="avgWeight"
           stroke="#8884d8"
           activeDot={{ r: 8 }}
         />
-        <Line type="monotone" dataKey="totalReps" stroke="#82ca9d" />
-        <Line type="monotone" dataKey="weight" stroke="#ffc222" />
+        <Line name="Total Repetitions" type="monotone" dataKey="totalReps" stroke="#eeb111" />
       </LineChart>
     </ResponsiveContainer>
   );
