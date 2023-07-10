@@ -88,8 +88,8 @@ const LandingPage: React.FC<SessionData> = (props) => {
 
   return (
     <FrontPageLayout>
-      <div className="relative flex flex-col items-center justify-between bg-hero bg-cover bg-center bg-no-repeat pb-4 text-center after:absolute after:z-0 after:min-h-mobileScreen after:w-full after:bg-gradient-to-t after:from-slate-800 after:from-50% after:via-slate-transparent after:via-70% after:to-slate-800 after:to-95%">
-        <div className="relative z-10 h-mobileScreenHalf w-full">
+      <div className="relative flex flex-col items-center justify-between bg-hero bg-cover bg-center bg-no-repeat pb-4 text-center after:absolute after:z-0 after:min-h-smallScreen after:w-full after:bg-gradient-to-t after:from-slate-800 after:from-50% after:via-slate-transparent after:via-70% after:to-slate-800 after:to-95%">
+        <div className="relative z-10 h-smallScreenHalf w-full">
           <h1 className="mt-4 font-bebasneue text-4xl text-lime-400">
             PROGRESS JOURNAL
           </h1>

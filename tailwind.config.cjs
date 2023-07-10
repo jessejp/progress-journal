@@ -3,21 +3,17 @@ module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      height: {
-        smallScreen: ["100vh", "100svh"],
-      },
       maxHeight: {
         128: "32rem",
         192: "48rem",
       },
       minHeight: {
         20: "5rem",
-        mobileScreen: ["100vh", "100svh"],
-        mobileScreenHalf: ["50vh", "50svh"],
+        smallScreen: ["100vh", "100svh"],
       },
       height: {
-        mobileScreen: ["100vh", "100svh"],
-        mobileScreenHalf: ["50vh", "50svh"],
+        smallScreen: ["100vh", "100svh"],
+        smallScreenHalf: ["50vh", "50svh"],
         inherit: "inherit",
       },
       width: {
