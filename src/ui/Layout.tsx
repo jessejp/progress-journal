@@ -17,7 +17,7 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({ children, page }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex flex-col items-center justify-center bg-slate-800">
-        <div className="flex h-screen w-full flex-col items-center justify-between md:w-3/4">
+        <div className="flex h-smallScreen w-full flex-col items-center justify-between md:w-3/4">
           {children}
         </div>
       </div>
