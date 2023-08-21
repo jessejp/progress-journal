@@ -44,20 +44,20 @@ const Subjects: React.FC = () => {
     );
 
   return (
-    <>
+    <div className="flex flex-col h-full justify-center">
       {data.map((subject) => {
         const url = `subjects/${subject.name}`;
         return (
           <Link
             key={subject.id}
             href={url}
-            className="m-3 w-full max-w-sm rounded bg-zinc-200 px-3 py-5 text-center text-lg text-zinc-900"
+            className="w-full max-w-xs rounded bg-slate-300 mb-3 px-7 py-5 text-center text-lg text-zinc-900"
           >
             {subject.name}
           </Link>
         );
       })}
-    </>
+    </div>
   );
 };
 

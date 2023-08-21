@@ -5,6 +5,8 @@ import Layout from "../ui/Layout";
 import Button from "../ui/Button";
 import Heading from "../ui/Heading";
 import ButtonContainer from "../ui/ButtonContainer";
+import MainContent from "../ui/MainContent";
+import Accordion from "../ui/Accordion";
 import {
   useZodForm,
   subjectValidationSchema,
@@ -15,8 +17,7 @@ import {
 } from "../utils/useZodForm";
 import React, { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import MainContent from "../ui/MainContent";
-import Accordion from "../ui/Accordion";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Configure: NextPage = () => {
   const router = useRouter();
@@ -39,6 +40,7 @@ const Configure: NextPage = () => {
   const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
     useState(false);
   const [showCancelChangesButton, setShowCancelChangesButton] = useState(false);
+  const [animationParent] = useAutoAnimate();
 
   // For deleting existing fields from DB
   const [deletedFields, setDeletedFields] = useState<Array<string>>([]);
@@ -382,7 +384,7 @@ const Configure: NextPage = () => {
     <Layout page="configure">
       <Heading>Configure Subject</Heading>
       <MainContent>
-        <form className="flex w-full flex-col p-2">
+        <form className="flex w-full flex-col p-2 gap-2" ref={animationParent}>
           <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
             <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
               Select Subject
@@ -461,7 +463,7 @@ const Configure: NextPage = () => {
             })}
           >
             <div
-              className={clsx("rounded p-2", {
+              className={clsx("flex flex-row items-center gap-1 rounded p-2", {
                 "bg-slate-500": selectedFilter === "all",
                 "bg-slate-700": selectedFilter !== "all",
               })}
@@ -481,7 +483,7 @@ const Configure: NextPage = () => {
                 return (
                   <React.Fragment key={`${category}${categoryIndex}`}>
                     <div
-                      className={clsx("flex flex-row gap-1 rounded p-2", {
+                      className={clsx("flex flex-row items-center gap-2 rounded p-2", {
                         "bg-slate-500": selectedFilter === category,
                         "bg-slate-700": selectedFilter !== category,
                       })}
@@ -504,7 +506,7 @@ const Configure: NextPage = () => {
                           intent="cancel"
                           style="xsmall"
                         >
-                          Delete category
+                          Delete
                         </Button>
                       )}
                     </div>
@@ -766,7 +768,7 @@ const Configure: NextPage = () => {
               }
             )}
           {subjectSelection !== "Add New Subject" && (
-            <div className="mt-4 flex scale-75 flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
+            <div className="mt-4 flex scale-75 flex-row flex-wrap items-center justify-between rounded bg-slate-700 p-4">
               <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
                 Delete Subject
               </label>
@@ -789,7 +791,7 @@ const Configure: NextPage = () => {
                       deleteSubject.mutate({ id: subjectSelection });
                     }}
                   >
-                    Delete Subject
+                    Confirm Subject Deletion
                   </button>
                   <button
                     className="rounded bg-slate-500 px-2 py-1 text-xl font-bold text-white hover:bg-slate-700"
