@@ -12,20 +12,20 @@ const Heading: React.FC<PropsWithChildren<HeadingProps>> = ({
   sessionData,
 }) => {
   return (
-    <div className="mt-3 flex max-h-16 flex-row justify-evenly">
-      <h1 className="text-center text-2xl font-bold text-zinc-100 md:text-4xl">
-        <Link className="hover:bg-zinc-800 hover:text-cyan-400" href="/">
+    <div className="relative mt-3 flex w-full max-h-16 flex-row justify-evenly items-center">
+      <h1 className="text-center text-2xl font-bold text-zinc-300 md:text-4xl">
+        <Link href="/">
           {children}
         </Link>
       </h1>
       {sessionData && (
         <button
-          className="text-red-700 hover:bg-zinc-800 hover:text-cyan-400"
+          className="absolute right-2 -top-1 text-sm text-black border-2 border-black bg-red-700 px-2 py-1 rounded"
           onClick={() => {
             signOut();
           }}
         >
-          log off 📴
+          Logout
         </button>
       )}
     </div>

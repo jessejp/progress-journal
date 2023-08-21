@@ -766,7 +766,7 @@ const Configure: NextPage = () => {
               }
             )}
           {subjectSelection !== "Add New Subject" && (
-            <div className="mt-4 flex scale-75 flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
+            <div className="mt-4 flex scale-75 flex-row flex-wrap justify-between items-center rounded bg-slate-700 p-4">
               <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
                 Delete Subject
               </label>
@@ -789,7 +789,7 @@ const Configure: NextPage = () => {
                       deleteSubject.mutate({ id: subjectSelection });
                     }}
                   >
-                    Delete Subject
+                    Confirm Subject Deletion
                   </button>
                   <button
                     className="rounded bg-slate-500 px-2 py-1 text-xl font-bold text-white hover:bg-slate-700"
