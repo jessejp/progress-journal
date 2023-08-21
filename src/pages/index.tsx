@@ -51,7 +51,7 @@ const Subjects: React.FC = () => {
           <Link
             key={subject.id}
             href={url}
-            className="m-3 w-full max-w-sm rounded bg-zinc-200 px-3 py-5 text-center text-lg text-zinc-900"
+            className="w-full max-w-xs rounded bg-zinc-200 mb-3 px-3 py-5 text-center text-lg text-zinc-900"
           >
             {subject.name}
           </Link>

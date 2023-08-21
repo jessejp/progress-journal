@@ -12,7 +12,7 @@ const Heading: React.FC<PropsWithChildren<HeadingProps>> = ({
   sessionData,
 }) => {
   return (
-    <div className="mt-3 flex h-1/6 max-h-16 flex-row justify-evenly">
+    <div className="mt-3 flex max-h-16 flex-row justify-evenly">
       <h1 className="text-center text-2xl font-bold text-zinc-100 md:text-4xl">
         <Link className="hover:bg-zinc-800 hover:text-cyan-400" href="/">
           {children}

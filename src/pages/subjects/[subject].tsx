@@ -26,6 +26,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
     }
   );
 
+  // SubjectFields is for chart selection
   const SubjectFields = trpc.entry.getEntry.useQuery(
     {
       subjectName: subject,
@@ -62,7 +63,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
       <Heading>{subject}</Heading>
       <MainContent>
         <select
-          className="focus:shadow-outline max-w-sm appearance-none rounded border px-3 py-2 leading-tight text-gray-700 focus:outline-none"
+          className="focus:shadow-outline max-w-sm appearance-none rounded border mb-2 px-3 py-2 leading-tight text-gray-700 focus:outline-none"
           onChange={(event) => setSelectedField(event.target.value)}
         >
           <option value={"Select a field"}>Select a field</option>
