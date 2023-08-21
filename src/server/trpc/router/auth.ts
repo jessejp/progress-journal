@@ -9,17 +9,18 @@ export const authRouter = router({
     return "you can now see this secret message!";
   }),
   deleteAccount: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const account = await ctx.prisma.account.findFirst({
         where: {
-          id: input.id,
           userId: ctx.session.user.id,
         },
       });
+
       if (!account) {
         throw new Error("Account not found");
       }
+
       return account;
     }),
 });
