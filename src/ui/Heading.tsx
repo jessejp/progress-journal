@@ -20,7 +20,7 @@ const Heading: React.FC<PropsWithChildren<HeadingProps>> = ({
       </h1>
       {sessionData && (
         <button
-          className="absolute right-2 -top-1 text-sm text-black border-2 border-black bg-red-700 px-2 py-1 rounded"
+          className="absolute right-2 -top-1 text-sm text-black bg-red-600 px-2 py-1 rounded"
           onClick={() => {
             signOut();
           }}

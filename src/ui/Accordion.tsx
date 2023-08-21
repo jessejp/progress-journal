@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 interface AccordionProps {
   title: string;
@@ -12,6 +13,7 @@ const Accordion: React.FC<AccordionProps> = ({
   children,
   defaultOpen = false,
 }) => {
+  const [animationParent] = useAutoAnimate({ duration: 125 });
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const toggleAccordion = () => {
@@ -20,8 +22,9 @@ const Accordion: React.FC<AccordionProps> = ({
 
   return (
     <div
+      ref={animationParent}
       className={clsx(
-        "my-2 flex flex-row flex-wrap items-center gap-2 rounded bg-slate-600 p-4 sm:justify-start",
+        "flex flex-row flex-wrap items-center gap-2 rounded bg-slate-600 p-4 sm:justify-start",
         {
           "bg-slate-700": !isOpen,
           "bg-slate-600": !!isOpen,
@@ -35,9 +38,7 @@ const Accordion: React.FC<AccordionProps> = ({
         <h3 className="text-lg text-zinc-200">{title}</h3>
         <div className="mx-2 font-bold">{isOpen ? "-" : "+"}</div>
       </div>
-      {isOpen && (
-          <>{children}</>
-      )}
+      {isOpen && <>{children}</>}
     </div>
   );
 };

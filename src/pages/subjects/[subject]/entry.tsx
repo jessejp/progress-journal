@@ -15,6 +15,7 @@ import {
   type fieldType,
 } from "../../../utils/useZodForm";
 import clsx from "clsx";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Accordion from "../../../ui/Accordion";
 import { useFieldArray } from "react-hook-form";
 import { createServerSideHelpers } from "@trpc/react-query/server";
@@ -33,6 +34,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
     { refetchOnWindowFocus: false }
   );
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
+  const [animationParent] = useAutoAnimate();
 
   const addEntry = trpc.entry.addEntry.useMutation({
     onSuccess: async () => {
@@ -167,7 +169,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
               })}
         </div>
         <div className="mt-4" />
-        <form className="flex w-full flex-col gap-2 sm:w-9/12">
+        <form ref={animationParent} className="flex w-full flex-col gap-3 sm:w-9/12">
           {!!watchForm?.entries[0]?.fields &&
             watchForm?.entries[0]?.fields.map(
               (field, fieldIndex, fieldArray) => {
@@ -184,7 +186,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                       title={`${fieldIndex + 1}: ${field.name}`}
                       defaultOpen={fieldIndex === 0 || fieldArray.length < 5}
                     >
-                      <div className="mb-4 flex w-full flex-grow flex-row flex-wrap justify-evenly gap-2 sm:justify-center">
+                      <div className="flex w-full flex-grow flex-row flex-wrap justify-evenly gap-2 sm:justify-center">
                         {field.fieldInputs.map((input, inputIndex) => {
                           switch (input.inputType) {
                             case "TEXTAREA":
