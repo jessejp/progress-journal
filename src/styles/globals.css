@@ -13,15 +13,22 @@
 }
 
 @font-face {
-  font-family: "Montserrat";
-  src: url("/fonts/Montserrat-Regular.ttf");
+  font-family: "Inter";
+  src: url("/fonts/Inter-Regular.ttf");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
-  font-family: "Montserrat";
-  src: url("/fonts/Montserrat-Bold.ttf");
+  font-family: "Inter";
+  src: url("/fonts/Inter-Medium.ttf");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Bold.ttf");
   font-weight: bold;
   font-style: normal;
 }

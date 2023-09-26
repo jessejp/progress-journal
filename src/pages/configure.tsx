@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { trpc } from "../utils/trpc";
-import Layout from "../ui/Layout";
+
 import Button from "../ui/Button";
 import Heading from "../ui/Heading";
 import ButtonContainer from "../ui/ButtonContainer";
@@ -18,6 +18,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import AppLayout from "../ui/layouts/AppLayout";
 
 const Configure: NextPage = () => {
   const router = useRouter();
@@ -372,16 +373,16 @@ const Configure: NextPage = () => {
 
   if (updateSubject.isLoading)
     return (
-      <Layout page="configure">
+      <AppLayout page="configure">
         <Heading>Configure Subject</Heading>
         <MainContent>
           <p className="text-2xl text-zinc-100">Loading</p>
         </MainContent>
-      </Layout>
+      </AppLayout>
     );
 
   return (
-    <Layout page="configure">
+    <AppLayout page="configure">
       <Heading>Configure Subject</Heading>
       <MainContent>
         <form className="flex w-full flex-col p-2 gap-2" ref={animationParent}>
@@ -504,7 +505,6 @@ const Configure: NextPage = () => {
                             );
                           }}
                           intent="cancel"
-                          style="xsmall"
                         >
                           Delete
                         </Button>
@@ -811,7 +811,7 @@ const Configure: NextPage = () => {
         {!!showCancelChangesButton &&
           subjectSelection !== "Add New Subject" && (
             <Button
-              intent="undo"
+              intent="secondary"
               action={() => {
                 setDeletedFields([]);
                 refetch();
@@ -821,7 +821,7 @@ const Configure: NextPage = () => {
             </Button>
           )}
         <Button
-          intent="accept"
+          intent="primary"
           action={form.handleSubmit(async (values) => {
             if (subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
@@ -839,7 +839,7 @@ const Configure: NextPage = () => {
           {subjectSelection === "Add New Subject" ? subjectSelection : "Update"}
         </Button>
       </ButtonContainer>
-    </Layout>
+    </AppLayout>
   );
 };
 

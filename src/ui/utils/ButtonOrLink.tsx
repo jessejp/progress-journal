@@ -21,11 +21,11 @@ const ButtonOrLink: React.FC<PropsWithChildren<Props>> = ({
       <button onClick={action} className={className}>
         {icon && (
           <Image
-            src={`/images/${icon}`}
+            src={`/icons/${icon}`}
             width={1}
             height={1}
             alt={`${icon.split(".")[0]} icon`}
-            className="mr-2 h-6 w-6 opacity-75"
+            className="h-4 w-4"
           />
         )}
         {children}
@@ -34,6 +34,15 @@ const ButtonOrLink: React.FC<PropsWithChildren<Props>> = ({
   } else if (link) {
     return (
       <Link href={link} className={className}>
+        {icon && (
+          <Image
+            src={`/icons/${icon}`}
+            width={1}
+            height={1}
+            alt={`${icon.split(".")[0]} icon`}
+            className="h-4 w-4 stroke-neutral-800"
+          />
+        )}
         {children}
       </Link>
     );

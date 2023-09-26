@@ -4,13 +4,12 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import FrontPageLayout from "../ui/layouts/FrontPageLayout";
 import AppLayout from "../ui/layouts/AppLayout";
 import Button from "../ui/Button";
-import Heading from "../ui/Heading";
 import ButtonContainer from "../ui/ButtonContainer";
 import MainContent from "../ui/MainContent";
 import Subjects from "../components/Subjects";
 import { type SessionData } from "../types/next-auth";
 import Authentication from "../components/Authentication";
-import LogoHeading from "../ui/LogoHeading";
+import LogoHeading from "../ui/typography/LogoHeading";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
@@ -28,15 +27,48 @@ const Home: NextPage = () => {
 
   return (
     <AppLayout page="home">
-      <Heading sessionData={sessionData}>Progress Journal</Heading>
+      <LogoHeading />
 
-      <MainContent>{sessionData && <Subjects />}</MainContent>
-
-      <ButtonContainer>
-        <Button intent="primary" link="/configure">
-          Configure
+      <MainContent>
+        <Subjects />
+        <div className="mt-3"></div>
+        <Button
+          icon="settings-neutral-800.svg"
+          intent="primary"
+          link="/configure"
+        >
+          Configure Subjects
         </Button>
-      </ButtonContainer>
+      </MainContent>
+
+      <ButtonContainer
+        mainButton={
+          <Button
+            icon="plus.svg"
+            intent="primary"
+            style="rounded-full"
+            link="/configure"
+          >
+            New Entry
+          </Button>
+        }
+        iconButton={
+          <>
+            <Button
+              icon="settings-neutral-500.svg"
+              intent="option"
+              style="just-icon-circle"
+              link="/configure"
+            />
+            <Button
+              icon="user.svg"
+              intent="option"
+              style="just-icon-circle"
+              link="/configure"
+            />
+          </>
+        }
+      />
     </AppLayout>
   );
 };
@@ -61,9 +93,9 @@ const LandingPage: React.FC<LandingPageProps> = ({
           <h2 className="text-3xl font-bold text-slate-100">
             Progress Journal helps you to find your footing
           </h2>
-            <Button intent="primary" style="rounded-full" action={onGoToApp}>
-              Proceed to the App
-            </Button>
+          <Button intent="primary" style="rounded-full" action={onGoToApp}>
+            Proceed to the App
+          </Button>
           <p className="text-sm text-zinc-50">
             Not a member yet?{" "}
             <a

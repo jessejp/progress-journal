@@ -1,33 +1,33 @@
 import Link from "next/link";
 import { trpc } from "../utils/trpc";
+import ContentContainer from "../ui/ContentContainer";
+import H2 from "../ui/typography/H2";
 
 const Subjects: React.FC = () => {
-    const subjectsQuery = trpc.subject.getSubjects.useQuery();
-    const { data } = subjectsQuery;
-  
-    if (!data)
-      return (
-        <p className="text-red-600">
-          Create your first subject in order to start journaling!
-        </p>
-      );
-  
-    return (
-      <div className="flex h-full flex-col justify-center">
-        {data.map((subject) => {
-          const url = `subjects/${subject.name}`;
-          return (
-            <Link
-              key={subject.id}
-              href={url}
-              className="mb-3 w-full max-w-xs rounded bg-slate-300 px-7 py-5 text-center text-lg text-zinc-900"
-            >
-              {subject.name}
-            </Link>
-          );
-        })}
-      </div>
-    );
-  };
+  const subjectsQuery = trpc.subject.getSubjects.useQuery();
+  const { data } = subjectsQuery;
 
-  export default Subjects;
+  return (
+    <ContentContainer>
+      <H2>Your Subjects</H2>
+      {!!data && (
+        <div className="flex flex-col gap-3">
+          {data.map((subject) => {
+            const url = `subjects/${subject.name}`;
+            return (
+              <Link
+                key={subject.id}
+                href={url}
+                className="w-full rounded-md border-1 border-slate-100 bg-violet-700 px-4 py-2 font-bold text-slate-100"
+              >
+                {subject.name}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </ContentContainer>
+  );
+};
+
+export default Subjects;

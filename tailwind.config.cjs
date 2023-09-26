@@ -3,13 +3,14 @@ module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      maxHeight: {
-        128: "32rem",
-        192: "48rem",
-        256: "64rem",
+      borderWidth: {
+        1: "1px",
+      },
+      spacing: {
+        74: "18.5rem",
+        "34/36": "94%",
       },
       minHeight: {
-        20: "5rem",
         smallScreen: ["100vh", "100svh"],
       },
       height: {
@@ -32,9 +33,9 @@ module.exports = {
         "exercising-user": "url('/images/background-2.jpg')",
       },
       fontFamily: {
-        montserrat: ["Montserrat", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
         bebasneue: ["Bebas Neue", "sans-serif"],
-      }
+      },
     },
   },
   plugins: [require("tailwind-scrollbar")],
