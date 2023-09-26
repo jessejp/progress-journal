@@ -1,4 +1,5 @@
 import { router, publicProcedure, protectedProcedure } from "../trpc";
+import z from "zod";
 
 export const authRouter = router({
   getSession: publicProcedure.query(({ ctx }) => {
@@ -6,5 +7,20 @@ export const authRouter = router({
   }),
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
-  })
+  }),
+  deleteAccount: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const account = await ctx.prisma.account.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+        },
+      });
+
+      if (!account) {
+        throw new Error("Account not found");
+      }
+
+      return account;
+    }),
 });

@@ -1,6 +1,5 @@
 import type { PropsWithChildren } from "react";
 import type { Session } from "next-auth";
-import { signOut } from "next-auth/react";
 import Link from "next/link";
 
 interface HeadingProps {
@@ -9,7 +8,6 @@ interface HeadingProps {
 
 const Heading: React.FC<PropsWithChildren<HeadingProps>> = ({
   children,
-  sessionData,
 }) => {
   return (
     <div className="relative mt-3 flex w-full max-h-16 flex-row justify-evenly items-center">
@@ -18,16 +16,6 @@ const Heading: React.FC<PropsWithChildren<HeadingProps>> = ({
           {children}
         </Link>
       </h1>
-      {sessionData && (
-        <button
-          className="absolute right-2 -top-1 text-sm text-black bg-red-600 px-2 py-1 rounded"
-          onClick={() => {
-            signOut();
-          }}
-        >
-          Logout
-        </button>
-      )}
     </div>
   );
 };

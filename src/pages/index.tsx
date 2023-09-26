@@ -18,8 +18,16 @@ const Home: NextPage = () => {
   return (
     <Layout page="home">
       <Heading sessionData={sessionData}>Progress Journal</Heading>
-
-      <MainContent>{sessionData && <Subjects />}</MainContent>
+    
+      <MainContent>
+        <Link
+          href="/user-settings"
+          className="absolute right-2 top-2 rounded bg-zinc-300 px-2 py-1 text-base text-black"
+        >
+          User
+        </Link>
+        {sessionData && <Subjects />}
+      </MainContent>
 
       <ButtonContainer>
         <Button intent="open" link="/configure">
@@ -44,14 +52,14 @@ const Subjects: React.FC = () => {
     );
 
   return (
-    <div className="flex flex-col h-full justify-center">
+    <div className="flex h-full flex-col justify-center">
       {data.map((subject) => {
         const url = `subjects/${subject.name}`;
         return (
           <Link
             key={subject.id}
             href={url}
-            className="w-full max-w-xs rounded bg-slate-300 mb-3 px-7 py-5 text-center text-lg text-zinc-900"
+            className="mb-3 w-full max-w-xs rounded bg-slate-300 px-7 py-5 text-center text-lg text-zinc-900"
           >
             {subject.name}
           </Link>
