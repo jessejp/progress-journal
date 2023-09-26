@@ -5,7 +5,7 @@ interface Props {
   page: string;
 }
 
-const Layout: React.FC<PropsWithChildren<Props>> = ({ children, page }) => {
+const AppLayout: React.FC<PropsWithChildren<Props>> = ({ children, page }) => {
   const title = `${
     page.charAt(0).toUpperCase() + page.slice(1)
   } | Progress Journal`;
@@ -25,4 +25,4 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({ children, page }) => {
   );
 };
 
-export default Layout;
+export default AppLayout;
