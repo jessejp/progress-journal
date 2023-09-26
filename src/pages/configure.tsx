@@ -1,12 +1,11 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { trpc } from "../utils/trpc";
-
-import Button from "../ui/Button";
+import Button from "../ui/primitives/Button";
 import Heading from "../ui/Heading";
-import ButtonContainer from "../ui/ButtonContainer";
-import MainContent from "../ui/MainContent";
-import Accordion from "../ui/Accordion";
+import ButtonContainer from "../ui/wrappers/ButtonContainer";
+import MainContent from "../ui/wrappers/MainContent";
+import Accordion from "../ui/primitives/Accordion";
 import {
   useZodForm,
   subjectValidationSchema,
@@ -19,6 +18,13 @@ import React, { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import AppLayout from "../ui/layouts/AppLayout";
+import LogoHeading from "../ui/typography/LogoHeading";
+import ContentContainer from "../ui/wrappers/ContentContainer";
+import H2 from "../ui/typography/H2";
+import Select from "../ui/primitives/Select";
+import Label from "../ui/primitives/Label";
+import Input from "../ui/primitives/Input";
+import InputContainer from "../ui/wrappers/InputContainer";
 
 const Configure: NextPage = () => {
   const router = useRouter();
@@ -383,45 +389,39 @@ const Configure: NextPage = () => {
 
   return (
     <AppLayout page="configure">
-      <Heading>Configure Subject</Heading>
+      <LogoHeading />
       <MainContent>
-        <form className="flex w-full flex-col p-2 gap-2" ref={animationParent}>
-          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
-            <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
-              Select Subject
-            </label>
-            <select
-              className="w-40 overflow-clip border-2 max-sm:order-2 max-sm:w-1/2"
-              value={subjectSelection}
-              onChange={(event) => {
-                setSubjectSelection(event.target.value);
-              }}
-            >
-              <option value="Add New Subject">Add New Subject</option>
-              {subjects.data?.map((subject) => (
-                <option key={subject.id} value={subject.id}>
-                  {subject.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
-            <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
-              Subject Name
-            </label>
-            <input
-              type="text"
-              className="w-40 border-2 max-sm:w-1/2"
-              {...form.register("name")}
-            />
-            {form.formState.errors.name && (
-              <div className="mt-1 flex w-full flex-grow justify-end">
-                <p className="w-fit text-red-500 max-sm:order-3">
-                  {form.formState.errors.name.message}
-                </p>
-              </div>
-            )}
-          </div>
+        <form className="flex w-full flex-col gap-3" ref={animationParent}>
+          <ContentContainer>
+            <H2>Configure Subjects</H2>
+            <InputContainer>
+              <Label htmlFor="subject-selection">Select Subject</Label>
+              <Select
+                id="subject-selection"
+                value={subjectSelection}
+                onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                  setSubjectSelection(event.target.value);
+                }}
+              >
+                <option value="Add New Subject">Add New Subject</option>
+                {subjects.data?.map((subject) => (
+                  <option key={subject.id} value={subject.id}>
+                    {subject.name}
+                  </option>
+                ))}
+              </Select>
+            </InputContainer>
+            <InputContainer>
+              <Label htmlFor="subject-name">Subject Name</Label>
+              <Input
+                placeholder="Add Subject Name"
+                id="subject-name"
+                inputType="text"
+                formProps={form.register("name")}
+                error={form.formState.errors.name?.message}
+              />
+            </InputContainer>
+          </ContentContainer>
           {newCategorySelect.showInput === true && (
             <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2 rounded bg-slate-600 p-4">
               <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
@@ -484,10 +484,13 @@ const Configure: NextPage = () => {
                 return (
                   <React.Fragment key={`${category}${categoryIndex}`}>
                     <div
-                      className={clsx("flex flex-row items-center gap-2 rounded p-2", {
-                        "bg-slate-500": selectedFilter === category,
-                        "bg-slate-700": selectedFilter !== category,
-                      })}
+                      className={clsx(
+                        "flex flex-row items-center gap-2 rounded p-2",
+                        {
+                          "bg-slate-500": selectedFilter === category,
+                          "bg-slate-700": selectedFilter !== category,
+                        }
+                      )}
                     >
                       <input
                         type="radio"
@@ -528,10 +531,12 @@ const Configure: NextPage = () => {
                     })}
                   >
                     <Accordion
-                      title={`${field.name}: ${field.category || "unassigned"}`}
+                      title={`Field: ${field.name} (${
+                        field.category || "unassigned"
+                      })`}
                       defaultOpen={!field.id}
                     >
-                      <div className="mb-4 flex w-full flex-grow flex-row items-center justify-between gap-2">
+                      {/* <div className="mb-4 flex w-full flex-grow flex-row items-center justify-between gap-2">
                         <div className="flex w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
                           <label className="text-sm text-zinc-300">
                             Category
@@ -568,8 +573,8 @@ const Configure: NextPage = () => {
                             X
                           </button>
                         )}
-                      </div>
-                      <div
+                      </div> */}
+                      {/* <div
                         className={clsx(
                           "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
                           {
@@ -599,28 +604,31 @@ const Configure: NextPage = () => {
                             }
                           </p>
                         )}
-                      </div>
+                      </div> */}
+                      <InputContainer background="violet">
+                        <Label htmlFor="field-name">Field Name</Label>
+                        <Input
+                          id="field-name"
+                          placeholder="Add Field Name"
+                          inputType="text"
+                          formProps={form.register(
+                            `entries.0.fields.${fieldIndex}.name`
+                          )}
+                          error={
+                            form.formState.errors.entries?.[0]?.fields?.[
+                              fieldIndex
+                            ]?.name?.message
+                          }
+                        />
+                      </InputContainer>
                       {field?.fieldInputs?.map(
                         (input, inputIndex, inputArray) => {
                           return (
                             <React.Fragment key={inputIndex}>
-                              <div
-                                className={clsx(
-                                  "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
-                                  {
-                                    "border-2 border-rose-700":
-                                      form.formState.errors.entries?.[0]
-                                        ?.fields?.[fieldIndex]?.fieldInputs?.[
-                                        inputIndex
-                                      ],
-                                  }
-                                )}
-                              >
-                                <label className="text-sm text-zinc-300">
+                              {/* <label className="text-sm text-zinc-300">
                                   Input Type
-                                </label>
-                                <div className="flex flex-grow flex-wrap gap-4">
-                                  <select
+                                </label> */}
+                              {/*  <select
                                     className="w-fit border-2"
                                     {...form.register(
                                       `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
@@ -643,87 +651,122 @@ const Configure: NextPage = () => {
                                       .map((type) => {
                                         return (
                                           <option key={type} value={type}>
-                                            {type === "BOOLEAN"
-                                              ? "YES/NO"
-                                              : type}
+                                            {type}
                                           </option>
                                         );
                                       })}
-                                  </select>
+                                  </select> */}
+                              <ContentContainer
+                                background="violet"
+                                direction="row"
+                              >
+                                <InputContainer>
+                                  <Label htmlFor="input-type">Input Type</Label>
+                                  <Select
+                                    id="input-type"
+                                    value={input?.inputType}
+                                    formProps={form.register(
+                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
+                                    )}
+                                  >
+                                    <option value={input?.inputType}>
+                                      {input?.inputType}
+                                    </option>
+                                    {inputTypes
+                                      .filter(
+                                        (type) => type !== input?.inputType
+                                      )
+                                      .map((type) => {
+                                        return (
+                                          <option key={type} value={type}>
+                                            {type}
+                                          </option>
+                                        );
+                                      })}
+                                  </Select>
+                                </InputContainer>
+                                <InputContainer>
                                   {input?.inputType === "NUMBER" && (
-                                    <select
-                                      value={input?.inputHelper || ""}
-                                      {...form.register(
-                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
-                                      )}
-                                    >
-                                      <option>{input.inputHelper}</option>
-                                      {inputUnitTypes
-                                        .filter(
-                                          (type) => type !== input?.inputHelper
-                                        )
-                                        .map((unit) => {
-                                          return (
-                                            <option key={unit} value={unit}>
-                                              {unit}
-                                            </option>
-                                          );
-                                        })}
-                                    </select>
+                                    <>
+                                      <Label htmlFor="input-unit">Unit</Label>
+                                      <Select
+                                        id="input-unit"
+                                        value={input?.inputHelper || ""}
+                                        formProps={form.register(
+                                          `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                                        )}
+                                      >
+                                        <option>{input.inputHelper}</option>
+                                        {inputUnitTypes
+                                          .filter(
+                                            (type) =>
+                                              type !== input?.inputHelper
+                                          )
+                                          .map((unit) => {
+                                            return (
+                                              <option key={unit} value={unit}>
+                                                {unit}
+                                              </option>
+                                            );
+                                          })}
+                                      </Select>
+                                    </>
                                   )}
                                   {(input?.inputType === "RANGE" ||
                                     input?.inputType === "BOOLEAN") && (
                                     <>
-                                      <input
-                                        className="w-24"
-                                        type="text"
+                                      <Label htmlFor="input-label">
+                                        Input Label
+                                      </Label>
+                                      <Input
+                                        id="input-label"
+                                        inputType="text"
                                         placeholder={
                                           input.inputType === "RANGE"
                                             ? "Subjective" // RANGE
                                             : "Question?" // BOOLEAN
                                         }
-                                        {...form.register(
+                                        formProps={form.register(
                                           `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
                                         )}
+                                        error={
+                                          form.formState.errors.entries?.[0]
+                                            ?.fields?.[fieldIndex]
+                                            ?.fieldInputs?.[inputIndex]?.message
+                                        }
                                       />
-                                      {input?.inputType === "RANGE" && (
-                                        <span className="self-center text-zinc-300">
-                                          0-100%
-                                        </span>
-                                      )}
                                     </>
                                   )}
-                                  <div className="flex flex-grow-0 gap-2">
-                                    {inputArray.length > 1 && !input.id && (
-                                      <button
-                                        className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
-                                        onClick={(event) =>
-                                          removeFieldInput(
-                                            event,
-                                            fieldIndex,
-                                            inputIndex
-                                          )
-                                        }
-                                      >
-                                        X
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {form.formState.errors.entries?.[0]?.fields?.[
-                                  fieldIndex
-                                ]?.fieldInputs?.[inputIndex] && (
-                                  <p className="text-red-500 max-sm:order-3">
-                                    {
-                                      form.formState.errors.entries?.[0]
-                                        ?.fields?.[fieldIndex]?.fieldInputs?.[
-                                        inputIndex
-                                      ]?.message
-                                    }
-                                  </p>
-                                )}
-                              </div>
+                                </InputContainer>
+                                {/* <div className="flex flex-grow-0 gap-2">
+                                  {inputArray.length > 1 && !input.id && (
+                                    <button
+                                      className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
+                                      onClick={(event) =>
+                                        removeFieldInput(
+                                          event,
+                                          fieldIndex,
+                                          inputIndex
+                                        )
+                                      }
+                                    >
+                                      X
+                                    </button>
+                                  )}
+                                </div> */}
+                              </ContentContainer>
+                              {form.formState.errors.entries?.[0]?.fields?.[
+                                fieldIndex
+                              ]?.fieldInputs?.[inputIndex] && (
+                                <p className="text-red-500 max-sm:order-3">
+                                  {
+                                    form.formState.errors.entries?.[0]
+                                      ?.fields?.[fieldIndex]?.fieldInputs?.[
+                                      inputIndex
+                                    ]?.message
+                                  }
+                                </p>
+                              )}
                               {inputIndex === inputArray.length - 1 && (
                                 <button
                                   className="h-fit rounded bg-blue-500 px-4 py-2 align-middle text-xl font-bold text-white hover:bg-blue-700"
@@ -807,8 +850,49 @@ const Configure: NextPage = () => {
           )}
         </form>
       </MainContent>
-      <ButtonContainer>
-        {!!showCancelChangesButton &&
+      <ButtonContainer
+        mainButton={
+          <Button
+            intent="primary"
+            action={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+              addField(event, fieldTemplateSelection)
+            }
+            icon="plus.svg"
+            style="rounded-full"
+          >
+            Add Field
+          </Button>
+        }
+        iconButton={
+          <>
+            <Button
+              icon="undo-neutral-800.svg"
+              intent="secondary"
+              style="just-icon-circle"
+              link="/configure"
+            />
+            <Button
+              icon="save-neutral-800.svg"
+              intent="primary"
+              style="just-icon-circle"
+              action={form.handleSubmit(async (values) => {
+                if (subjectSelection === "Add New Subject") {
+                  await addSubject.mutateAsync(values);
+                } else {
+                  if (deletedFields.length > 0 && !!values.entries[0]?.id)
+                    await deleteFields.mutateAsync({
+                      entryId: values.entries[0].id,
+                      fieldIds: deletedFields,
+                    });
+
+                  await updateSubject.mutateAsync(values);
+                }
+              })}
+            />
+          </>
+        }
+      >
+        {/*  {!!showCancelChangesButton &&
           subjectSelection !== "Add New Subject" && (
             <Button
               intent="secondary"
@@ -837,7 +921,7 @@ const Configure: NextPage = () => {
           })}
         >
           {subjectSelection === "Add New Subject" ? subjectSelection : "Update"}
-        </Button>
+        </Button> */}
       </ButtonContainer>
     </AppLayout>
   );

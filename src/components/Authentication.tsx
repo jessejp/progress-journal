@@ -1,6 +1,6 @@
 import { signOut, signIn } from "next-auth/react";
 import { type SessionData } from "../types/next-auth";
-import Button from "../ui/Button";
+import Button from "../ui/primitives/Button";
 
 interface AuthProps extends SessionData {
   text: string;

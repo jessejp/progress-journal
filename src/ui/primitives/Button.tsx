@@ -1,6 +1,6 @@
 import type { MouseEventHandler, PropsWithChildren } from "react";
 import clsx from "clsx";
-import ButtonOrLink from "./utils/ButtonOrLink";
+import ButtonOrLink from "../utils/ButtonOrLink";
 
 type ButtonStyle = "default" | "rounded-full" | "just-icon-circle";
 

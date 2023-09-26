@@ -40,7 +40,7 @@ const ButtonOrLink: React.FC<PropsWithChildren<Props>> = ({
             width={1}
             height={1}
             alt={`${icon.split(".")[0]} icon`}
-            className="h-4 w-4 stroke-neutral-800"
+            className="h-4 w-4"
           />
         )}
         {children}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { trpc } from "../utils/trpc";
-import ContentContainer from "../ui/ContentContainer";
+import ContentContainer from "../ui/wrappers/ContentContainer";
 import H2 from "../ui/typography/H2";
 
 const Subjects: React.FC = () => {
