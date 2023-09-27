@@ -1,9 +1,4 @@
 import { type NextPage } from "next";
-import Layout from "../../ui/Layout";
-import Heading from "../../ui/Heading";
-import Button from "../../ui/Button";
-import ButtonContainer from "../../ui/ButtonContainer";
-import MainContent from "../../ui/MainContent";
 import { trpc } from "../../utils/trpc";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import { appRouter } from "../../server/trpc/router/_app";
@@ -13,6 +8,15 @@ import type { GetStaticPaths, GetStaticPropsContext } from "next";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import FieldLineChart from "../../ui/charts/FieldLineChart";
+import LogoHeading from "../../ui/typography/LogoHeading";
+import AppLayout from "../../ui/layouts/AppLayout";
+import Button from "../../ui/primitives/Button";
+import ButtonContainer from "../../ui/wrappers/ButtonContainer";
+import MainContent from "../../ui/wrappers/MainContent";
+import ContentContainer from "../../ui/wrappers/ContentContainer";
+import Link from "next/link";
+import Select from "../../ui/primitives/Select";
+import Label from "../../ui/primitives/Label";
 
 const Subject: NextPage<{ subject: string }> = ({ subject }) => {
   const [selectedField, setSelectedField] = useState<string>("Select a field");
@@ -59,78 +63,110 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
   if (!SubjectEntries.data) return <div>404 Not Found</div>;
 
   return (
-    <Layout page={"Subject"}>
-      <Heading>{subject}</Heading>
+    <AppLayout page={"Subject"}>
+      <LogoHeading />
       <MainContent>
-        <select
-          className="focus:shadow-outline max-w-sm appearance-none rounded border mb-2 px-3 py-2 leading-tight text-gray-700 focus:outline-none"
-          onChange={(event) => setSelectedField(event.target.value)}
-        >
-          <option value={"Select a field"}>Select a field</option>
-          {SubjectFields.data?.entries[0]?.fields.map((field) => {
-            return (
-              <option key={field.id} value={field.id}>
-                {field.name}
-              </option>
-            );
-          })}
-        </select>
-
-        {showChart && (
-          <FieldLineChart
-            data={ChartFields.data?.map((field) => {
-              const weight = field.fieldInputs.find(
-                (input) => input.inputHelper === "kg"
-              )?.valueNumber;
-              const reps = field.fieldInputs.find(
-                (input) => input.inputHelper === "reps"
-              )?.valueNumber;
-              const sets = field.fieldInputs.find(
-                (input) => input.inputHelper === "sets"
-              )?.valueNumber;
-
-              if (!weight && !reps && !sets) return null;
-
-              return {
-                entryId: field.entryId,
-                date: dayjs(field.createdAt).format("DD/MM/YYYY"),
-                weight,
-                reps,
-                sets,
-              };
-            })}
-          />
-        )}
         <div className="flex flex-col gap-3">
-        {!SubjectEntries.data.length && <div>No entries yet</div>}
-        {!!SubjectEntries.data.length &&
-          SubjectEntries.data
-            .filter((entry) => entry.template === false)
-            .map((entry) => {
-              const date = dayjs(entry.createdAt).format("DD/MM/YYYY HH-mm");
-              return (
-                <Button
-                  key={entry.id}
-                  link={`/subjects/${subject}/${entry.id}`}
-                  intent="selection"
-                  style="small"
-                >
-                  Entry: {date}
-                </Button>
-              );
-            })
-            .reverse()}
-            </div>
+          <ContentContainer>
+            <Label htmlFor="field-chart">Select a field for statistics</Label>
+            <Select
+              value={selectedField}
+              id="field-chart"
+              onChange={(event) => setSelectedField(event.target.value)}
+            >
+              <option value={"Select a field"}>Select a field</option>
+              {SubjectFields.data?.entries[0]?.fields.map((field) => {
+                return (
+                  <option key={field.id} value={field.id}>
+                    {field.name}
+                  </option>
+                );
+              })}
+            </Select>
+            {/*   <select
+          className="focus:shadow-outline mb-2 max-w-sm appearance-none rounded border px-3 py-2 leading-tight text-gray-700 focus:outline-none"
+        >
+          
+        </select> */}
+
+            {showChart && (
+              <FieldLineChart
+                data={ChartFields.data?.map((field) => {
+                  const weight = field.fieldInputs.find(
+                    (input) => input.inputHelper === "kg"
+                  )?.valueNumber;
+                  const reps = field.fieldInputs.find(
+                    (input) => input.inputHelper === "reps"
+                  )?.valueNumber;
+                  const sets = field.fieldInputs.find(
+                    (input) => input.inputHelper === "sets"
+                  )?.valueNumber;
+
+                  if (!weight && !reps && !sets) return null;
+
+                  return {
+                    entryId: field.entryId,
+                    date: dayjs(field.createdAt).format("DD/MM/YYYY"),
+                    weight,
+                    reps,
+                    sets,
+                  };
+                })}
+              />
+            )}
+          </ContentContainer>
+          <ContentContainer>
+            {!SubjectEntries.data.length && <div>No entries yet</div>}
+            {!!SubjectEntries.data.length &&
+              SubjectEntries.data
+                .filter((entry) => entry.template === false)
+                .map((entry) => {
+                  const date = dayjs(entry.createdAt).format(
+                    "DD/MM/YYYY HH-mm"
+                  );
+                  return (
+                    <Link
+                      className="w-full rounded-md border-1 border-slate-100 bg-violet-700 px-4 py-2 font-bold text-slate-100"
+                      key={entry.id}
+                      href={`/subjects/${subject}/${entry.id}`}
+                    >
+                      Entry: {date}
+                    </Link>
+                  );
+                })
+                .reverse()}
+          </ContentContainer>
+        </div>
       </MainContent>
-      <ButtonContainer>
-        {/*  <Button intent="cancel" link="/">
-          Back
-        </Button> */}
-        <Button intent="open" link={`/subjects/${subject}/entry`}>
-          + Journal
-        </Button>
-      </ButtonContainer>
-    </Layout>
+      <ButtonContainer
+        mainButton={
+          <Button
+            icon="plus.svg"
+            intent="primary"
+            variant="rounded-full"
+            link="/configure"
+          >
+            New Entry
+          </Button>
+        }
+        iconButton={
+          <>
+            <Button
+              icon="settings-neutral-500.svg"
+              intent="option"
+              variant="just-icon-circle"
+              link="/configure"
+            />
+            <Button
+              icon="user.svg"
+              intent="option"
+              variant="just-icon-circle"
+              link="/configure"
+            />
+          </>
+        }
+      />
+    </AppLayout>
   );
 };
 

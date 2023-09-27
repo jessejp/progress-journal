@@ -17,7 +17,7 @@ const AppLayout: React.FC<PropsWithChildren<Props>> = ({ children, page }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex flex-col items-center justify-start h-smallScreen w-full bg-neutral-800 font-inter">
-        <div className="flex flex-col items-center justify-start h-full w-full max-w-xl">
+        <div className="flex flex-col items-center justify-start h-full w-full max-w-lg">
           {children}
         </div>
       </div>

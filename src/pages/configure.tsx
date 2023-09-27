@@ -198,7 +198,7 @@ const Configure: NextPage = () => {
 
   const selectCategoryHandler = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    category: string | null,
+    category: string | "",
     fieldIndex: number,
     createCategory = false
   ) => {
@@ -210,19 +210,15 @@ const Configure: NextPage = () => {
     } else {
       setNewCategorySelect((prev) => ({ ...prev, showInput: false }));
 
-      if (!!category) {
-        watchFields.entries[0]?.fields[fieldIndex]?.category === undefined
-          ? form.register(`entries.0.fields.${fieldIndex}.category`, {
-              value: category,
-            })
-          : form.setValue(`entries.0.fields.${fieldIndex}.category`, category);
-      }
+      watchFields.entries[0]?.fields[fieldIndex]?.category === undefined
+        ? form.register(`entries.0.fields.${fieldIndex}.category`, {
+            value: category,
+          })
+        : form.setValue(`entries.0.fields.${fieldIndex}.category`, category);
     }
   };
 
-  const addCategoryHandler = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const addCategoryHandler = (event: React.MouseEvent<Element, MouseEvent>) => {
     event.preventDefault();
     setFieldCategories((prev) => {
       const newCategory = {
@@ -230,7 +226,7 @@ const Configure: NextPage = () => {
         fieldIndex: newCategorySelect.fieldIndex,
       };
 
-      if (newCategory.fieldIndex !== null && !!newCategory.value) {
+      if (newCategory.fieldIndex !== null && newCategory.value !== undefined) {
         watchFields.entries[0]?.fields[newCategory.fieldIndex]?.category ===
         undefined
           ? form.register(
@@ -441,48 +437,60 @@ const Configure: NextPage = () => {
             </InputContainer>
           </ContentContainer>
           {newCategorySelect.showInput === true && (
-            <ContentContainer>
-              <Label htmlFor="new-category">Category Name</Label>
-              <Select
-                onChange={(event) =>
-                  setNewCategorySelect((prev) => {
-                    return { ...prev, selectedCategory: event.target.value };
-                  })
-                }
-                ref={fieldCategorySelection}
-                value={newCategorySelect.selectedCategory || ""}
-                id="new-category"
-              >
-                {categories
-                  .filter((cat) => !fieldCategories.includes(cat))
-                  .map((categories) => {
-                    return (
-                      <option key={categories} value={categories}>
-                        {categories}
-                      </option>
-                    );
-                  })}
-              </Select>
-              <button
-                onClick={(event) => {
-                  addCategoryHandler(event);
-                }}
-                className="text-l order-3 w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-              >
-                Add Category
-              </button>
-            </ContentContainer>
+            <>
+              <ContentContainer direction="row">
+                <InputContainer>
+                  <Label htmlFor="new-category">Category Name</Label>
+                  <Select
+                    onChange={(event) =>
+                      setNewCategorySelect((prev) => {
+                        return {
+                          ...prev,
+                          selectedCategory: event.target.value,
+                        };
+                      })
+                    }
+                    ref={fieldCategorySelection}
+                    value={newCategorySelect.selectedCategory || ""}
+                    id="new-category"
+                  >
+                    {categories
+                      .filter((cat) => !fieldCategories.includes(cat))
+                      .map((categories) => {
+                        return (
+                          <option key={categories} value={categories}>
+                            {categories}
+                          </option>
+                        );
+                      })}
+                  </Select>
+                </InputContainer>
+                <InputContainer>
+                  <Label htmlFor="">Add Selected Category</Label>
+                  <div className="w-fit">
+                    <Button
+                      intent="secondary"
+                      action={(event) => {
+                        addCategoryHandler(event);
+                      }}
+                    >
+                      Add Category
+                    </Button>
+                  </div>
+                </InputContainer>
+              </ContentContainer>
+            </>
           )}
 
           <div
-            className={clsx("flex flex-row flex-wrap gap-4", {
+            className={clsx("flex flex-row flex-wrap gap-3 p-1.5 rounded-md bg-neutral-700 w-fit", {
               hidden: fieldCategories.length === 0,
             })}
           >
             <div
-              className={clsx("flex flex-row items-center gap-1 rounded p-2", {
-                "bg-slate-500": selectedFilter === "all",
-                "bg-slate-700": selectedFilter !== "all",
+              className={clsx("flex flex-row items-center gap-1 rounded p-2 text-slate-100", {
+                "bg-violet-700": selectedFilter === "all",
+                "bg-neutral-700": selectedFilter !== "all",
               })}
             >
               <input
@@ -493,20 +501,17 @@ const Configure: NextPage = () => {
                 checked={selectedFilter === "all"}
                 onChange={(e) => setSelectedFilter(e.target.value)}
               />
-              <label htmlFor="all">All</label>
+              <label htmlFor="all">All Fields</label>
             </div>
             {fieldCategories.length > 0 &&
               fieldCategories.map((category, categoryIndex) => {
                 return (
                   <React.Fragment key={`${category}${categoryIndex}`}>
                     <div
-                      className={clsx(
-                        "flex flex-row items-center gap-2 rounded p-2",
-                        {
-                          "bg-slate-500": selectedFilter === category,
-                          "bg-slate-700": selectedFilter !== category,
-                        }
-                      )}
+                     className={clsx("flex flex-row items-center gap-1 rounded p-2 text-slate-100", {
+                      "bg-violet-700": selectedFilter === category,
+                      "bg-neutral-700": selectedFilter !== category,
+                    })}
                     >
                       <input
                         type="radio"
@@ -516,7 +521,7 @@ const Configure: NextPage = () => {
                         onChange={(e) => setSelectedFilter(e.target.value)}
                       />
                       <label htmlFor={category}>{category}</label>
-                      {selectedFilter === category && (
+                      {/* {selectedFilter === category && (
                         <Button
                           action={() => {
                             setFieldCategories(
@@ -527,7 +532,7 @@ const Configure: NextPage = () => {
                         >
                           Delete
                         </Button>
-                      )}
+                      )} */}
                     </div>
                   </React.Fragment>
                 );
@@ -835,7 +840,7 @@ const Configure: NextPage = () => {
                                       action={(event) =>
                                         selectCategoryHandler(
                                           event,
-                                          null,
+                                          "",
                                           fieldIndex,
                                           true
                                         )

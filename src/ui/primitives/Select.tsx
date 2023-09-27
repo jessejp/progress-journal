@@ -18,7 +18,7 @@ const Select = forwardRef<Ref, SelectProps>(function Select(
 ) {
   return (
     <>
-      <div className="relative flex w-fit min-w-[8.875rem]">
+      <div className="relative flex w-full min-w-[8.875rem]">
         <select
           ref={ref}
           id={id}

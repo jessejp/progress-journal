@@ -36,12 +36,8 @@ interface MergedData {
 const FieldLineChart: React.FC<ChartProps> = ({ data }) => {
   const filteredData = data?.filter((entry) => entry);
   const [mergedData, setMergedData] = useState<MergedData[]>([]);
-  console.log(data);
-  console.log(filteredData);
-  console.log(mergedData);
 
   useEffect(() => {
-    console.log(filteredData);
     if (filteredData) {
       setMergedData(() => {
         const newMergedData: MergedData[] = [];
@@ -101,7 +97,7 @@ const FieldLineChart: React.FC<ChartProps> = ({ data }) => {
           bottom: 5,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
         <XAxis dataKey="date" />
         <YAxis />
         <Tooltip />
@@ -110,10 +106,10 @@ const FieldLineChart: React.FC<ChartProps> = ({ data }) => {
           name="Weight Average"
           type="monotone"
           dataKey="avgWeight"
-          stroke="#8884d8"
+          stroke="#a3e635"
           activeDot={{ r: 8 }}
         />
-        <Line name="Total Repetitions" type="monotone" dataKey="totalReps" stroke="#eeb111" />
+        <Line name="Total Repetitions" type="monotone" dataKey="totalReps" stroke="#f97316" />
       </LineChart>
     </ResponsiveContainer>
   );

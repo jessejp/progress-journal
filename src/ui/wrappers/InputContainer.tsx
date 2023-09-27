@@ -14,7 +14,7 @@ const InputContainer: React.FC<InputContainerProps> = ({
   return (
     <div
       className={clsx("flex w-full flex-col gap-1.5 rounded-md", {
-        "bg-violet-800": background === "violet",
+        "bg-violet-700": background === "violet",
         "p-0": variant === "unpadded",
         "p-2.5": variant !== "unpadded",
       })}
