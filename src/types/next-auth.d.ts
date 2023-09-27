@@ -10,3 +10,7 @@ declare module "next-auth" {
     } & DefaultSession["user"];
   }
 }
+
+export type SessionData = {
+  sessionData: Session | null;
+};

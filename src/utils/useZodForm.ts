@@ -71,7 +71,7 @@ export const fieldInputValidation = z
     valueString: z.optional(z.string().max(510).nullable()),
     valueBoolean: z.optional(z.boolean().nullable()),
     inputType: z.enum(inputTypes),
-    inputHelper: z.string().nullable(),
+    inputHelper: z.string().max(16).nullable(),
   })
   .superRefine((value, ctx) => {
     if (
@@ -83,6 +83,19 @@ export const fieldInputValidation = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: `Label is required for ${value.inputType} input type`,
+        params: { inputHelper: value.inputHelper },
+      });
+    }
+    if (
+      (value.inputType === "NUMBER" ||
+        value.inputType === "BOOLEAN" ||
+        value.inputType === "RANGE") &&
+      !!value.inputHelper &&
+      value.inputHelper.length > 16
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Label must be less than 16 characters`,
         params: { inputHelper: value.inputHelper },
       });
     }

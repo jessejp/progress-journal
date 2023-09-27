@@ -23,20 +23,14 @@ const Accordion: React.FC<AccordionProps> = ({
   return (
     <div
       ref={animationParent}
-      className={clsx(
-        "flex flex-row flex-wrap items-center gap-2 rounded bg-slate-600 p-4 sm:justify-start",
-        {
-          "bg-slate-700": !isOpen,
-          "bg-slate-600": !!isOpen,
-        }
-      )}
+      className="flex w-full flex-col gap-3 rounded-md bg-neutral-700 p-3"
     >
       <div
-        className="flex w-full grow flex-row justify-between align-middle text-lg"
+        className="flex w-full grow flex-row justify-between align-middle"
         onClick={toggleAccordion}
       >
-        <h3 className="text-lg text-zinc-200">{title}</h3>
-        <div className="mx-2 font-bold">{isOpen ? "-" : "+"}</div>
+        <h3 className="text-base text-slate-100">{title}</h3>
+        <div className="text-slate-100">{isOpen ? "-" : "+"}</div>
       </div>
       {isOpen && <>{children}</>}
     </div>

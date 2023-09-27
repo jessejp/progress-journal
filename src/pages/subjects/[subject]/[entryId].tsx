@@ -3,13 +3,15 @@ import type { GetStaticPaths, GetStaticPropsContext, NextPage } from "next";
 import { appRouter } from "../../../server/trpc/router/_app";
 import superjson from "superjson";
 import { trpc } from "../../../utils/trpc";
-import Layout from "../../../ui/Layout";
-import Heading from "../../../ui/Heading";
-import Button from "../../../ui/Button";
-import ButtonContainer from "../../../ui/ButtonContainer";
-import MainContent from "../../../ui/MainContent";
 import { createContextInner } from "../../../server/trpc/context";
 import React from "react";
+import AppLayout from "../../../ui/layouts/AppLayout";
+import LogoHeading from "../../../ui/typography/LogoHeading";
+import MainContent from "../../../ui/wrappers/MainContent";
+import ButtonContainer from "../../../ui/wrappers/ButtonContainer";
+import Button from "../../../ui/primitives/Button";
+import ContentContainer from "../../../ui/wrappers/ContentContainer";
+import DisplayFieldInput from "../../../ui/components/DisplayFieldInput";
 
 const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
   subject,
@@ -22,67 +24,86 @@ const ReadEntry: NextPage<{ subject: string; entryId: string }> = ({
   });
 
   return (
-    <Layout page="Entry">
-      <Heading>Read Entry</Heading>
+    <AppLayout page="Entry">
+      <LogoHeading />
       <MainContent>
         {data && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {data?.entries[0]?.fields.map((field) => {
               return (
-                <div
-                  className="rounded bg-slate-600 p-3 text-slate-300"
-                  key={field.id}
-                >
-                  <h2 className="text-lg">{field.name}</h2>
-                  <div className="flex flex-wrap gap-2">
+                <ContentContainer key={field.id}>
+                  <h2 className="text-xl font-semibold text-white">
+                    {field.name}
+                  </h2>
+                  <div className="flex flex-wrap justify-evenly gap-3">
                     {field.fieldInputs.map((input) => {
                       return (
                         <React.Fragment key={input.id}>
                           {input.inputType === "TEXTAREA" && (
-                            <div className="w-full rounded bg-slate-700 p-2">
+                            <div className="w-full">
                               <p>{input.valueString}</p>
                             </div>
                           )}
                           {input.inputType === "NUMBER" && (
-                            <div className="w-fit rounded bg-slate-700 p-2">
-                              <p>{`${input.valueNumber} ${input.inputHelper}`}</p>
-                            </div>
+                            <DisplayFieldInput
+                              value={input.valueNumber}
+                              inputLabel={input.inputHelper}
+                            />
                           )}
                           {input.inputType === "RANGE" && (
-                            <div className="w-fit rounded bg-slate-700 p-2">
-                              <p>{`${input.valueNumber}% ${input.inputHelper}`}</p>
-                            </div>
+                            <DisplayFieldInput
+                              value={input.valueNumber}
+                              inputLabel={input.inputHelper}
+                            />
                           )}
                           {input.inputType === "BOOLEAN" && (
-                            <div className="w-fit rounded bg-slate-700 p-2">
-                              <p>
-                                {`${input.inputHelper}: `}
-                                <b>
-                                  {input.valueBoolean ? (
-                                    <span className="text-green-500">Yes</span>
-                                  ) : (
-                                    "No"
-                                  )}
-                                </b>
-                              </p>
-                            </div>
+                            <DisplayFieldInput
+                              value={input.valueBoolean ? "Yes" : "No"}
+                              inputLabel={input.inputHelper}
+                              intent={
+                                input.valueBoolean ? "primary" : "destructive"
+                              }
+                            />
                           )}
                         </React.Fragment>
                       );
                     })}
                   </div>
-                </div>
+                </ContentContainer>
               );
             })}
           </div>
         )}
       </MainContent>
-      <ButtonContainer>
-        <Button intent="cancel" link={`/subjects/${subject}`}>
-          Back
-        </Button>
-      </ButtonContainer>
-    </Layout>
+      <ButtonContainer
+        mainButton={
+          <Button
+            icon="plus.svg"
+            intent="primary"
+            variant="rounded-full"
+            link="/configure"
+          >
+            New Entry
+          </Button>
+        }
+        iconButton={
+          <>
+            <Button
+              icon="settings-neutral-500.svg"
+              intent="option"
+              variant="just-icon-circle"
+              link="/configure"
+            />
+            <Button
+              icon="user.svg"
+              intent="option"
+              variant="just-icon-circle"
+              link="/configure"
+            />
+          </>
+        }
+      />
+    </AppLayout>
   );
 };
 

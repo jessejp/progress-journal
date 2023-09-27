@@ -1,12 +1,11 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { trpc } from "../utils/trpc";
-import Layout from "../ui/Layout";
-import Button from "../ui/Button";
+import Button from "../ui/primitives/Button";
 import Heading from "../ui/Heading";
-import ButtonContainer from "../ui/ButtonContainer";
-import MainContent from "../ui/MainContent";
-import Accordion from "../ui/Accordion";
+import ButtonContainer from "../ui/wrappers/ButtonContainer";
+import MainContent from "../ui/wrappers/MainContent";
+import Accordion from "../ui/primitives/Accordion";
 import {
   useZodForm,
   subjectValidationSchema,
@@ -18,27 +17,53 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import AppLayout from "../ui/layouts/AppLayout";
+import LogoHeading from "../ui/typography/LogoHeading";
+import ContentContainer from "../ui/wrappers/ContentContainer";
+import H2 from "../ui/typography/H2";
+import Select from "../ui/primitives/Select";
+import Label from "../ui/primitives/Label";
+import Input from "../ui/primitives/Input";
+import InputContainer from "../ui/wrappers/InputContainer";
+import CommandMenu from "../ui/components/CommandMenu/CommandMenu";
+import CommandHeading from "../ui/components/CommandMenu/CommandHeading";
+import Command from "../ui/components/CommandMenu/Command";
+
+const categories = [
+  "Category 🦍",
+  "Category 🐓",
+  "Category 🐳",
+  "Category 🐶",
+  "Category 🐸",
+  "Category 🐻",
+  "Category 🐉",
+  "Category 🐞",
+  "Category 🟨",
+  "Category 🟩",
+  "Category 🟪",
+  "Category 🟦",
+];
 
 const Configure: NextPage = () => {
   const router = useRouter();
   const subjects = trpc.subject.getSubjects.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
-  const [fieldTemplateSelection, setFieldTemplateSelection] =
-    useState("journal");
   const [subjectSelection, setSubjectSelection] = useState("Add New Subject");
   const [fieldCategories, setFieldCategories] = useState<Array<string>>([]);
   const [newCategorySelect, setNewCategorySelect] = useState<{
     showInput: boolean;
     fieldIndex: number | null;
+    selectedCategory: string | null;
   }>({
     showInput: false,
     fieldIndex: null,
+    selectedCategory: "Category 🦍",
   });
   const fieldCategorySelection = useRef<HTMLSelectElement>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
-  const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
-    useState(false);
+/*   const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
+    useState(false); */
   const [showCancelChangesButton, setShowCancelChangesButton] = useState(false);
   const [animationParent] = useAutoAnimate();
 
@@ -97,12 +122,12 @@ const Configure: NextPage = () => {
 
   const watchFields = form.watch();
 
-  const deleteSubject = trpc.subject.deleteSubject.useMutation({
+/*   const deleteSubject = trpc.subject.deleteSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
     },
   });
-
+ */
   const deleteFields = trpc.field.deleteFields.useMutation({
     onSuccess: async () => {
       console.log("onSuccess deleteFields");
@@ -157,7 +182,7 @@ const Configure: NextPage = () => {
     }
 
     setSelectedFilter("all");
-    setSubjectDeleteConfirmation(false);
+    // setSubjectDeleteConfirmation(false);
     setDeletedFields([]);
   }, [
     isFetched,
@@ -165,38 +190,33 @@ const Configure: NextPage = () => {
     form,
     subjectSelection,
     setFieldCategories,
-    setSubjectDeleteConfirmation,
+    // setSubjectDeleteConfirmation,
     setSelectedFilter,
   ]);
 
   const selectCategoryHandler = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-    fieldIndex: number
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    category: string | "",
+    fieldIndex: number,
+    createCategory = false
   ) => {
-    if (event.target.value === "+ new category") {
-      setNewCategorySelect({
-        showInput: true,
-        fieldIndex,
+    event.preventDefault();
+    if (createCategory) {
+      setNewCategorySelect((prev) => {
+        return { ...prev, showInput: true, fieldIndex };
       });
     } else {
       setNewCategorySelect((prev) => ({ ...prev, showInput: false }));
 
-      if (!!event.target.value) {
-        watchFields.entries[0]?.fields[fieldIndex]?.category === undefined
-          ? form.register(`entries.0.fields.${fieldIndex}.category`, {
-              value: event.target.value,
-            })
-          : form.setValue(
-              `entries.0.fields.${fieldIndex}.category`,
-              event.target.value
-            );
-      }
+      watchFields.entries[0]?.fields[fieldIndex]?.category === undefined
+        ? form.register(`entries.0.fields.${fieldIndex}.category`, {
+            value: category,
+          })
+        : form.setValue(`entries.0.fields.${fieldIndex}.category`, category);
     }
   };
 
-  const addCategoryHandler = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const addCategoryHandler = (event: React.MouseEvent<Element, MouseEvent>) => {
     event.preventDefault();
     setFieldCategories((prev) => {
       const newCategory = {
@@ -218,9 +238,8 @@ const Configure: NextPage = () => {
               newCategory.value
             );
 
-        setNewCategorySelect({
-          showInput: false,
-          fieldIndex: null,
+        setNewCategorySelect((prev) => {
+          return { ...prev, showInput: false, fieldIndex: null };
         });
 
         return [...prev, newCategory.value];
@@ -372,101 +391,111 @@ const Configure: NextPage = () => {
 
   if (updateSubject.isLoading)
     return (
-      <Layout page="configure">
+      <AppLayout page="configure">
         <Heading>Configure Subject</Heading>
         <MainContent>
           <p className="text-2xl text-zinc-100">Loading</p>
         </MainContent>
-      </Layout>
+      </AppLayout>
     );
 
   return (
-    <Layout page="configure">
-      <Heading>Configure Subject</Heading>
+    <AppLayout page="configure">
+      <LogoHeading />
       <MainContent>
-        <form className="flex w-full flex-col p-2 gap-2" ref={animationParent}>
-          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
-            <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
-              Select Subject
-            </label>
-            <select
-              className="w-40 overflow-clip border-2 max-sm:order-2 max-sm:w-1/2"
-              value={subjectSelection}
-              onChange={(event) => {
-                setSubjectSelection(event.target.value);
-              }}
-            >
-              <option value="Add New Subject">Add New Subject</option>
-              {subjects.data?.map((subject) => (
-                <option key={subject.id} value={subject.id}>
-                  {subject.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between rounded bg-slate-600 p-4">
-            <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
-              Subject Name
-            </label>
-            <input
-              type="text"
-              className="w-40 border-2 max-sm:w-1/2"
-              {...form.register("name")}
-            />
-            {form.formState.errors.name && (
-              <div className="mt-1 flex w-full flex-grow justify-end">
-                <p className="w-fit text-red-500 max-sm:order-3">
-                  {form.formState.errors.name.message}
-                </p>
-              </div>
-            )}
-          </div>
-          {newCategorySelect.showInput === true && (
-            <div className="mb-4 mt-2 flex flex-row flex-wrap justify-between gap-2 rounded bg-slate-600 p-4">
-              <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:order-1 max-sm:w-1/2">
-                Category Name
-              </label>
-              <select
-                className="flex h-12 w-16 appearance-none flex-row flex-wrap bg-gray-100 text-center text-2xl"
-                autoFocus={true}
-                ref={fieldCategorySelection}
-              >
-                <option selected value="🦍">
-                  🦍
-                </option>
-                <option value="🐓">🐓</option>
-                <option value="🐳">🐳</option>
-                <option value="🐶">🐶</option>
-                <option value="🐸">🐸</option>
-                <option value="🐻">🐻</option>
-                <option value="🐉">🐉</option>
-                <option value="🐞">🐞</option>
-                <option value="🟨">🟨</option>
-                <option value="🟩">🟩</option>
-                <option value="🟪">🟪</option>
-                <option value="🟦">🟦</option>
-              </select>
-              <button
-                onClick={(event) => {
-                  addCategoryHandler(event);
+        <form className="flex w-full flex-col gap-3" ref={animationParent}>
+          <ContentContainer>
+            <H2>Configure Subjects</H2>
+            <InputContainer variant="unpadded">
+              <Label htmlFor="subject-selection">Select Subject</Label>
+              <Select
+                id="subject-selection"
+                value={subjectSelection}
+                onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                  setSubjectSelection(event.target.value);
                 }}
-                className="text-l order-3 w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
               >
-                Add Category
-              </button>
-            </div>
+                <option value="Add New Subject">Add New Subject</option>
+                {subjects.data?.map((subject) => (
+                  <option key={subject.id} value={subject.id}>
+                    {subject.name}
+                  </option>
+                ))}
+              </Select>
+            </InputContainer>
+            <InputContainer variant="unpadded">
+              <Label htmlFor="subject-name">Subject Name</Label>
+              <Input
+                placeholder="Add Subject Name"
+                id="subject-name"
+                inputType="text"
+                formProps={form.register("name")}
+                error={form.formState.errors.name?.message}
+              />
+            </InputContainer>
+          </ContentContainer>
+          {newCategorySelect.showInput === true && (
+            <>
+              <ContentContainer direction="row">
+                <InputContainer>
+                  <Label htmlFor="new-category">Category Name</Label>
+                  <Select
+                    onChange={(event) =>
+                      setNewCategorySelect((prev) => {
+                        return {
+                          ...prev,
+                          selectedCategory: event.target.value,
+                        };
+                      })
+                    }
+                    ref={fieldCategorySelection}
+                    value={newCategorySelect.selectedCategory || ""}
+                    id="new-category"
+                  >
+                    {categories
+                      .filter((cat) => !fieldCategories.includes(cat))
+                      .map((categories) => {
+                        return (
+                          <option key={categories} value={categories}>
+                            {categories}
+                          </option>
+                        );
+                      })}
+                  </Select>
+                </InputContainer>
+                <InputContainer>
+                  <Label htmlFor="">Set Category</Label>
+                  <div className="w-fit">
+                    <Button
+                      intent="secondary"
+                      action={(event) => {
+                        addCategoryHandler(event);
+                      }}
+                    >
+                      Set Category
+                    </Button>
+                  </div>
+                </InputContainer>
+              </ContentContainer>
+            </>
           )}
 
           <div
-            className={clsx("flex flex-row flex-wrap gap-4", {
-              hidden: fieldCategories.length === 0,
-            })}
+            className={clsx(
+              "flex w-fit flex-row flex-wrap gap-3 rounded-md bg-neutral-700 p-1.5",
+              {
+                hidden: fieldCategories.length === 0,
+              }
+            )}
           >
             <div
-              className={clsx("flex flex-row items-center gap-1 rounded p-2", {
-                "bg-slate-500": selectedFilter === "all",
-                "bg-slate-700": selectedFilter !== "all",
-              })}
+              className={clsx(
+                "flex flex-row items-center gap-1 rounded p-2 text-slate-100",
+                {
+                  "bg-violet-700": selectedFilter === "all",
+                  "bg-neutral-700": selectedFilter !== "all",
+                }
+              )}
             >
               <input
                 type="radio"
@@ -476,17 +505,20 @@ const Configure: NextPage = () => {
                 checked={selectedFilter === "all"}
                 onChange={(e) => setSelectedFilter(e.target.value)}
               />
-              <label htmlFor="all">All</label>
+              <label htmlFor="all">All Fields</label>
             </div>
             {fieldCategories.length > 0 &&
               fieldCategories.map((category, categoryIndex) => {
                 return (
                   <React.Fragment key={`${category}${categoryIndex}`}>
                     <div
-                      className={clsx("flex flex-row items-center gap-2 rounded p-2", {
-                        "bg-slate-500": selectedFilter === category,
-                        "bg-slate-700": selectedFilter !== category,
-                      })}
+                      className={clsx(
+                        "flex flex-row items-center gap-1 rounded p-2 text-slate-100",
+                        {
+                          "bg-violet-700": selectedFilter === category,
+                          "bg-neutral-700": selectedFilter !== category,
+                        }
+                      )}
                     >
                       <input
                         type="radio"
@@ -496,19 +528,6 @@ const Configure: NextPage = () => {
                         onChange={(e) => setSelectedFilter(e.target.value)}
                       />
                       <label htmlFor={category}>{category}</label>
-                      {selectedFilter === category && (
-                        <Button
-                          action={() => {
-                            setFieldCategories(
-                              fieldCategories.filter((cat) => cat !== category)
-                            );
-                          }}
-                          intent="cancel"
-                          style="xsmall"
-                        >
-                          Delete
-                        </Button>
-                      )}
                     </div>
                   </React.Fragment>
                 );
@@ -528,101 +547,41 @@ const Configure: NextPage = () => {
                     })}
                   >
                     <Accordion
-                      title={`${field.name}: ${field.category || "unassigned"}`}
+                      title={`Field: ${field.name} (${
+                        field.category || "unassigned"
+                      })`}
                       defaultOpen={!field.id}
                     >
-                      <div className="mb-4 flex w-full flex-grow flex-row items-center justify-between gap-2">
-                        <div className="flex w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
-                          <label className="text-sm text-zinc-300">
-                            Category
-                          </label>
-                          <select
-                            aria-label="field category"
-                            className="w-40 overflow-clip border-2"
-                            value={field.category || "unassigned"}
-                            onChange={(event) =>
-                              selectCategoryHandler(event, fieldIndex)
-                            }
-                          >
-                            <option value="unassigned">unassigned</option>
-                            {fieldCategories?.map((category) => (
-                              <option key={category} value={category}>
-                                {category}
-                              </option>
-                            ))}
-                            <option value="+ new category">
-                              + new category
-                            </option>
-                          </select>
-                        </div>
-                        {fieldArray.length > 1 && (
-                          <button
-                            className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                            onClick={(event) => {
-                              removeField(event, fieldIndex);
-                              if (!!field.id) {
-                                setDeletedFields((prev) => [...prev, field.id]);
-                              }
-                            }}
-                          >
-                            X
-                          </button>
-                        )}
-                      </div>
-                      <div
-                        className={clsx(
-                          "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
-                          {
-                            "border-2 border-rose-700":
-                              form.formState.errors.entries?.[0]?.fields?.[
-                                fieldIndex
-                              ]?.name,
-                          }
-                        )}
-                      >
-                        <label className="text-sm text-zinc-300">Name</label>
-                        <input
-                          type="text"
-                          className="w-40 max-w-xs border-2"
-                          {...form.register(
+                      <InputContainer background="violet">
+                        <Label htmlFor="field-name">Field Name</Label>
+                        <Input
+                          id="field-name"
+                          placeholder="Add Field Name"
+                          inputType="text"
+                          formProps={form.register(
                             `entries.0.fields.${fieldIndex}.name`
                           )}
+                          error={
+                            form.formState.errors.entries?.[0]?.fields?.[
+                              fieldIndex
+                            ]?.name?.message
+                          }
                         />
-                        {form.formState.errors.entries?.[0]?.fields?.[
-                          fieldIndex
-                        ]?.name && (
-                          <p className="text-red-500 max-sm:order-3">
-                            {
-                              form.formState.errors.entries?.[0]?.fields?.[
-                                fieldIndex
-                              ]?.name?.message
-                            }
-                          </p>
-                        )}
-                      </div>
+                      </InputContainer>
                       {field?.fieldInputs?.map(
                         (input, inputIndex, inputArray) => {
                           return (
                             <React.Fragment key={inputIndex}>
-                              <div
-                                className={clsx(
-                                  "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
-                                  {
-                                    "border-2 border-rose-700":
-                                      form.formState.errors.entries?.[0]
-                                        ?.fields?.[fieldIndex]?.fieldInputs?.[
-                                        inputIndex
-                                      ],
-                                  }
-                                )}
+                              <ContentContainer
+                                background="violet"
+                                direction="row"
                               >
-                                <label className="text-sm text-zinc-300">
-                                  Input Type
-                                </label>
-                                <div className="flex flex-grow flex-wrap gap-4">
-                                  <select
-                                    className="w-fit border-2"
-                                    {...form.register(
+                                <InputContainer variant="unpadded">
+                                  <Label htmlFor="input-type">Input Type</Label>
+                                  <Select
+                                    id="input-type"
+                                    value={input?.inputType}
+                                    formProps={form.register(
                                       `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
                                     )}
                                     disabled={
@@ -643,175 +602,274 @@ const Configure: NextPage = () => {
                                       .map((type) => {
                                         return (
                                           <option key={type} value={type}>
-                                            {type === "BOOLEAN"
-                                              ? "YES/NO"
-                                              : type}
+                                            {type}
                                           </option>
                                         );
                                       })}
-                                  </select>
+                                  </Select>
+                                </InputContainer>
+                                <InputContainer variant="unpadded">
                                   {input?.inputType === "NUMBER" && (
-                                    <select
-                                      value={input?.inputHelper || ""}
-                                      {...form.register(
-                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
-                                      )}
-                                    >
-                                      <option>{input.inputHelper}</option>
-                                      {inputUnitTypes
-                                        .filter(
-                                          (type) => type !== input?.inputHelper
-                                        )
-                                        .map((unit) => {
-                                          return (
-                                            <option key={unit} value={unit}>
-                                              {unit}
-                                            </option>
-                                          );
-                                        })}
-                                    </select>
+                                    <>
+                                      <Label htmlFor="input-unit">Unit</Label>
+                                      <Select
+                                        id="input-unit"
+                                        value={input?.inputHelper || ""}
+                                        formProps={form.register(
+                                          `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
+                                        )}
+                                        error={
+                                          form.formState.errors.entries?.[0]
+                                            ?.fields?.[fieldIndex]
+                                            ?.fieldInputs?.[inputIndex]?.message
+                                        }
+                                      >
+                                        <option>{input.inputHelper}</option>
+                                        {inputUnitTypes
+                                          .filter(
+                                            (type) =>
+                                              type !== input?.inputHelper
+                                          )
+                                          .map((unit) => {
+                                            return (
+                                              <option key={unit} value={unit}>
+                                                {unit}
+                                              </option>
+                                            );
+                                          })}
+                                      </Select>
+                                    </>
                                   )}
                                   {(input?.inputType === "RANGE" ||
                                     input?.inputType === "BOOLEAN") && (
                                     <>
-                                      <input
-                                        className="w-24"
-                                        type="text"
+                                      <Label htmlFor="input-label">
+                                        Input Label
+                                      </Label>
+                                      <Input
+                                        id="input-label"
+                                        inputType="text"
                                         placeholder={
                                           input.inputType === "RANGE"
                                             ? "Subjective" // RANGE
                                             : "Question?" // BOOLEAN
                                         }
-                                        {...form.register(
+                                        formProps={form.register(
                                           `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputHelper`
                                         )}
+                                        error={
+                                          form.formState.errors.entries?.[0]
+                                            ?.fields?.[fieldIndex]
+                                            ?.fieldInputs?.[inputIndex]?.message
+                                        }
                                       />
-                                      {input?.inputType === "RANGE" && (
-                                        <span className="self-center text-zinc-300">
-                                          0-100%
-                                        </span>
-                                      )}
                                     </>
                                   )}
-                                  <div className="flex flex-grow-0 gap-2">
+                                </InputContainer>
+                              </ContentContainer>
+                              {inputArray.length - 1 === inputIndex && (
+                                <div className="flex justify-center">
+                                  <CommandMenu
+                                    button={{
+                                      intent: "ghost",
+                                      variant: "just-icon-circle",
+                                      icon: "more-slate-100.svg",
+                                    }}
+                                  >
+                                    <CommandHeading intent="primary">
+                                      Add Input
+                                    </CommandHeading>
+                                    <Command
+                                      action={(event) =>
+                                        addFieldInput(event, fieldIndex)
+                                      }
+                                      intent="primary"
+                                      icon="plus-circle-slate-100.svg"
+                                    >
+                                      New Input
+                                    </Command>
+                                    <CommandHeading intent="option">
+                                      Set Category
+                                    </CommandHeading>
+                                    <Command
+                                      key={"unassigned"}
+                                      intent="option"
+                                      icon="filter-slate-100.svg"
+                                      action={(event) =>
+                                        selectCategoryHandler(
+                                          event,
+                                          "",
+                                          fieldIndex
+                                        )
+                                      }
+                                      activeSelection={
+                                        field.category || "Unassigned"
+                                      }
+                                    >
+                                      Unassigned
+                                    </Command>
+                                    {fieldCategories.map((category) => {
+                                      return (
+                                        <Command
+                                          key={category}
+                                          intent="option"
+                                          icon="filter-slate-100.svg"
+                                          action={(event) =>
+                                            selectCategoryHandler(
+                                              event,
+                                              category,
+                                              fieldIndex
+                                            )
+                                          }
+                                          activeSelection={
+                                            field.category || "unassigned"
+                                          }
+                                        >
+                                          {category}
+                                        </Command>
+                                      );
+                                    })}
+                                    <Command
+                                      intent="primary"
+                                      icon="plus-circle-slate-100.svg"
+                                      action={(event) =>
+                                        selectCategoryHandler(
+                                          event,
+                                          "",
+                                          fieldIndex,
+                                          true
+                                        )
+                                      }
+                                    >
+                                      Assign New Category
+                                    </Command>
                                     {inputArray.length > 1 && !input.id && (
-                                      <button
-                                        className="rounded  bg-red-500 px-3 py-1 text-xl font-bold text-white hover:bg-red-700"
-                                        onClick={(event) =>
-                                          removeFieldInput(
-                                            event,
-                                            fieldIndex,
-                                            inputIndex
-                                          )
-                                        }
-                                      >
-                                        X
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
+                                      <>
+                                        <CommandHeading intent="destructive">
+                                          Delete Input
+                                        </CommandHeading>
 
-                                {form.formState.errors.entries?.[0]?.fields?.[
-                                  fieldIndex
-                                ]?.fieldInputs?.[inputIndex] && (
-                                  <p className="text-red-500 max-sm:order-3">
-                                    {
-                                      form.formState.errors.entries?.[0]
-                                        ?.fields?.[fieldIndex]?.fieldInputs?.[
-                                        inputIndex
-                                      ]?.message
-                                    }
-                                  </p>
-                                )}
-                              </div>
-                              {inputIndex === inputArray.length - 1 && (
-                                <button
-                                  className="h-fit rounded bg-blue-500 px-4 py-2 align-middle text-xl font-bold text-white hover:bg-blue-700"
-                                  onClick={(event) =>
-                                    addFieldInput(event, fieldIndex)
-                                  }
-                                >
-                                  +
-                                </button>
+                                        {inputArray.map((input, index) => {
+                                          return (
+                                            <Command
+                                              key={`${inputIndex}${index}`}
+                                              intent="destructive"
+                                              icon="minus-circle-slate-100.svg"
+                                              action={(
+                                                event: React.MouseEvent<
+                                                  HTMLButtonElement,
+                                                  MouseEvent
+                                                >
+                                              ) =>
+                                                removeFieldInput(
+                                                  event,
+                                                  fieldIndex,
+                                                  index
+                                                )
+                                              }
+                                            >
+                                              <span className="capitalize">
+                                                {input.inputType.toLowerCase()}
+                                              </span>
+                                              {!!input.inputHelper &&
+                                                ` | ${input.inputHelper}`}
+                                            </Command>
+                                          );
+                                        })}
+                                      </>
+                                    )}
+                                    {fieldArray.length > 1 && (
+                                      <>
+                                        <CommandHeading intent="destructive">
+                                          Delete Field
+                                        </CommandHeading>
+
+                                        <Command
+                                          action={(event) => {
+                                            removeField(event, fieldIndex);
+                                            if (!!field.id) {
+                                              setDeletedFields((prev) => [
+                                                ...prev,
+                                                field.id,
+                                              ]);
+                                            }
+                                          }}
+                                          intent="destructive"
+                                          icon="minus-circle-slate-100.svg"
+                                        >
+                                          Delete Field
+                                        </Command>
+                                      </>
+                                    )}
+                                  </CommandMenu>
+                                </div>
                               )}
                             </React.Fragment>
                           );
                         }
                       )}
                     </Accordion>
-                    {fieldIndex === fieldArray.length - 1 && (
-                      <div className="mt-4 flex w-full flex-row justify-center">
-                        <button
-                          className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-                          onClick={(event) =>
-                            addField(event, fieldTemplateSelection)
-                          }
-                        >
-                          New Field
-                        </button>
-                        <select
-                          value={fieldTemplateSelection}
-                          onChange={(event) => {
-                            setFieldTemplateSelection(event.target.value);
-                          }}
-                          className="w-fit border-2"
-                        >
-                          <option value="journal">default template</option>
-                          <option value="weight training">
-                            kg/reps/sets template
-                          </option>
-                        </select>
-                      </div>
-                    )}
                   </div>
                 );
               }
             )}
-          {subjectSelection !== "Add New Subject" && (
-            <div className="mt-4 flex scale-75 flex-row flex-wrap items-center justify-between rounded bg-slate-700 p-4">
-              <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
-                Delete Subject
-              </label>
-              {!subjectDeleteConfirmation && (
-                <button
-                  className="rounded bg-zinc-500 px-2 py-1 text-xl font-bold text-white hover:bg-zinc-700"
-                  onClick={() => {
-                    setSubjectDeleteConfirmation(true);
-                  }}
-                >
-                  Delete Subject
-                </button>
-              )}
-              {!!subjectDeleteConfirmation && (
-                <>
-                  <button
-                    className="rounded bg-red-500 px-2 py-1 text-xl font-bold text-white hover:bg-red-700"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      deleteSubject.mutate({ id: subjectSelection });
-                    }}
-                  >
-                    Confirm Subject Deletion
-                  </button>
-                  <button
-                    className="rounded bg-slate-500 px-2 py-1 text-xl font-bold text-white hover:bg-slate-700"
-                    onClick={() => {
-                      setSubjectDeleteConfirmation(false);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </>
-              )}
-            </div>
-          )}
         </form>
       </MainContent>
-      <ButtonContainer>
-        {!!showCancelChangesButton &&
+      <ButtonContainer
+        mainButton={
+          <Button
+            intent="primary"
+            action={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+              addField(event, "journal")
+            }
+            icon="plus.svg"
+            variant="rounded-full"
+          >
+            Add Field
+          </Button>
+        }
+        iconButton={
+          <>
+            <Button
+              action={() => {
+                setDeletedFields([]);
+                refetch();
+              }}
+              icon="undo-neutral-800.svg"
+              intent={
+                showCancelChangesButton &&
+                subjectSelection !== "Add New Subject"
+                  ? "secondary"
+                  : "disabled"
+              }
+              variant="just-icon-circle"
+              link="/configure"
+            />
+            <Button
+              icon="save-neutral-800.svg"
+              intent="primary"
+              variant="just-icon-circle"
+              action={form.handleSubmit(async (values) => {
+                if (subjectSelection === "Add New Subject") {
+                  await addSubject.mutateAsync(values);
+                } else {
+                  if (deletedFields.length > 0 && !!values.entries[0]?.id)
+                    await deleteFields.mutateAsync({
+                      entryId: values.entries[0].id,
+                      fieldIds: deletedFields,
+                    });
+
+                  await updateSubject.mutateAsync(values);
+                }
+              })}
+            />
+          </>
+        }
+      >
+        {/*  {!!showCancelChangesButton &&
           subjectSelection !== "Add New Subject" && (
             <Button
-              intent="undo"
+              intent="secondary"
               action={() => {
                 setDeletedFields([]);
                 refetch();
@@ -821,7 +879,7 @@ const Configure: NextPage = () => {
             </Button>
           )}
         <Button
-          intent="accept"
+          intent="primary"
           action={form.handleSubmit(async (values) => {
             if (subjectSelection === "Add New Subject") {
               await addSubject.mutateAsync(values);
@@ -837,9 +895,9 @@ const Configure: NextPage = () => {
           })}
         >
           {subjectSelection === "Add New Subject" ? subjectSelection : "Update"}
-        </Button>
+        </Button> */}
       </ButtonContainer>
-    </Layout>
+    </AppLayout>
   );
 };
 

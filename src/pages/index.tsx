@@ -1,108 +1,120 @@
 import { type NextPage } from "next";
-import Link from "next/link";
+import { useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
-import type { Session } from "next-auth";
-import Layout from "../ui/Layout";
-import Button from "../ui/Button";
-import Heading from "../ui/Heading";
+import FrontPageLayout from "../ui/layouts/FrontPageLayout";
+import AppLayout from "../ui/layouts/AppLayout";
+import Button from "../ui/primitives/Button";
+import ButtonContainer from "../ui/wrappers/ButtonContainer";
+import MainContent from "../ui/wrappers/MainContent";
+import Subjects from "../components/Subjects";
+import { type SessionData } from "../types/next-auth";
+import Authentication from "../components/Authentication";
+import LogoHeading from "../ui/typography/LogoHeading";
+import CommandMenu from "../ui/components/CommandMenu/CommandMenu";
+import CommandHeading from "../ui/components/CommandMenu/CommandHeading";
 import { trpc } from "../utils/trpc";
-import ButtonContainer from "../ui/ButtonContainer";
-import MainContent from "../ui/MainContent";
-import FrontPageLayout from "../ui/landing-page/FrontPageLayout";
+import Command from "../ui/components/CommandMenu/Command";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
+  const [loadApp, setLoadApp] = useState(!!sessionData);
 
-  if (!sessionData) return <LandingPage sessionData={sessionData} />;
+  const subjectsQuery = trpc.subject.getSubjects.useQuery();
+
+  if (!loadApp)
+    return (
+      <LandingPage
+        sessionData={sessionData}
+        onGoToApp={() => {
+          setLoadApp(true);
+        }}
+      />
+    );
 
   return (
-    <Layout page="home">
-      <Heading sessionData={sessionData}>Progress Journal</Heading>
+    <AppLayout page="home">
+      <LogoHeading />
 
-      <MainContent>{sessionData && <Subjects />}</MainContent>
-
-      <ButtonContainer>
-        <Button intent="open" link="/configure">
-          Configure
+      <MainContent>
+        <Subjects data={{ data: subjectsQuery.data }} />
+        <div className="mt-3"></div>
+        <Button
+          icon="settings-neutral-800.svg"
+          intent="primary"
+          link="/configure"
+        >
+          Configure Subjects
         </Button>
-      </ButtonContainer>
-    </Layout>
+      </MainContent>
+
+      <ButtonContainer
+        mainButton={
+          <CommandMenu
+            button={{
+              icon: "plus.svg",
+              intent: "primary",
+              variant: "rounded-full",
+              text: "New Entry",
+            }}
+          >
+            <CommandHeading>Select Subject</CommandHeading>
+            {subjectsQuery.data?.map((subject) => {
+              return (
+                <Command
+                  icon="plus-circle-slate-100.svg"
+                  key={subject.id}
+                  link={`/subjects/${subject.name}/entry`}
+                >
+                  {subject.name}
+                </Command>
+              );
+            })}
+          </CommandMenu>
+        }
+        iconButton={
+          <>
+            <Button
+              icon="settings-neutral-500.svg"
+              intent="option"
+              variant="just-icon-circle"
+              link="/configure"
+            />
+            <Button
+              icon="user.svg"
+              intent="option"
+              variant="just-icon-circle"
+              action={sessionData ? () => signOut() : () => signIn()}
+            />
+          </>
+        }
+      />
+    </AppLayout>
   );
 };
 
 export default Home;
 
-const Subjects: React.FC = () => {
-  const subjectsQuery = trpc.subject.getSubjects.useQuery();
-  const { data } = subjectsQuery;
+interface LandingPageProps extends SessionData {
+  onGoToApp: () => void;
+}
 
-  if (!data)
-    return (
-      <p className="text-red-600">
-        Create your first subject in order to start journaling!
-      </p>
-    );
-
-  return (
-    <div className="flex flex-col h-full justify-center">
-      {data.map((subject) => {
-        const url = `subjects/${subject.name}`;
-        return (
-          <Link
-            key={subject.id}
-            href={url}
-            className="w-full max-w-xs rounded bg-slate-300 mb-3 px-7 py-5 text-center text-lg text-zinc-900"
-          >
-            {subject.name}
-          </Link>
-        );
-      })}
-    </div>
-  );
-};
-
-type SessionData = {
-  sessionData: Session | null;
-  text?: string;
-  icon?: string;
-};
-
-const AuthShowcase: React.FC<SessionData> = (props) => {
-  const { sessionData } = props;
-
-  return (
-    <Button
-      intent={sessionData ? "cancel" : "open"}
-      action={sessionData ? () => signOut() : () => signIn()}
-      style="small rounded-full"
-      icon={props.icon}
-    >
-      {!!props.text && props.text}
-      {!props.text && (sessionData ? "Sign out" : "Sign in")}
-    </Button>
-  );
-};
-
-const LandingPage: React.FC<SessionData> = (props) => {
-  const { sessionData } = props;
-
+const LandingPage: React.FC<LandingPageProps> = ({
+  sessionData,
+  onGoToApp,
+}) => {
   return (
     <FrontPageLayout>
-      <div className="relative flex flex-col items-center justify-between bg-hero bg-cover bg-center bg-no-repeat pb-4 text-center after:absolute after:z-0 after:min-h-smallScreen after:w-full after:bg-gradient-to-t after:from-slate-800 after:from-50% after:via-slate-transparent after:via-70% after:to-slate-800 after:to-95%">
+      <div className="relative flex w-full max-w-4xl flex-col items-center justify-between bg-hero bg-cover bg-center bg-no-repeat pb-4 text-center after:absolute after:z-0 after:min-h-smallScreen after:w-full after:bg-gradient-to-t after:from-neutral-800 after:from-50% after:via-slate-transparent after:via-70% after:to-neutral-800 after:to-95%">
         <div className="relative z-10 h-smallScreenHalf w-full">
-          <h1 className="mt-4 font-bebasneue text-4xl text-lime-400">
-            PROGRESS JOURNAL
-          </h1>
+          <LogoHeading />
         </div>
         <div className="bottom-0 z-10 flex w-11/12 flex-col justify-center gap-4 pb-6">
-          <h2 className="text-3xl font-bold text-zinc-100">
+          <h2 className="text-3xl font-bold text-slate-100">
             Progress Journal helps you to find your footing
           </h2>
-          <AuthShowcase
-            sessionData={sessionData}
-            icon="discord.svg"
-            text="Sign in with Discord"
-          />
+          <Button intent="primary" variant="rounded-full" action={onGoToApp}>
+            Proceed to the App
+          </Button>
           <p className="text-sm text-zinc-50">
             Not a member yet?{" "}
             <a
@@ -115,9 +127,9 @@ const LandingPage: React.FC<SessionData> = (props) => {
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-end text-center">
+      <div className="relative z-10 flex w-full max-w-4xl flex-col items-center justify-end text-center">
         <div className="h-80 w-full bg-mobile-user bg-cover bg-center"></div>
-        <div className="relative -top-14 flex w-11/12 flex-col justify-center gap-4 bg-slate-800 px-4 pb-6 pt-4 text-zinc-100">
+        <div className="relative -top-14 flex w-11/12 flex-col justify-center gap-4 bg-neutral-800 px-4 pb-6 pt-4 text-slate-100">
           <h2 className="text-3xl font-bold">
             Progress Journal helps you to find your footing
           </h2>
@@ -126,22 +138,22 @@ const LandingPage: React.FC<SessionData> = (props) => {
             It&apos;s a great way to keep yourself accountable and to see how
             far you&apos;ve come.
           </p>
-          <AuthShowcase
+          <Authentication
             sessionData={sessionData}
             icon="discord.svg"
-            text="Sign in with Discord"
+            text={!sessionData ? "Sign in with Discord" : "Sign out"}
           />
         </div>
       </div>
 
-      <div className="relative flex flex-col items-center justify-end text-center">
+      <div className="relative flex w-full max-w-4xl flex-col items-center justify-end text-center">
         <div className="flex w-full flex-col items-center justify-evenly gap-6 bg-exercising-user bg-cover bg-center pb-20 pt-6 after:absolute after:top-0 after:-z-0 after:h-4/5 after:w-full after:bg-lime-800 after:opacity-70 ">
-          <div className="z-10 flex w-11/12 flex-col items-center justify-center gap-1 py-2 text-center text-zinc-100">
+          <div className="z-10 flex w-11/12 flex-col items-center justify-center gap-1 py-2 text-center text-slate-100">
             <p>&quot;There are no shortcuts to any place worth going.&quot;</p>
             <p className="text-sm">— Beverly Sills</p>
           </div>
 
-          <div className="z-10 flex w-11/12 flex-col items-center justify-center gap-1 py-2 text-center text-zinc-100">
+          <div className="z-10 flex w-11/12 flex-col items-center justify-center gap-1 py-2 text-center text-slate-100">
             <p>
               &quot;Training is about skill development, not about winning or
               losing. You don’t need to win every battle, you only need to win
@@ -151,20 +163,20 @@ const LandingPage: React.FC<SessionData> = (props) => {
           </div>
         </div>
 
-        <div className="relative -top-14 flex w-11/12 flex-col justify-center gap-4 bg-slate-800 px-4 pb-6 pt-4 text-zinc-100">
+        <div className="relative -top-14 flex w-11/12 flex-col justify-center gap-4 bg-neutral-800 px-4 pb-6 pt-4 text-slate-100">
           <h3 className="text-3xl font-bold">
             Progress Journal helps you to find your footing
           </h3>
         </div>
       </div>
-      <div className="relative flex flex-col items-center justify-end gap-6 pb-20 text-center">
+      <div className="relative flex w-full max-w-4xl flex-col items-center justify-end gap-6 pb-20 text-center">
         <h4 className="font-bebasneue text-5xl text-lime-400">
           PROGRESS JOURNAL
         </h4>
-        <AuthShowcase
+        <Authentication
           sessionData={sessionData}
           icon="discord.svg"
-          text="Sign in with Discord"
+          text={!sessionData ? "Sign in with Discord" : "Sign out"}
         />
       </div>
     </FrontPageLayout>
