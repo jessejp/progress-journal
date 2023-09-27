@@ -22,6 +22,14 @@ import Button from "../../../ui/primitives/Button";
 import ButtonContainer from "../../../ui/wrappers/ButtonContainer";
 import MainContent from "../../../ui/wrappers/MainContent";
 import AppLayout from "../../../ui/layouts/AppLayout";
+import LogoHeading from "../../../ui/typography/LogoHeading";
+import H2 from "../../../ui/typography/H2";
+import InputContainer from "../../../ui/wrappers/InputContainer";
+import DisplayFieldInput from "../../../ui/components/DisplayFieldInput";
+import Image from "next/image";
+import CommandMenu from "../../../ui/components/CommandMenu/CommandMenu";
+import CommandHeading from "../../../ui/components/CommandMenu/CommandHeading";
+import Command from "../../../ui/components/CommandMenu/Command";
 
 const Entry: NextPage<{ subject: string }> = ({ subject }) => {
   const router = useRouter();
@@ -125,14 +133,25 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
 
   return (
     <AppLayout page="New Entry">
-      <Heading>New Entry</Heading>
+      <LogoHeading />
+      <H2>New Entry</H2>
       <MainContent>
-        <div className="flex flex-row flex-wrap gap-4">
+        <div
+          className={clsx(
+            "flex w-fit flex-row flex-wrap gap-3 rounded-md bg-neutral-700 p-1.5",
+            {
+              hidden: !watchForm?.entries[0]?.categories,
+            }
+          )}
+        >
           <div
-            className={clsx("rounded p-2", {
-              "bg-slate-500": selectedFilter === "all",
-              "bg-slate-700": selectedFilter !== "all",
-            })}
+            className={clsx(
+              "flex flex-row items-center gap-1 rounded p-2 text-slate-100",
+              {
+                "bg-violet-700": selectedFilter === "all",
+                "bg-neutral-700": selectedFilter !== "all",
+              }
+            )}
           >
             <input
               type="radio"
@@ -142,7 +161,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
               defaultChecked
               onChange={(e) => setSelectedFilter(e.target.value)}
             />
-            <label htmlFor="all">All</label>
+            <label htmlFor="all">All Fields</label>
           </div>
           {!!watchForm?.entries[0]?.categories &&
             watchForm?.entries[0]?.categories
@@ -150,11 +169,14 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
               .map((category, categoryIndex) => {
                 return (
                   <div
-                    className={clsx("rounded p-2", {
-                      "bg-slate-500": selectedFilter === category,
-                      "bg-slate-700": selectedFilter !== category,
-                    })}
                     key={`${category}${categoryIndex}`}
+                    className={clsx(
+                      "flex flex-row items-center gap-1 rounded p-2 text-slate-100",
+                      {
+                        "bg-violet-700": selectedFilter === category,
+                        "bg-neutral-700": selectedFilter !== category,
+                      }
+                    )}
                   >
                     <input
                       type="radio"
@@ -189,59 +211,43 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                       title={`${fieldIndex + 1}: ${field.name}`}
                       defaultOpen={fieldIndex === 0 || fieldArray.length < 5}
                     >
-                      <div className="flex w-full flex-grow flex-row flex-wrap justify-evenly gap-2 sm:justify-center">
+                      <div className="flex w-full flex-grow flex-row flex-wrap justify-evenly gap-2">
                         {field.fieldInputs.map((input, inputIndex) => {
                           switch (input.inputType) {
                             case "TEXTAREA":
                               return (
-                                <div
-                                  className="flex w-full flex-col rounded bg-slate-700 p-2 md:w-10/12"
+                                <InputContainer
+                                  variant="unpadded"
                                   key={input.id}
                                 >
-                                  <label className="text-sm text-zinc-300">
-                                    {input.inputHelper || "textarea"}
-                                  </label>
                                   <textarea
-                                    className="h-32 bg-slate-800 text-slate-200"
+                                    className="min-h-[6.125rem] rounded-md bg-slate-100 px-3 py-2 text-base text-neutral-800"
                                     {...form.register(
                                       `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueString`
                                     )}
                                   />
-                                </div>
+                                </InputContainer>
                               );
                             case "NUMBER":
                               return (
                                 <div
                                   key={input.id}
-                                  className="flex flex-grow-0 flex-row items-center gap-1 rounded bg-slate-700 p-1"
+                                  className="flex w-32 flex-col items-center justify-start gap-2 rounded-md bg-neutral-800 p-3"
                                 >
-                                  <div className="flex w-12 flex-col justify-center gap-1">
+                                  <input
+                                    type="number"
+                                    className="w-16 rounded-md bg-white p-1 text-center text-neutral-800"
+                                    {...form.register(
+                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                      { valueAsNumber: true }
+                                    )}
+                                  />
+                                  <label className="text-sm text-zinc-300">
+                                    {input.inputHelper}
+                                  </label>
+                                  <div className="flex w-full flex-nowrap">
                                     <button
-                                      className="w-full bg-slate-600 font-bold text-slate-200"
-                                      onClick={(event) => {
-                                        event.preventDefault();
-                                        const currentValue = form.getValues(
-                                          `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
-                                        );
-                                        form.setValue(
-                                          `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                          currentValue ? currentValue + 1 : 1,
-                                          { shouldDirty: true }
-                                        );
-                                      }}
-                                    >
-                                      +
-                                    </button>
-                                    <input
-                                      type="number"
-                                      className="bg-slate-800 p-1 text-center text-slate-200"
-                                      {...form.register(
-                                        `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
-                                        { valueAsNumber: true }
-                                      )}
-                                    />
-                                    <button
-                                      className="w-full bg-slate-600 font-bold text-slate-200"
+                                      className="w-full rounded-l-full bg-neutral-600 px-4 py-2 font-bold text-slate-200"
                                       onClick={(event) => {
                                         event.preventDefault();
                                         const currentValue = form.getValues(
@@ -254,32 +260,57 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                         );
                                       }}
                                     >
-                                      -
+                                      <Image
+                                        src={`/icons/minus-input.svg`}
+                                        width={1}
+                                        height={1}
+                                        alt={`minus 1 from number input ${input.inputHelper}`}
+                                        className="h-4 w-4"
+                                      />
+                                    </button>
+                                    <button
+                                      className="w-full rounded-r-full border-1 border-neutral-700 bg-neutral-600 px-4 py-2 font-bold text-slate-200"
+                                      onClick={(event) => {
+                                        event.preventDefault();
+                                        const currentValue = form.getValues(
+                                          `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`
+                                        );
+                                        form.setValue(
+                                          `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
+                                          currentValue ? currentValue + 1 : 1,
+                                          { shouldDirty: true }
+                                        );
+                                      }}
+                                    >
+                                      <Image
+                                        src={`/icons/plus-input.svg`}
+                                        width={1}
+                                        height={1}
+                                        alt={`plus 1 from number input ${input.inputHelper}`}
+                                        className="h-4 w-4"
+                                      />
                                     </button>
                                   </div>
-                                  <label className="text-sm text-zinc-300">
-                                    {input.inputHelper}
-                                  </label>
                                 </div>
                               );
                             case "BOOLEAN":
                               return (
                                 <div
                                   key={input.id}
-                                  className="flex flex-grow-0 flex-col items-center gap-1 rounded bg-slate-700 p-3"
+                                  className="flex w-32 flex-col items-center justify-start gap-2 rounded-md bg-neutral-800 p-3"
                                 >
                                   <label className="ml-2 text-base font-medium text-zinc-300">
                                     {input.inputHelper}
                                   </label>
                                   <div
                                     className={clsx(
-                                      "flex flex-row items-center gap-1 rounded px-3 py-2",
+                                      "flex w-20 flex-row items-center gap-2 rounded px-3 py-2",
                                       {
-                                        "bg-slate-600 text-zinc-300":
+                                        "bg-neutral-600 text-orange-500":
                                           !input.valueBoolean,
                                       },
                                       {
-                                        "bg-green-700 text-zinc-100":
+                                        "bg-neutral-600 text-lime-500":
                                           !!input.valueBoolean,
                                       }
                                     )}
@@ -309,23 +340,17 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                               return (
                                 <div
                                   key={input.id}
-                                  className="flex flex-col items-center justify-evenly gap-2 rounded bg-slate-700 px-3 py-1"
+                                  className="flex w-32 flex-col items-center justify-start gap-3 rounded-md bg-neutral-800 p-3"
                                 >
-                                  <label className="text-lg font-bold text-zinc-300">
-                                    {input.inputHelper}
-                                  </label>
+                                  <DisplayFieldInput
+                                    value={`${sliderValue}%`}
+                                    inputLabel={input.inputHelper}
+                                  />
                                   <div className="flex flex-col items-center justify-center rounded-md bg-slate-300 p-0.5">
                                     <input
                                       type="range"
                                       className={clsx(
-                                        "h-1 w-2/3 scale-150 appearance-none rounded bg-gradient-to-r from-sky-500 to-rose-700 transition-accent duration-700",
-                                        { "accent-sky-300": sliderValue < 25 },
-                                        {
-                                          "accent-slate-100":
-                                            sliderValue >= 25 &&
-                                            sliderValue <= 75,
-                                        },
-                                        { "accent-red-500": sliderValue > 75 }
+                                        "h-1 w-2/3 scale-150 appearance-none rounded  accent-slate-100 transition-accent duration-700"
                                       )}
                                       {...form.register(
                                         `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.valueNumber`,
@@ -333,9 +358,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                       )}
                                     />
                                   </div>
-                                  <div className="flex flex-row justify-center text-base text-slate-300">
-                                    <span>{sliderValue}%</span>
-                                  </div>
+                                  <div className="mt-3" />
                                 </div>
                               );
                             default:
@@ -344,14 +367,24 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                         })}
                       </div>
                       <div className="flex w-full justify-center">
-                        <button
-                          className="h-fit w-fit rounded bg-slate-500 px-3 py-2 align-middle text-sm font-bold text-white hover:bg-blue-700"
-                          onClick={(event) => {
-                            cloneField(event, fieldIndex, field);
+                        <CommandMenu
+                          button={{
+                            intent: "ghost",
+                            variant: "just-icon-circle",
+                            icon: "more-slate-100.svg",
                           }}
                         >
-                          🔁 Clone
-                        </button>
+                          <CommandHeading>Clone Field</CommandHeading>
+                          <Command
+                            action={(event) => {
+                              cloneField(event, fieldIndex, field);
+                            }}
+                            intent="primary"
+                            icon="plus-circle-slate-100.svg"
+                          >
+                            Clone
+                          </Command>
+                        </CommandMenu>
                       </div>
                     </Accordion>
                   </div>
@@ -360,46 +393,59 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
             )}
         </form>
       </MainContent>
-      <ButtonContainer>
-        <Button intent="cancel" link={`/subjects/${subject}`}>
-          Back
-        </Button>
-        <Button
-          intent={`${!!dirtyFields.entries ? "accept" : "disabled"}`}
-          action={form.handleSubmit(
-            async (values) => {
-              const fieldIndexes: number[] = [];
-              if (!!dirtyFields.entries)
-                dirtyFields?.entries[0]?.fields?.map((_, fieldIndex) => {
-                  fieldIndexes.push(fieldIndex);
-                });
+      <ButtonContainer
+        mainButton={
+          <>
+            <Button
+              variant="rounded-full"
+              icon="undo-neutral-800.svg"
+              intent="cancel"
+              link={`/subjects/${subject}`}
+            >
+              Back
+            </Button>
+            <Button
+              variant="rounded-full"
+              icon="save-neutral-800.svg"
+              intent={`${!!dirtyFields.entries ? "primary" : "disabled"}`}
+              action={form.handleSubmit(
+                async (values) => {
+                  const fieldIndexes: number[] = [];
+                  if (!!dirtyFields.entries)
+                    dirtyFields?.entries[0]?.fields?.map((_, fieldIndex) => {
+                      fieldIndexes.push(fieldIndex);
+                    });
 
-              if (!!values.entries[0] && fieldIndexes.length > 0) {
-                values.entries[0].fields = values.entries[0].fields.filter(
-                  (_, fieldIndex) => fieldIndexes.includes(fieldIndex)
-                );
+                  if (!!values.entries[0] && fieldIndexes.length > 0) {
+                    values.entries[0].fields = values.entries[0].fields.filter(
+                      (_, fieldIndex) => fieldIndexes.includes(fieldIndex)
+                    );
 
-                values.entries[0].fields.map((field) => {
-                  field.fieldInputs = field.fieldInputs.filter((input) => {
-                    return [
-                      input.valueString,
-                      input.valueNumber,
-                      input.valueBoolean,
-                    ].some((value) => value !== undefined && value !== null);
-                  });
-                });
-              }
+                    values.entries[0].fields.map((field) => {
+                      field.fieldInputs = field.fieldInputs.filter((input) => {
+                        return [
+                          input.valueString,
+                          input.valueNumber,
+                          input.valueBoolean,
+                        ].some(
+                          (value) => value !== undefined && value !== null
+                        );
+                      });
+                    });
+                  }
 
-              await addEntry.mutateAsync(values);
-            },
-            (err) => {
-              console.log("on invalid", err);
-            }
-          )}
-        >
-          Save
-        </Button>
-      </ButtonContainer>
+                  await addEntry.mutateAsync(values);
+                },
+                (err) => {
+                  console.log("on invalid", err);
+                }
+              )}
+            >
+              Save
+            </Button>
+          </>
+        }
+      ></ButtonContainer>
     </AppLayout>
   );
 };

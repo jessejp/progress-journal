@@ -1,11 +1,13 @@
 import clsx from "clsx";
 import Image from "next/image";
 import React, { type PropsWithChildren } from "react";
+import ButtonOrLink from "../../utils/ButtonOrLink";
 
 interface CommandProps extends PropsWithChildren {
   intent?: "primary" | "option" | "destructive";
   icon: string;
   action?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  link?: string;
   activeSelection?: string | null | undefined;
 }
 
@@ -13,11 +15,13 @@ const Command: React.FC<CommandProps> = ({
   children,
   icon,
   action,
+  link,
   intent = "primary",
   activeSelection,
 }) => {
   return (
-    <button
+    <ButtonOrLink
+      intent={intent}
       className={clsx(
         "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start text-sm font-medium text-slate-100",
         {
@@ -28,7 +32,8 @@ const Command: React.FC<CommandProps> = ({
           "bg-neutral-700": activeSelection === children,
         }
       )}
-      onClick={action}
+      action={action}
+      link={link}
     >
       <Image
         src={`/icons/${icon}`}
@@ -38,7 +43,7 @@ const Command: React.FC<CommandProps> = ({
         className="h-4 w-4"
       />
       <span>{children}</span>
-    </button>
+    </ButtonOrLink>
   );
 };
 

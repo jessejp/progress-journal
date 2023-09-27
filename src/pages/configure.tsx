@@ -49,8 +49,6 @@ const Configure: NextPage = () => {
   const subjects = trpc.subject.getSubjects.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
-  const [fieldTemplateSelection, setFieldTemplateSelection] =
-    useState("journal");
   const [subjectSelection, setSubjectSelection] = useState("Add New Subject");
   const [fieldCategories, setFieldCategories] = useState<Array<string>>([]);
   const [newCategorySelect, setNewCategorySelect] = useState<{
@@ -64,8 +62,8 @@ const Configure: NextPage = () => {
   });
   const fieldCategorySelection = useRef<HTMLSelectElement>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
-  const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
-    useState(false);
+/*   const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
+    useState(false); */
   const [showCancelChangesButton, setShowCancelChangesButton] = useState(false);
   const [animationParent] = useAutoAnimate();
 
@@ -124,12 +122,12 @@ const Configure: NextPage = () => {
 
   const watchFields = form.watch();
 
-  const deleteSubject = trpc.subject.deleteSubject.useMutation({
+/*   const deleteSubject = trpc.subject.deleteSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
     },
   });
-
+ */
   const deleteFields = trpc.field.deleteFields.useMutation({
     onSuccess: async () => {
       console.log("onSuccess deleteFields");
@@ -184,7 +182,7 @@ const Configure: NextPage = () => {
     }
 
     setSelectedFilter("all");
-    setSubjectDeleteConfirmation(false);
+    // setSubjectDeleteConfirmation(false);
     setDeletedFields([]);
   }, [
     isFetched,
@@ -192,7 +190,7 @@ const Configure: NextPage = () => {
     form,
     subjectSelection,
     setFieldCategories,
-    setSubjectDeleteConfirmation,
+    // setSubjectDeleteConfirmation,
     setSelectedFilter,
   ]);
 
@@ -408,7 +406,7 @@ const Configure: NextPage = () => {
         <form className="flex w-full flex-col gap-3" ref={animationParent}>
           <ContentContainer>
             <H2>Configure Subjects</H2>
-            <InputContainer>
+            <InputContainer variant="unpadded">
               <Label htmlFor="subject-selection">Select Subject</Label>
               <Select
                 id="subject-selection"
@@ -425,7 +423,7 @@ const Configure: NextPage = () => {
                 ))}
               </Select>
             </InputContainer>
-            <InputContainer>
+            <InputContainer variant="unpadded">
               <Label htmlFor="subject-name">Subject Name</Label>
               <Input
                 placeholder="Add Subject Name"
@@ -483,15 +481,21 @@ const Configure: NextPage = () => {
           )}
 
           <div
-            className={clsx("flex flex-row flex-wrap gap-3 p-1.5 rounded-md bg-neutral-700 w-fit", {
-              hidden: fieldCategories.length === 0,
-            })}
+            className={clsx(
+              "flex w-fit flex-row flex-wrap gap-3 rounded-md bg-neutral-700 p-1.5",
+              {
+                hidden: fieldCategories.length === 0,
+              }
+            )}
           >
             <div
-              className={clsx("flex flex-row items-center gap-1 rounded p-2 text-slate-100", {
-                "bg-violet-700": selectedFilter === "all",
-                "bg-neutral-700": selectedFilter !== "all",
-              })}
+              className={clsx(
+                "flex flex-row items-center gap-1 rounded p-2 text-slate-100",
+                {
+                  "bg-violet-700": selectedFilter === "all",
+                  "bg-neutral-700": selectedFilter !== "all",
+                }
+              )}
             >
               <input
                 type="radio"
@@ -508,10 +512,13 @@ const Configure: NextPage = () => {
                 return (
                   <React.Fragment key={`${category}${categoryIndex}`}>
                     <div
-                     className={clsx("flex flex-row items-center gap-1 rounded p-2 text-slate-100", {
-                      "bg-violet-700": selectedFilter === category,
-                      "bg-neutral-700": selectedFilter !== category,
-                    })}
+                      className={clsx(
+                        "flex flex-row items-center gap-1 rounded p-2 text-slate-100",
+                        {
+                          "bg-violet-700": selectedFilter === category,
+                          "bg-neutral-700": selectedFilter !== category,
+                        }
+                      )}
                     >
                       <input
                         type="radio"
@@ -521,18 +528,6 @@ const Configure: NextPage = () => {
                         onChange={(e) => setSelectedFilter(e.target.value)}
                       />
                       <label htmlFor={category}>{category}</label>
-                      {/* {selectedFilter === category && (
-                        <Button
-                          action={() => {
-                            setFieldCategories(
-                              fieldCategories.filter((cat) => cat !== category)
-                            );
-                          }}
-                          intent="cancel"
-                        >
-                          Delete
-                        </Button>
-                      )} */}
                     </div>
                   </React.Fragment>
                 );
@@ -557,75 +552,6 @@ const Configure: NextPage = () => {
                       })`}
                       defaultOpen={!field.id}
                     >
-                      {/* <div className="mb-4 flex w-full flex-grow flex-row items-center justify-between gap-2">
-                        <div className="flex w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2">
-                          <label className="text-sm text-zinc-300">
-                            Category
-                          </label>
-                          <select
-                            aria-label="field category"
-                            className="w-40 overflow-clip border-2"
-                            value={field.category || "unassigned"}
-                            onChange={(event) =>
-                              selectCategoryHandler(event, fieldIndex)
-                            }
-                          >
-                            <option value="unassigned">unassigned</option>
-                            {fieldCategories?.map((category) => (
-                              <option key={category} value={category}>
-                                {category}
-                              </option>
-                            ))}
-                            <option value="+ new category">
-                              + new category
-                            </option>
-                          </select>
-                        </div>
-                        {fieldArray.length > 1 && (
-                          <button
-                            className="rounded bg-red-500 px-4 py-2 text-xl font-bold text-white hover:bg-red-700"
-                            onClick={(event) => {
-                              removeField(event, fieldIndex);
-                              if (!!field.id) {
-                                setDeletedFields((prev) => [...prev, field.id]);
-                              }
-                            }}
-                          >
-                            X
-                          </button>
-                        )}
-                      </div> */}
-                      {/* <div
-                        className={clsx(
-                          "flex min-h-[5rem] w-fit flex-col justify-start gap-2 rounded bg-slate-700 p-2",
-                          {
-                            "border-2 border-rose-700":
-                              form.formState.errors.entries?.[0]?.fields?.[
-                                fieldIndex
-                              ]?.name,
-                          }
-                        )}
-                      >
-                        <label className="text-sm text-zinc-300">Name</label>
-                        <input
-                          type="text"
-                          className="w-40 max-w-xs border-2"
-                          {...form.register(
-                            `entries.0.fields.${fieldIndex}.name`
-                          )}
-                        />
-                        {form.formState.errors.entries?.[0]?.fields?.[
-                          fieldIndex
-                        ]?.name && (
-                          <p className="text-red-500 max-sm:order-3">
-                            {
-                              form.formState.errors.entries?.[0]?.fields?.[
-                                fieldIndex
-                              ]?.name?.message
-                            }
-                          </p>
-                        )}
-                      </div> */}
                       <InputContainer background="violet">
                         <Label htmlFor="field-name">Field Name</Label>
                         <Input
@@ -646,37 +572,6 @@ const Configure: NextPage = () => {
                         (input, inputIndex, inputArray) => {
                           return (
                             <React.Fragment key={inputIndex}>
-                              {/* <label className="text-sm text-zinc-300">
-                                  Input Type
-                                </label> */}
-                              {/*  <select
-                                    className="w-fit border-2"
-                                    {...form.register(
-                                      `entries.0.fields.${fieldIndex}.fieldInputs.${inputIndex}.inputType`
-                                    )}
-                                    disabled={
-                                      input.id !== "" &&
-                                      form.formState.dirtyFields?.entries?.[0]
-                                        ?.fields?.[fieldIndex]?.fieldInputs?.[
-                                        inputIndex
-                                      ]?.id !== undefined
-                                    }
-                                  >
-                                    <option value={input?.inputType}>
-                                      {input?.inputType}
-                                    </option>
-                                    {inputTypes
-                                      .filter(
-                                        (type) => type !== input?.inputType
-                                      )
-                                      .map((type) => {
-                                        return (
-                                          <option key={type} value={type}>
-                                            {type}
-                                          </option>
-                                        );
-                                      })}
-                                  </select> */}
                               <ContentContainer
                                 background="violet"
                                 direction="row"
@@ -914,73 +809,10 @@ const Configure: NextPage = () => {
                         }
                       )}
                     </Accordion>
-                    {/* {fieldIndex === fieldArray.length - 1 && (
-                      <div className="mt-4 flex w-full flex-row justify-center">
-                        <button
-                          className="text-l w-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-                          onClick={(event) =>
-                            addField(event, fieldTemplateSelection)
-                          }
-                        >
-                          New Field
-                        </button>
-                        <select
-                          value={fieldTemplateSelection}
-                          onChange={(event) => {
-                            setFieldTemplateSelection(event.target.value);
-                          }}
-                          className="w-fit border-2"
-                        >
-                          <option value="journal">default template</option>
-                          <option value="weight training">
-                            kg/reps/sets template
-                          </option>
-                        </select>
-                      </div>
-                    )} */}
                   </div>
                 );
               }
             )}
-          {/* {subjectSelection !== "Add New Subject" && (
-            <div className="mt-4 flex scale-75 flex-row flex-wrap items-center justify-between rounded bg-slate-700 p-4">
-              <label className="h-8 overflow-clip text-lg font-bold text-zinc-300 max-sm:w-1/2">
-                Delete Subject
-              </label>
-              {!subjectDeleteConfirmation && (
-                <button
-                  className="rounded bg-zinc-500 px-2 py-1 text-xl font-bold text-white hover:bg-zinc-700"
-                  onClick={() => {
-                    setSubjectDeleteConfirmation(true);
-                  }}
-                >
-                  Delete Subject
-                </button>
-              )}
-              {!!subjectDeleteConfirmation && (
-                <>
-                  <button
-                    className="rounded bg-red-500 px-2 py-1 text-xl font-bold text-white hover:bg-red-700"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      deleteSubject.mutate({ id: subjectSelection });
-                    }}
-                  >
-                    Confirm Subject Deletion
-                  </button>
-                  <button
-                    className="rounded bg-slate-500 px-2 py-1 text-xl font-bold text-white hover:bg-slate-700"
-                    onClick={() => {
-                      setSubjectDeleteConfirmation(false);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </>
-              )}
-            </div>
-          )} */}
-          <div className="mt-12" />
         </form>
       </MainContent>
       <ButtonContainer
@@ -988,7 +820,7 @@ const Configure: NextPage = () => {
           <Button
             intent="primary"
             action={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
-              addField(event, fieldTemplateSelection)
+              addField(event, "journal")
             }
             icon="plus.svg"
             variant="rounded-full"

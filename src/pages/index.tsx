@@ -10,10 +10,16 @@ import Subjects from "../components/Subjects";
 import { type SessionData } from "../types/next-auth";
 import Authentication from "../components/Authentication";
 import LogoHeading from "../ui/typography/LogoHeading";
+import CommandMenu from "../ui/components/CommandMenu/CommandMenu";
+import CommandHeading from "../ui/components/CommandMenu/CommandHeading";
+import { trpc } from "../utils/trpc";
+import Command from "../ui/components/CommandMenu/Command";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
   const [loadApp, setLoadApp] = useState(!!sessionData);
+
+  const subjectsQuery = trpc.subject.getSubjects.useQuery();
 
   if (!loadApp)
     return (
@@ -30,7 +36,7 @@ const Home: NextPage = () => {
       <LogoHeading />
 
       <MainContent>
-        <Subjects />
+        <Subjects data={{ data: subjectsQuery.data }} />
         <div className="mt-3"></div>
         <Button
           icon="settings-neutral-800.svg"
@@ -43,14 +49,27 @@ const Home: NextPage = () => {
 
       <ButtonContainer
         mainButton={
-          <Button
-            icon="plus.svg"
-            intent="primary"
-            variant="rounded-full"
-            link="/configure"
+          <CommandMenu
+            button={{
+              icon: "plus.svg",
+              intent: "primary",
+              variant: "rounded-full",
+              text: "New Entry",
+            }}
           >
-            New Entry
-          </Button>
+            <CommandHeading>Select Subject</CommandHeading>
+            {subjectsQuery.data?.map((subject) => {
+              return (
+                <Command
+                  icon="plus-circle-slate-100.svg"
+                  key={subject.id}
+                  link={`/subjects/${subject.name}/entry`}
+                >
+                  {subject.name}
+                </Command>
+              );
+            })}
+          </CommandMenu>
         }
         iconButton={
           <>
@@ -155,10 +174,10 @@ const LandingPage: React.FC<LandingPageProps> = ({
           PROGRESS JOURNAL
         </h4>
         <Authentication
-            sessionData={sessionData}
-            icon="discord.svg"
-            text={!sessionData ? "Sign in with Discord" : "Sign out"}
-          />
+          sessionData={sessionData}
+          icon="discord.svg"
+          text={!sessionData ? "Sign in with Discord" : "Sign out"}
+        />
       </div>
     </FrontPageLayout>
   );

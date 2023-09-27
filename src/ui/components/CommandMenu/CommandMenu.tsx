@@ -8,10 +8,14 @@ import Button, {
   type ButtonIntent,
   type ButtonVariant,
 } from "../../primitives/Button";
-import CommandHeading from "./CommandHeading";
 
 interface CommandMenuProps extends PropsWithChildren {
-  button: { intent: ButtonIntent; variant: ButtonVariant; icon: string };
+  button: {
+    text?: string;
+    intent: ButtonIntent;
+    variant: ButtonVariant;
+    icon: string;
+  };
 }
 
 const CommandMenu: React.FC<CommandMenuProps> = ({ button, children }) => {
@@ -46,7 +50,7 @@ const CommandMenu: React.FC<CommandMenuProps> = ({ button, children }) => {
           e.preventDefault();
           setShowCommandMenu((state) => !state);
         }}
-      ></Button>
+      >{button.text}</Button>
       {!!showCommandMenu && (
         <div className="absolute bottom-4 left-6 flex min-w-[13rem] flex-col items-start rounded-md bg-neutral-500 px-2 py-1.5">
           {children}

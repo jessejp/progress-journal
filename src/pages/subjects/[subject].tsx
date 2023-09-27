@@ -83,11 +83,6 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
                 );
               })}
             </Select>
-            {/*   <select
-          className="focus:shadow-outline mb-2 max-w-sm appearance-none rounded border px-3 py-2 leading-tight text-gray-700 focus:outline-none"
-        >
-          
-        </select> */}
 
             {showChart && (
               <FieldLineChart
@@ -144,7 +139,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
             icon="plus.svg"
             intent="primary"
             variant="rounded-full"
-            link="/configure"
+            link={`/subjects/${subject}/entry`}
           >
             New Entry
           </Button>

@@ -13,7 +13,7 @@ const ContentContainer: React.FC<ContentContainerProps> = ({
 }) => {
   return (
     <div
-      className={clsx("flex w-full gap-3 rounded-md bg-neutral-700 p-3", {
+      className={clsx("flex w-full gap-3 rounded-md bg-neutral-700 text-slate-100 p-3", {
         "bg-violet-700": background === "violet",
         "flex-row": direction === "row",
         "flex-col": direction === "column",

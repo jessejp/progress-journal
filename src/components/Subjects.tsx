@@ -1,12 +1,18 @@
 import Link from "next/link";
-import { trpc } from "../utils/trpc";
 import ContentContainer from "../ui/wrappers/ContentContainer";
 import H2 from "../ui/typography/H2";
 
-const Subjects: React.FC = () => {
-  const subjectsQuery = trpc.subject.getSubjects.useQuery();
-  const { data } = subjectsQuery;
+interface SubjectProps {
+  data: {
+    data: {
+      id: string;
+      name: string;
+    }[] | undefined;
+  };
+}
 
+const Subjects: React.FC<SubjectProps> = (props) => {
+  const { data } = props.data;
   return (
     <ContentContainer>
       <H2>Your Subjects</H2>
