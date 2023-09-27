@@ -2,11 +2,7 @@ import React, { useEffect, useState } from "react";
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import type { GetStaticPaths, GetStaticPropsContext } from "next";
-import Layout from "../../../ui/Layout";
-import Button from "../../../ui/Button";
 import Heading from "../../../ui/Heading";
-import ButtonContainer from "../../../ui/ButtonContainer";
-import MainContent from "../../../ui/MainContent";
 import { trpc } from "../../../utils/trpc";
 import {
   useZodForm,
@@ -16,12 +12,16 @@ import {
 } from "../../../utils/useZodForm";
 import clsx from "clsx";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import Accordion from "../../../ui/Accordion";
 import { useFieldArray } from "react-hook-form";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import { createContextInner } from "../../../server/trpc/context";
 import { appRouter } from "../../../server/trpc/router/_app";
 import superjson from "superjson";
+import Accordion from "../../../ui/primitives/Accordion";
+import Button from "../../../ui/primitives/Button";
+import ButtonContainer from "../../../ui/wrappers/ButtonContainer";
+import MainContent from "../../../ui/wrappers/MainContent";
+import AppLayout from "../../../ui/layouts/AppLayout";
 
 const Entry: NextPage<{ subject: string }> = ({ subject }) => {
   const router = useRouter();
@@ -115,16 +115,16 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
 
   if (!watchForm || !watchForm?.entries?.length || addEntry.isLoading)
     return (
-      <Layout page="New Entry">
+      <AppLayout page="New Entry">
         <Heading>New Entry</Heading>
         <MainContent>
           <p className="text-2xl text-zinc-100">Loading</p>
         </MainContent>
-      </Layout>
+      </AppLayout>
     );
 
   return (
-    <Layout page="New Entry">
+    <AppLayout page="New Entry">
       <Heading>New Entry</Heading>
       <MainContent>
         <div className="flex flex-row flex-wrap gap-4">
@@ -169,7 +169,10 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
               })}
         </div>
         <div className="mt-4" />
-        <form ref={animationParent} className="flex w-full flex-col gap-3 sm:w-9/12">
+        <form
+          ref={animationParent}
+          className="flex w-full flex-col gap-3 sm:w-9/12"
+        >
           {!!watchForm?.entries[0]?.fields &&
             watchForm?.entries[0]?.fields.map(
               (field, fieldIndex, fieldArray) => {
@@ -397,7 +400,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
           Save
         </Button>
       </ButtonContainer>
-    </Layout>
+    </AppLayout>
   );
 };
 

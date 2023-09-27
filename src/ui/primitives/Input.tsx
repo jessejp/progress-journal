@@ -23,7 +23,7 @@ const Input: React.FC<InputProps> = ({
         placeholder={placeholder}
         type={inputType}
         className={clsx(
-          "w-full rounded-md px-3 py-2 text-base text-slate-900",
+          "w-full rounded-md px-3 py-2 text-base text-slate-900 leading-6",
           {
             "border-2 border-red-600": !!error,
             "border-2 border-transparent": !error,

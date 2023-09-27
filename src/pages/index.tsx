@@ -46,7 +46,7 @@ const Home: NextPage = () => {
           <Button
             icon="plus.svg"
             intent="primary"
-            style="rounded-full"
+            variant="rounded-full"
             link="/configure"
           >
             New Entry
@@ -57,13 +57,13 @@ const Home: NextPage = () => {
             <Button
               icon="settings-neutral-500.svg"
               intent="option"
-              style="just-icon-circle"
+              variant="just-icon-circle"
               link="/configure"
             />
             <Button
               icon="user.svg"
               intent="option"
-              style="just-icon-circle"
+              variant="just-icon-circle"
               link="/configure"
             />
           </>
@@ -93,7 +93,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
           <h2 className="text-3xl font-bold text-slate-100">
             Progress Journal helps you to find your footing
           </h2>
-          <Button intent="primary" style="rounded-full" action={onGoToApp}>
+          <Button intent="primary" variant="rounded-full" action={onGoToApp}>
             Proceed to the App
           </Button>
           <p className="text-sm text-zinc-50">
@@ -122,7 +122,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
           <Authentication
             sessionData={sessionData}
             icon="discord.svg"
-            text="Sign in with Discord"
+            text={!sessionData ? "Sign in with Discord" : "Sign out"}
           />
         </div>
       </div>
@@ -155,10 +155,10 @@ const LandingPage: React.FC<LandingPageProps> = ({
           PROGRESS JOURNAL
         </h4>
         <Authentication
-          sessionData={sessionData}
-          icon="discord.svg"
-          text="Sign in with Discord"
-        />
+            sessionData={sessionData}
+            icon="discord.svg"
+            text={!sessionData ? "Sign in with Discord" : "Sign out"}
+          />
       </div>
     </FrontPageLayout>
   );

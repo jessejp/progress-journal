@@ -14,7 +14,7 @@ const Authentication: React.FC<AuthProps> = (props) => {
     <Button
       intent={sessionData ? "cancel" : "primary"}
       action={sessionData ? () => signOut() : () => signIn()}
-      style="rounded-full"
+      variant="rounded-full"
       icon={props.icon}
     >
       {!!props.text && props.text}

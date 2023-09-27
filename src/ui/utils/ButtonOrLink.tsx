@@ -1,12 +1,15 @@
 import type { MouseEventHandler, PropsWithChildren } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { type ButtonIntent } from "../primitives/Button";
 
 interface Props {
   className: string;
   action?: MouseEventHandler | undefined;
+  intent: ButtonIntent;
   link?: string;
   icon?: string;
+  disabled?: boolean;
 }
 
 const ButtonOrLink: React.FC<PropsWithChildren<Props>> = ({
@@ -15,10 +18,11 @@ const ButtonOrLink: React.FC<PropsWithChildren<Props>> = ({
   action,
   link,
   icon,
+  intent
 }) => {
   if (action) {
     return (
-      <button onClick={action} className={className}>
+      <button onClick={action} className={className} disabled={intent === "disabled"}>
         {icon && (
           <Image
             src={`/icons/${icon}`}
