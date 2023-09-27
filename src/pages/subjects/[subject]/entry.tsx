@@ -190,10 +190,10 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                 );
               })}
         </div>
-        <div className="mt-4" />
+        <div className="mt-3" />
         <form
           ref={animationParent}
-          className="flex w-full flex-col gap-3 sm:w-9/12"
+          className="flex w-full flex-col gap-3"
         >
           {!!watchForm?.entries[0]?.fields &&
             watchForm?.entries[0]?.fields.map(
@@ -211,7 +211,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                       title={`${fieldIndex + 1}: ${field.name}`}
                       defaultOpen={fieldIndex === 0 || fieldArray.length < 5}
                     >
-                      <div className="flex w-full flex-grow flex-row flex-wrap justify-evenly gap-2">
+                      <div className="flex w-full flex-grow flex-row flex-wrap justify-evenly gap-3">
                         {field.fieldInputs.map((input, inputIndex) => {
                           switch (input.inputType) {
                             case "TEXTAREA":
@@ -220,6 +220,9 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                                   variant="unpadded"
                                   key={input.id}
                                 >
+                                  <label className="text-sm text-zinc-300">
+                                    Journal
+                                  </label>
                                   <textarea
                                     className="min-h-[6.125rem] rounded-md bg-slate-100 px-3 py-2 text-base text-neutral-800"
                                     {...form.register(
@@ -232,7 +235,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                               return (
                                 <div
                                   key={input.id}
-                                  className="flex w-32 flex-col items-center justify-start gap-2 rounded-md bg-neutral-800 p-3"
+                                  className="flex h-[7.5rem] w-[7.75rem] flex-col items-center justify-start gap-2 rounded-md bg-neutral-800 p-3"
                                 >
                                   <input
                                     type="number"
@@ -297,9 +300,9 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                               return (
                                 <div
                                   key={input.id}
-                                  className="flex w-32 flex-col items-center justify-start gap-2 rounded-md bg-neutral-800 p-3"
+                                  className="flex h-[7.5rem] w-[7.75rem] flex-col items-center justify-evenly gap-2 rounded-md bg-neutral-800 p-3"
                                 >
-                                  <label className="ml-2 text-base font-medium text-zinc-300">
+                                  <label className="text-center text-base font-medium text-zinc-300">
                                     {input.inputHelper}
                                   </label>
                                   <div
@@ -340,7 +343,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                               return (
                                 <div
                                   key={input.id}
-                                  className="flex w-32 flex-col items-center justify-start gap-3 rounded-md bg-neutral-800 p-3"
+                                  className="flex h-[7.5rem] w-[7.75rem] flex-col items-center justify-start gap-3 rounded-md bg-neutral-800 p-3"
                                 >
                                   <DisplayFieldInput
                                     value={`${sliderValue}%`}

@@ -10,7 +10,7 @@ const ButtonContainer: React.FC<ButtonContainerProps> = ({
   iconButton,
 }) => {
   return (
-    <div className="fixed bottom-5 flex w-74 shrink-0 justify-between rounded-full bg-neutral-700 p-1.5">
+    <div className="fixed bottom-5 flex w-74 shrink-0 justify-between rounded-full bg-neutral-700 p-1.5 shadow">
       {mainButton}
 
       {!!iconButton && (

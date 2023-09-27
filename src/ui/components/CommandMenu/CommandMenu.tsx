@@ -50,9 +50,11 @@ const CommandMenu: React.FC<CommandMenuProps> = ({ button, children }) => {
           e.preventDefault();
           setShowCommandMenu((state) => !state);
         }}
-      >{button.text}</Button>
+      >
+        {button.text}
+      </Button>
       {!!showCommandMenu && (
-        <div className="absolute bottom-4 left-6 flex min-w-[13rem] flex-col items-start rounded-md bg-neutral-500 px-2 py-1.5">
+        <div className="absolute bottom-6 -left-6 flex min-w-[13rem] flex-col items-start rounded-md bg-neutral-500 px-2 py-1.5 shadow">
           {children}
         </div>
       )}

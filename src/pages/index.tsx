@@ -83,7 +83,7 @@ const Home: NextPage = () => {
               icon="user.svg"
               intent="option"
               variant="just-icon-circle"
-              link="/configure"
+              action={sessionData ? () => signOut() : () => signIn()}
             />
           </>
         }

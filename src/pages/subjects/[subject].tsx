@@ -3,6 +3,7 @@ import { trpc } from "../../utils/trpc";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import { appRouter } from "../../server/trpc/router/_app";
 import { prisma } from "../../server/db/client";
+import { signIn, signOut, useSession } from "next-auth/react";
 import superjson from "superjson";
 import type { GetStaticPaths, GetStaticPropsContext } from "next";
 import dayjs from "dayjs";
@@ -19,6 +20,7 @@ import Select from "../../ui/primitives/Select";
 import Label from "../../ui/primitives/Label";
 
 const Subject: NextPage<{ subject: string }> = ({ subject }) => {
+  const { data: sessionData } = useSession();
   const [selectedField, setSelectedField] = useState<string>("Select a field");
   const [showChart, setShowChart] = useState<boolean>(false);
   const SubjectEntries = trpc.entry.getEntries.useQuery(
@@ -156,7 +158,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
               icon="user.svg"
               intent="option"
               variant="just-icon-circle"
-              link="/configure"
+              action={sessionData ? () => signOut() : () => signIn()}
             />
           </>
         }

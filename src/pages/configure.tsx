@@ -382,12 +382,12 @@ const Configure: NextPage = () => {
     );
   };
 
-  useEffect(() => {
-    console.log("watchfields", watchFields);
-  }, [watchFields]);
+  // useEffect(() => {
+  //   console.log("watchfields", watchFields);
+  // }, [watchFields]);
 
-  console.log("form", form.formState.errors);
-  console.log("fieldCategories", fieldCategories);
+  // console.log("form", form.formState.errors);
+  // console.log("fieldCategories", fieldCategories);
 
   if (updateSubject.isLoading)
     return (
@@ -464,7 +464,7 @@ const Configure: NextPage = () => {
                   </Select>
                 </InputContainer>
                 <InputContainer>
-                  <Label htmlFor="">Add Selected Category</Label>
+                  <Label htmlFor="">Set Category</Label>
                   <div className="w-fit">
                     <Button
                       intent="secondary"
@@ -472,7 +472,7 @@ const Configure: NextPage = () => {
                         addCategoryHandler(event);
                       }}
                     >
-                      Add Category
+                      Set Category
                     </Button>
                   </div>
                 </InputContainer>
