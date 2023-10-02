@@ -74,14 +74,14 @@ const Home: NextPage = () => {
         iconButton={
           <>
             <Button
-              icon="settings-neutral-500.svg"
-              intent="option"
+              icon="settings-neutral-300.svg"
+              intent="ghost"
               variant="just-icon-circle"
               link="/configure"
             />
             <Button
-              icon="user.svg"
-              intent="option"
+              icon="user-neutral-300.svg"
+              intent="ghost"
               variant="just-icon-circle"
               action={sessionData ? () => signOut() : () => signIn()}
             />
