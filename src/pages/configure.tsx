@@ -62,8 +62,8 @@ const Configure: NextPage = () => {
   });
   const fieldCategorySelection = useRef<HTMLSelectElement>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
-/*   const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
-    useState(false); */
+  const [subjectDeleteConfirmation, setSubjectDeleteConfirmation] =
+    useState(false);
   const [showCancelChangesButton, setShowCancelChangesButton] = useState(false);
   const [animationParent] = useAutoAnimate();
 
@@ -122,12 +122,12 @@ const Configure: NextPage = () => {
 
   const watchFields = form.watch();
 
-/*   const deleteSubject = trpc.subject.deleteSubject.useMutation({
+  const deleteSubject = trpc.subject.deleteSubject.useMutation({
     onSuccess: async () => {
       router.push("/");
     },
   });
- */
+
   const deleteFields = trpc.field.deleteFields.useMutation({
     onSuccess: async () => {
       console.log("onSuccess deleteFields");
@@ -182,17 +182,9 @@ const Configure: NextPage = () => {
     }
 
     setSelectedFilter("all");
-    // setSubjectDeleteConfirmation(false);
+    setSubjectDeleteConfirmation(false);
     setDeletedFields([]);
-  }, [
-    isFetched,
-    data,
-    form,
-    subjectSelection,
-    setFieldCategories,
-    // setSubjectDeleteConfirmation,
-    setSelectedFilter,
-  ]);
+  }, [isFetched, data, form, subjectSelection]);
 
   const selectCategoryHandler = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -670,11 +662,13 @@ const Configure: NextPage = () => {
                               {inputArray.length - 1 === inputIndex && (
                                 <div className="flex justify-center">
                                   <CommandMenu
-                                    button={{
-                                      intent: "ghost",
-                                      variant: "just-icon-circle",
-                                      icon: "more-slate-100.svg",
-                                    }}
+                                    button={
+                                      <Button
+                                        intent="ghost"
+                                        variant="just-icon-circle"
+                                        icon="more-slate-100.svg"
+                                      />
+                                    }
                                   >
                                     <CommandHeading intent="primary">
                                       Add Input
@@ -830,12 +824,12 @@ const Configure: NextPage = () => {
         }
         iconButton={
           <>
-            <Button
+            {/* <Button
               action={() => {
                 setDeletedFields([]);
                 refetch();
               }}
-              icon="undo-neutral-800.svg"
+              icon="more-neutral-800.svg"
               intent={
                 showCancelChangesButton &&
                 subjectSelection !== "Add New Subject"
@@ -844,7 +838,27 @@ const Configure: NextPage = () => {
               }
               variant="just-icon-circle"
               link="/configure"
-            />
+            /> */}
+            <CommandMenu
+              button={
+                <Button
+                  icon="more-slate-100.svg"
+                  intent="ghost"
+                  variant="just-icon-circle"
+                />
+              }
+            >
+              <CommandHeading intent="primary">Edit</CommandHeading>
+              <Command
+                action={() => {
+                  setDeletedFields([]);
+                  refetch();
+                }}
+                icon="undo-slate-100.svg"
+              >
+                Undo All Changes
+              </Command>
+            </CommandMenu>
             <Button
               icon="save-neutral-800.svg"
               intent="primary"
@@ -865,38 +879,7 @@ const Configure: NextPage = () => {
             />
           </>
         }
-      >
-        {/*  {!!showCancelChangesButton &&
-          subjectSelection !== "Add New Subject" && (
-            <Button
-              intent="secondary"
-              action={() => {
-                setDeletedFields([]);
-                refetch();
-              }}
-            >
-              ↩Cancel Changes
-            </Button>
-          )}
-        <Button
-          intent="primary"
-          action={form.handleSubmit(async (values) => {
-            if (subjectSelection === "Add New Subject") {
-              await addSubject.mutateAsync(values);
-            } else {
-              if (deletedFields.length > 0 && !!values.entries[0]?.id)
-                await deleteFields.mutateAsync({
-                  entryId: values.entries[0].id,
-                  fieldIds: deletedFields,
-                });
-
-              await updateSubject.mutateAsync(values);
-            }
-          })}
-        >
-          {subjectSelection === "Add New Subject" ? subjectSelection : "Update"}
-        </Button> */}
-      </ButtonContainer>
+      ></ButtonContainer>
     </AppLayout>
   );
 };

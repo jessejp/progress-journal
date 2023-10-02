@@ -82,7 +82,7 @@ const FieldLineChart: React.FC<ChartProps> = ({ data }) => {
         return newMergedData;
       });
     }
-  }, []);
+  }, [filteredData]);
 
   return (
     <ResponsiveContainer width="100%" height={400}>

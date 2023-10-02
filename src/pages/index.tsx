@@ -50,12 +50,11 @@ const Home: NextPage = () => {
       <ButtonContainer
         mainButton={
           <CommandMenu
-            button={{
-              icon: "plus.svg",
-              intent: "primary",
-              variant: "rounded-full",
-              text: "New Entry",
-            }}
+            button={
+              <Button icon="plus.svg" intent="primary" variant="rounded-full">
+                New Entry
+              </Button>
+            }
           >
             <CommandHeading>Select Subject</CommandHeading>
             {subjectsQuery.data?.map((subject) => {
