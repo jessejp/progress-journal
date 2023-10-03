@@ -86,6 +86,7 @@ const Home: NextPage = () => {
             />
           </>
         }
+        variant="ghost-icons"
       />
     </AppLayout>
   );

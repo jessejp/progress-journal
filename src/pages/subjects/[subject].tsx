@@ -59,7 +59,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
   const { isFetched } = ChartFields;
 
   useEffect(() => {
-    setShowChart(isFetched);
+    setShowChart(isFetched && !!ChartFields.data);
   }, [selectedField, isFetched, ChartFields.data]);
 
   if (!SubjectEntries.data) return <div>404 Not Found</div>;
@@ -86,9 +86,9 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
               })}
             </Select>
 
-            {showChart && (
+            {showChart && !!ChartFields.data && (
               <FieldLineChart
-                data={ChartFields.data?.map((field) => {
+                data={ChartFields.data.map((field) => {
                   const weight = field.fieldInputs.find(
                     (input) => input.inputHelper === "kg"
                   )?.valueNumber;
@@ -149,19 +149,20 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
         iconButton={
           <>
             <Button
-              icon="settings-neutral-500.svg"
-              intent="option"
+              icon="settings-neutral-300.svg"
+              intent="ghost"
               variant="just-icon-circle"
               link="/configure"
             />
             <Button
-              icon="user.svg"
-              intent="option"
+              icon="user-neutral-300.svg"
+              intent="ghost"
               variant="just-icon-circle"
               action={sessionData ? () => signOut() : () => signIn()}
             />
           </>
         }
+        variant="ghost-icons"
       />
     </AppLayout>
   );

@@ -54,21 +54,27 @@ const FieldLineChart: React.FC<ChartProps> = ({ data }) => {
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
         <XAxis dataKey="date" />
         <YAxis />
-        <Tooltip />
+        <Tooltip
+        labelClassName="text-neutral-800"
+        />
         <Legend />
-        <Line
-          name="Weight Average"
-          type="monotone"
-          dataKey="avgWeight"
-          stroke="#a3e635"
-          activeDot={{ r: 8 }}
-        />
-        <Line
-          name="Total Repetitions"
-          type="monotone"
-          dataKey="totalReps"
-          stroke="#f97316"
-        />
+        {mergedData.length && (
+          <>
+            <Line
+              name="Weight Average"
+              type="monotone"
+              dataKey="avgWeight"
+              stroke="#a3e635"
+              activeDot={{ r: 8 }}
+            />
+            <Line
+              name="Total Repetitions"
+              type="monotone"
+              dataKey="totalReps"
+              stroke="#f97316"
+            />
+          </>
+        )}
       </LineChart>
     </ResponsiveContainer>
   );
