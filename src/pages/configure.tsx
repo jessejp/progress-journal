@@ -124,7 +124,7 @@ const Configure: NextPage = () => {
 
   const deleteSubject = trpc.subject.deleteSubject.useMutation({
     onSuccess: async () => {
-      router.push("/");
+      setSubjectSelection("Add New Subject");
     },
   });
 
@@ -373,13 +373,6 @@ const Configure: NextPage = () => {
       { keepDefaultValues: true }
     );
   };
-
-  // useEffect(() => {
-  //   console.log("watchfields", watchFields);
-  // }, [watchFields]);
-
-  // console.log("form", form.formState.errors);
-  // console.log("fieldCategories", fieldCategories);
 
   if (updateSubject.isLoading)
     return (
@@ -824,21 +817,6 @@ const Configure: NextPage = () => {
         }
         iconButton={
           <>
-            {/* <Button
-              action={() => {
-                setDeletedFields([]);
-                refetch();
-              }}
-              icon="more-neutral-800.svg"
-              intent={
-                showCancelChangesButton &&
-                subjectSelection !== "Add New Subject"
-                  ? "secondary"
-                  : "disabled"
-              }
-              variant="just-icon-circle"
-              link="/configure"
-            /> */}
             <CommandMenu
               button={
                 <Button
@@ -848,16 +826,64 @@ const Configure: NextPage = () => {
                 />
               }
             >
-              <CommandHeading intent="primary">Edit</CommandHeading>
-              <Command
-                action={() => {
-                  setDeletedFields([]);
-                  refetch();
-                }}
-                icon="undo-slate-100.svg"
-              >
-                Undo All Changes
-              </Command>
+              {subjectSelection === "Add New Subject" && (
+                <CommandHeading intent="option">
+                  No Options Available
+                </CommandHeading>
+              )}
+              {showCancelChangesButton && (
+                <>
+                  <CommandHeading intent="primary">Edit</CommandHeading>
+                  <Command
+                    action={() => {
+                      setDeletedFields([]);
+                      refetch();
+                    }}
+                    icon="undo-slate-100.svg"
+                  >
+                    Undo All Changes
+                  </Command>
+                </>
+              )}
+              {!subjectDeleteConfirmation &&
+                subjectSelection !== "Add New Subject" && (
+                  <>
+                    <CommandHeading intent="destructive">
+                      Delete Subject
+                    </CommandHeading>
+                    <Command
+                      action={() => setSubjectDeleteConfirmation(true)}
+                      icon="trash-slate-100.svg"
+                      intent="destructive"
+                    >
+                      Delete Subject
+                    </Command>
+                  </>
+                )}
+              {subjectDeleteConfirmation &&
+                subjectSelection !== "Add New Subject" && (
+                  <>
+                    <CommandHeading intent="destructive">
+                      Confirm Delete
+                    </CommandHeading>
+                    <Command
+                      action={() => {
+                        deleteSubject.mutateAsync({ id: subjectSelection });
+                      }}
+                      icon="trash-slate-100.svg"
+                      intent="destructive"
+                    >
+                      Yes, Delete Subject
+                    </Command>
+                    <Command
+                      action={() => setSubjectDeleteConfirmation(false)}
+                      icon="undo-slate-100.svg"
+                      intent="option"
+                    >
+                      Cancel
+                    </Command>
+                  </>
+                )}
             </CommandMenu>
             <Button
               icon="save-neutral-800.svg"
