@@ -191,10 +191,7 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
               })}
         </div>
         <div className="mt-3" />
-        <form
-          ref={animationParent}
-          className="flex w-full flex-col gap-3"
-        >
+        <form ref={animationParent} className="flex w-full flex-col gap-3">
           {!!watchForm?.entries[0]?.fields &&
             watchForm?.entries[0]?.fields.map(
               (field, fieldIndex, fieldArray) => {
@@ -371,11 +368,13 @@ const Entry: NextPage<{ subject: string }> = ({ subject }) => {
                       </div>
                       <div className="flex w-full justify-center">
                         <CommandMenu
-                          button={{
-                            intent: "ghost",
-                            variant: "just-icon-circle",
-                            icon: "more-slate-100.svg",
-                          }}
+                          button={
+                            <Button
+                              variant="just-icon-circle"
+                              intent="ghost"
+                              icon="more-slate-100.svg"
+                            />
+                          }
                         >
                           <CommandHeading>Clone Field</CommandHeading>
                           <Command

@@ -50,12 +50,11 @@ const Home: NextPage = () => {
       <ButtonContainer
         mainButton={
           <CommandMenu
-            button={{
-              icon: "plus.svg",
-              intent: "primary",
-              variant: "rounded-full",
-              text: "New Entry",
-            }}
+            button={
+              <Button icon="plus.svg" intent="primary" variant="rounded-full">
+                New Entry
+              </Button>
+            }
           >
             <CommandHeading>Select Subject</CommandHeading>
             {subjectsQuery.data?.map((subject) => {
@@ -74,19 +73,20 @@ const Home: NextPage = () => {
         iconButton={
           <>
             <Button
-              icon="settings-neutral-500.svg"
-              intent="option"
+              icon="settings-neutral-300.svg"
+              intent="ghost"
               variant="just-icon-circle"
               link="/configure"
             />
             <Button
-              icon="user.svg"
-              intent="option"
+              icon="user-neutral-300.svg"
+              intent="ghost"
               variant="just-icon-circle"
               action={sessionData ? () => signOut() : () => signIn()}
             />
           </>
         }
+        variant="ghost-icons"
       />
     </AppLayout>
   );

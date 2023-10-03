@@ -18,24 +18,9 @@ const ButtonOrLink: React.FC<PropsWithChildren<Props>> = ({
   action,
   link,
   icon,
-  intent
+  intent,
 }) => {
-  if (action) {
-    return (
-      <button onClick={action} className={className} disabled={intent === "disabled"}>
-        {icon && (
-          <Image
-            src={`/icons/${icon}`}
-            width={1}
-            height={1}
-            alt={`${icon.split(".")[0]} icon`}
-            className="h-4 w-4"
-          />
-        )}
-        {children}
-      </button>
-    );
-  } else if (link) {
+  if (link) {
     return (
       <Link href={link} className={className}>
         {icon && (
@@ -49,6 +34,25 @@ const ButtonOrLink: React.FC<PropsWithChildren<Props>> = ({
         )}
         {children}
       </Link>
+    );
+  } else if (action || !link) {
+    return (
+      <button
+        onClick={action}
+        className={className}
+        disabled={intent === "disabled"}
+      >
+        {icon && (
+          <Image
+            src={`/icons/${icon}`}
+            width={1}
+            height={1}
+            alt={`${icon.split(".")[0]} icon`}
+            className="h-4 w-4"
+          />
+        )}
+        {children}
+      </button>
     );
   } else {
     return null;
