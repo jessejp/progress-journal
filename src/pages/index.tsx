@@ -17,19 +17,12 @@ import Command from "../ui/components/CommandMenu/Command";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
-  const [loadApp, setLoadApp] = useState(!!sessionData);
 
-  const subjectsQuery = trpc.subject.getSubjects.useQuery();
+  const subjectsQuery = trpc.subject.getSubjects.useQuery(undefined, {
+    enabled: !!sessionData,
+  });
 
-  if (!loadApp)
-    return (
-      <LandingPage
-        sessionData={sessionData}
-        onGoToApp={() => {
-          setLoadApp(true);
-        }}
-      />
-    );
+  if (!sessionData) return <LandingPage sessionData={sessionData} />;
 
   return (
     <AppLayout page="home">
@@ -94,14 +87,7 @@ const Home: NextPage = () => {
 
 export default Home;
 
-interface LandingPageProps extends SessionData {
-  onGoToApp: () => void;
-}
-
-const LandingPage: React.FC<LandingPageProps> = ({
-  sessionData,
-  onGoToApp,
-}) => {
+const LandingPage: React.FC<SessionData> = ({ sessionData }) => {
   return (
     <FrontPageLayout>
       <div className="relative flex w-full max-w-4xl flex-col items-center justify-between bg-hero bg-cover bg-center bg-no-repeat pb-4 text-center after:absolute after:z-0 after:min-h-smallScreen after:w-full after:bg-gradient-to-t after:from-neutral-800 after:from-50% after:via-slate-transparent after:via-70% after:to-neutral-800 after:to-95%">
@@ -112,9 +98,11 @@ const LandingPage: React.FC<LandingPageProps> = ({
           <h2 className="text-3xl font-bold text-slate-100">
             Progress Journal helps you to find your footing
           </h2>
-          <Button intent="primary" variant="rounded-full" action={onGoToApp}>
-            Proceed to the App
-          </Button>
+          <Authentication
+            sessionData={sessionData}
+            icon="discord.svg"
+            text={!sessionData ? "Sign in with Discord" : "Sign out"}
+          />
           <p className="text-sm text-zinc-50">
             Not a member yet?{" "}
             <a
