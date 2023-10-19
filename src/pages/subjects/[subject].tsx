@@ -31,7 +31,7 @@ const Subject: NextPage<{ subject: string }> = ({ subject }) => {
       refetchOnWindowFocus: false,
     }
   );
-
+  
   // SubjectFields is for chart selection
   const SubjectFields = trpc.entry.getEntry.useQuery(
     {
